@@ -18,6 +18,12 @@
 /out/
 
 # production
+
+# database local (SQLite)
+/data/
+*.db
+*.db-shm
+*.db-wal
 /build
 
 # misc

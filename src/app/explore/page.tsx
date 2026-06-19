@@ -1,44 +1,87 @@
 import Link from "next/link";
-import { ArrowRight, Search, Filter, Grid3x3, List, TrendingUp } from "lucide-react";
+import { ArrowRight, Search, Filter, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NovelCard } from "@/components/novel/novel-card";
-import { mockNovels, mockGenres } from "@/lib/data/mock-novels";
+import { getDb } from "@/lib/db";
 
 export const metadata = {
   title: "Explorar — Tomoverso",
-  description: "Descubra Light Novels brasileiras por gênero, popularidade ou recência.",
 };
 
-export default function ExplorePage() {
-  const populares = [...mockNovels].sort((a, b) => b.views - a.views);
-  const recentes = [...mockNovels].sort(
-    (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-  );
+interface NovelRow {
+  id: string;
+  slug: string;
+  title: string;
+  alternative_titles: string;
+  synopsis: string;
+  cover_url: string;
+  author_id: string;
+  type: "light-novel" | "web-novel" | "short";
+  status: "ongoing" | "completed" | "hiatus" | "dropped";
+  genres: string;
+  tags: string;
+  views: number;
+  rating_sum: number;
+  rating_count: number;
+  is_featured: number;
+  created_at: string;
+}
+
+function parseNovel(r: NovelRow) {
+  return {
+    ...r,
+    alternative_titles: JSON.parse(r.alternative_titles || "[]"),
+    genres: JSON.parse(r.genres || "[]"),
+    tags: JSON.parse(r.tags || "[]"),
+    rating_avg: r.rating_count > 0 ? r.rating_sum / r.rating_count : 0,
+    chapter_count: 0,
+    is_featured: !!r.is_featured,
+    is_approved: true,
+    updated_at: r.created_at,
+  };
+}
+
+export default function ExplorePage({ searchParams }: { searchParams: Promise<{ genre?: string }> }) {
+  const params = searchParams as any; // ignore
+  return <ExploreContent searchParams={searchParams} />;
+}
+
+async function ExploreContent({ searchParams }: { searchParams: Promise<{ genre?: string }> }) {
+  const sp = await searchParams;
+  const db = getDb();
+  const allRows = db.prepare("SELECT * FROM novels ORDER BY created_at DESC").all() as NovelRow[];
+  const allNovels = allRows.map(parseNovel);
+
+  let novels = allNovels;
+  if (sp.genre) {
+    novels = allNovels.filter((n) => n.genres.includes(sp.genre!));
+  }
+
+  const featured = novels.filter((n) => n.is_featured);
+  const popular = [...novels].sort((a, b) => b.views - a.views);
+  const recent = [...novels].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  const allGenres = Array.from(new Set(allNovels.flatMap((n) => n.genres)));
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-10 space-y-8">
-      {/* Header */}
       <div className="space-y-3">
         <Badge variant="secondary">Catálogo</Badge>
         <h1 className="font-heading text-4xl md:text-5xl font-bold tracking-tight">
-          Explorar
+          {sp.genre ? sp.genre : "Explorar"}
         </h1>
         <p className="text-muted-foreground text-lg max-w-2xl">
-          Descubra a próxima história que vai te prender por horas. Filtros por gênero, popularidade, status.
+          {sp.genre ? `Novels do gênero ${sp.genre}` : "Descubra a próxima história que vai te prender por horas"}
         </p>
       </div>
 
-      {/* Search + filtros */}
       <div className="flex flex-col sm:flex-row gap-3 sticky top-16 z-30 py-3 bg-background/80 backdrop-blur-md -mx-4 px-4 border-b border-border/40">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por título, autor ou tag..."
-            className="pl-9 h-11"
-          />
+          <Input placeholder="Buscar por título, autor ou tag..." className="pl-9 h-11" />
         </div>
         <Button variant="outline" className="h-11">
           <Filter className="h-4 w-4 mr-2" />
@@ -46,70 +89,55 @@ export default function ExplorePage() {
         </Button>
       </div>
 
-      {/* Tags rápidas */}
       <div className="space-y-2">
         <div className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5">
           <TrendingUp className="h-4 w-4 text-primary" />
-          Gêneros populares
+          Gêneros
         </div>
         <div className="flex flex-wrap gap-2">
-          <Badge variant="default" className="cursor-pointer">Todos</Badge>
-          {mockGenres.map((g) => (
-            <Badge key={g} variant="outline" className="cursor-pointer hover:bg-primary/10 hover:border-primary/50 transition-colors">
-              {g}
-            </Badge>
+          <Link href="/explore">
+            <Badge variant={!sp.genre ? "default" : "outline"} className="cursor-pointer">Todos</Badge>
+          </Link>
+          {allGenres.map((g) => (
+            <Link key={g} href={`/explore?genre=${encodeURIComponent(g)}`}>
+              <Badge variant={sp.genre === g ? "default" : "outline"} className="cursor-pointer hover:bg-primary/10">
+                {g}
+              </Badge>
+            </Link>
           ))}
         </div>
       </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="todos" className="w-full">
-        <div className="flex items-center justify-between mb-6">
-          <TabsList>
-            <TabsTrigger value="todos">Todos</TabsTrigger>
-            <TabsTrigger value="destaque">
-              <span className="hidden sm:inline">⭐ </span>Em destaque
-            </TabsTrigger>
-            <TabsTrigger value="populares">Populares</TabsTrigger>
-            <TabsTrigger value="recentes">Recentes</TabsTrigger>
-          </TabsList>
-          <div className="hidden md:flex items-center gap-1 text-sm text-muted-foreground">
-            <span>Ordenar:</span>
-            <Button variant="ghost" size="sm">Relevância</Button>
-          </div>
-        </div>
+        <TabsList>
+          <TabsTrigger value="todos">Todos ({novels.length})</TabsTrigger>
+          <TabsTrigger value="destaque">Destaque ({featured.length})</TabsTrigger>
+          <TabsTrigger value="populares">Populares</TabsTrigger>
+          <TabsTrigger value="recentes">Recentes</TabsTrigger>
+        </TabsList>
 
-        <TabsContent value="todos" className="mt-0">
+        <TabsContent value="todos" className="mt-6">
+          {novels.length === 0 ? (
+            <p className="text-center text-muted-foreground py-12">Nenhuma novel encontrada. <Link href="/dashboard/novels/new" className="text-primary">Seja o primeiro a publicar!</Link></p>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {novels.map((n) => <NovelCard key={n.id} novel={n as any} variant="compact" />)}
+            </div>
+          )}
+        </TabsContent>
+        <TabsContent value="destaque" className="mt-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {mockNovels.map((n) => (
-              <NovelCard key={n.id} novel={n} variant="compact" />
-            ))}
+            {featured.map((n) => <NovelCard key={n.id} novel={n as any} variant="compact" />)}
           </div>
         </TabsContent>
-
-        <TabsContent value="destaque" className="mt-0">
+        <TabsContent value="populares" className="mt-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {mockNovels
-              .filter((n) => n.is_featured)
-              .map((n) => (
-                <NovelCard key={n.id} novel={n} variant="compact" />
-              ))}
+            {popular.map((n) => <NovelCard key={n.id} novel={n as any} variant="compact" />)}
           </div>
         </TabsContent>
-
-        <TabsContent value="populares" className="mt-0">
+        <TabsContent value="recentes" className="mt-6">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {populares.map((n) => (
-              <NovelCard key={n.id} novel={n} variant="compact" />
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="recentes" className="mt-0">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {recentes.map((n) => (
-              <NovelCard key={n.id} novel={n} variant="compact" />
-            ))}
+            {recent.map((n) => <NovelCard key={n.id} novel={n as any} variant="compact" />)}
           </div>
         </TabsContent>
       </Tabs>

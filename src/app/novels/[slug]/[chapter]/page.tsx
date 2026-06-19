@@ -9,80 +9,97 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ReadingProgress } from "@/components/reader/reading-progress";
 import { ChapterActions } from "@/components/reader/chapter-actions";
 import { ReaderSettings } from "@/components/reader/reader-settings";
-import { mockNovels, mockChapters } from "@/lib/data/mock-novels";
+import { getDb } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
+import { revalidatePath } from "next/cache";
 
 export async function generateStaticParams() {
-  const params: { slug: string; chapter: string }[] = [];
-  mockNovels.forEach((n) => {
-    mockChapters
-      .filter((c) => c.novel_id === n.id)
-      .forEach((c) => {
-        params.push({ slug: n.slug, chapter: String(c.chapter_number) });
-      });
-  });
-  return params;
+  const db = getDb();
+  const rows = db.prepare(`
+    SELECT n.slug, c.chapter_number
+    FROM chapters c JOIN novels n ON n.id = c.novel_id
+  `).all() as { slug: string; chapter_number: number }[];
+  return rows.map((r) => ({ slug: r.slug, chapter: String(r.chapter_number) }));
 }
 
-const mockComments = [
-  {
-    name: "Yuki_Yamato",
-    initial: "Y",
-    color: "bg-pink-500",
-    time: "2 horas atrás",
-    text: "Cara, o jeito que você descreveu o caderno me deu arrepios. A ideia de ela encontrar algo que ela mesma criou ANTES de criar é genial.",
-  },
-  {
-    name: "Lari_Otaku",
-    initial: "L",
-    color: "bg-purple-500",
-    time: "5 horas atrás",
-    text: "Não consigo parar de ler!! A Arlén é perfeito, o jeito que ele se comunica pelo caderno é tão fofo. Mal posso esperar pelo cap 3.",
-  },
-  {
-    name: "Rafael_Mago",
-    initial: "R",
-    color: "bg-blue-500",
-    time: "1 dia atrás",
-    text: "A primeira letra capitular tá funcionando perfeitamente. E esse detalhe do cheiro do papel — é isso que faz LN boa. Continua!",
-  },
-];
+interface ChapterRow {
+  id: string;
+  novel_id: string;
+  chapter_number: number;
+  title: string;
+  content: string;
+  word_count: number;
+  views: number;
+  published_at: string;
+}
 
-export default async function ChapterPage({
-  params,
-}: {
-  params: Promise<{ slug: string; chapter: string }>;
-}) {
+export default async function ChapterPage({ params }: { params: Promise<{ slug: string; chapter: string }> }) {
   const { slug, chapter: chapterNum } = await params;
-  const novel = mockNovels.find((n) => n.slug === slug);
-  if (!novel) notFound();
+  const db = getDb();
+  const novelRow = db.prepare("SELECT id, slug, title, author_id FROM novels WHERE slug = ?").get(slug) as { id: string; slug: string; title: string; author_id: string } | undefined;
+  if (!novelRow) notFound();
 
   const chapterNumInt = parseInt(chapterNum, 10);
-  const chapter = mockChapters
-    .filter((c) => c.novel_id === novel.id)
-    .find((c) => c.chapter_number === chapterNumInt);
+  const chapter = db.prepare("SELECT * FROM chapters WHERE novel_id = ? AND chapter_number = ?").get(novelRow.id, chapterNumInt) as ChapterRow | undefined;
   if (!chapter) notFound();
 
-  const allChapters = mockChapters
-    .filter((c) => c.novel_id === novel.id)
-    .sort((a, b) => a.chapter_number - b.chapter_number);
-
-  const idx = allChapters.findIndex((c) => c.id === chapter.id);
+  const allChapters = db.prepare("SELECT id, chapter_number, title FROM chapters WHERE novel_id = ? ORDER BY chapter_number ASC").all(novelRow.id) as { id: string; chapter_number: number; title: string }[];
+  const idx = allChapters.findIndex((c) => c.chapter_number === chapter.chapter_number);
   const prev = idx > 0 ? allChapters[idx - 1] : null;
   const next = idx < allChapters.length - 1 ? allChapters[idx + 1] : null;
+
+  // Incrementa views
+  db.prepare("UPDATE chapters SET views = views + 1 WHERE id = ?").run(chapter.id);
+  db.prepare("UPDATE novels SET views = views + 1 WHERE id = ?").run(novelRow.id);
+
+  const user = await getCurrentUser();
+  const isLiked = user ? !!db.prepare("SELECT 1 FROM likes WHERE user_id = ? AND chapter_id = ?").get(user.id, chapter.id) : false;
+  const isBookmarked = user ? !!db.prepare("SELECT 1 FROM bookmarks WHERE user_id = ? AND chapter_id = ?").get(user.id, chapter.id) : false;
+  const likesCount = (db.prepare("SELECT COUNT(*) as c FROM likes WHERE chapter_id = ?").get(chapter.id) as { c: number }).c;
+
+  // Comentários
+  const comments = db.prepare(`
+    SELECT c.*, u.display_name, u.username, u.avatar_url
+    FROM comments c JOIN users u ON u.id = c.user_id
+    WHERE c.chapter_id = ? AND c.is_hidden = 0
+    ORDER BY c.created_at DESC LIMIT 50
+  `).all(chapter.id) as Array<{
+    id: string;
+    content: string;
+    display_name: string;
+    username: string;
+    avatar_url: string | null;
+    created_at: string;
+  }>;
+
+  // Author info
+  const author = db.prepare("SELECT display_name FROM users WHERE id = ?").get(novelRow.author_id) as { display_name: string } | undefined;
+
+  async function postComment(formData: FormData) {
+    "use server";
+    const currentUser = await getCurrentUser();
+    if (!currentUser) return;
+    const content = (formData.get("content") as string)?.trim();
+    if (!content || content.length < 3) return;
+    const dbase = getDb();
+    dbase.prepare(
+      "INSERT INTO comments (id, novel_id, chapter_id, user_id, content) VALUES (?, ?, ?, ?, ?)"
+    ).run(crypto.randomUUID(), novelRow.id, chapter.id, currentUser.id, content.slice(0, 1000));
+    revalidatePath(`/novels/${slug}/${chapterNum}`);
+  }
 
   return (
     <div className="min-h-screen">
       <ReadingProgress />
       <ReaderSettings />
 
-      {/* Header do capítulo */}
       <div className="border-b border-border/40 bg-muted/20 sticky top-16 z-30 backdrop-blur-md">
         <div className="container mx-auto max-w-3xl px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <Button variant="ghost" asChild size="sm" className="-ml-2">
-              <Link href={`/novels/${novel.slug}`}>
+              <Link href={`/novels/${novelRow.slug}`}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                <span className="truncate max-w-[200px]">{novel.title}</span>
+                <span className="truncate max-w-[200px]">{novelRow.title}</span>
               </Link>
             </Button>
             <Badge variant="outline" className="font-mono">
@@ -92,16 +109,13 @@ export default async function ChapterPage({
         </div>
       </div>
 
-      {/* Conteúdo */}
       <article className="container mx-auto max-w-3xl px-4 py-10">
         <header className="mb-10 space-y-4">
           <Badge className="text-xs">Capítulo {chapter.chapter_number}</Badge>
-          <h1 className="font-heading text-3xl md:text-4xl font-bold tracking-tight">
-            {chapter.title}
-          </h1>
+          <h1 className="font-heading text-3xl md:text-4xl font-bold tracking-tight">{chapter.title}</h1>
           <ChapterActions
             chapterId={chapter.id}
-            novelSlug={novel.slug}
+            novelSlug={novelRow.slug}
             chapterNumber={chapter.chapter_number}
             wordCount={chapter.word_count}
             viewCount={chapter.views}
@@ -114,57 +128,46 @@ export default async function ChapterPage({
           ))}
         </div>
 
-        {/* Nota do autor (decorativa) */}
-        <div className="mt-16 p-6 rounded-lg border border-dashed border-border/60 bg-muted/20">
-          <div className="flex items-center gap-2 mb-2">
-            <Avatar className="h-8 w-8">
-              <AvatarFallback className="bg-primary/20 text-primary text-sm">
-                {novel.author?.display_name.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <div className="text-sm font-semibold">Nota do autor</div>
-              <div className="text-xs text-muted-foreground">
-                {novel.author?.display_name}
+        {author && (
+          <div className="mt-16 p-6 rounded-lg border border-dashed border-border/60 bg-muted/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Avatar className="h-8 w-8">
+                <AvatarFallback className="bg-primary/20 text-primary text-sm">
+                  {author.display_name.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="text-sm font-semibold">Nota do autor</div>
+                <div className="text-xs text-muted-foreground">{author.display_name}</div>
               </div>
             </div>
+            <p className="text-sm text-muted-foreground italic leading-relaxed">
+              Esse capítulo foi um dos mais difíceis de escrever até agora. Obrigado por ler até aqui. O próximo vai ser ainda mais intenso.
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground italic leading-relaxed">
-            Esse capítulo foi um dos mais difíceis de escrever até agora. Tinha
-            medo de não conseguir passar a sensação de mistério sem entregar
-            demais. Se você chegou até aqui, valeu demais. O próximo vai ser
-            ainda mais intenso. — {novel.author?.display_name.split(" ")[0]}
-          </p>
-        </div>
+        )}
       </article>
 
-      {/* Navegação prev/next */}
       <div className="border-t border-border/40 bg-muted/20">
         <div className="container mx-auto max-w-3xl px-4 py-8">
           <div className="grid grid-cols-2 gap-3">
             {prev ? (
               <Button variant="outline" asChild className="h-auto py-3 justify-start">
-                <Link href={`/novels/${novel.slug}/${prev.chapter_number}`} className="text-left">
+                <Link href={`/novels/${novelRow.slug}/${prev.chapter_number}`} className="text-left">
                   <ArrowLeft className="h-4 w-4 mr-2 flex-shrink-0" />
                   <div className="min-w-0">
-                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                      Cap {prev.chapter_number} · Anterior
-                    </div>
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Cap {prev.chapter_number} · Anterior</div>
                     <div className="font-medium text-sm truncate">{prev.title}</div>
                   </div>
                 </Link>
               </Button>
-            ) : (
-              <div />
-            )}
+            ) : <div />}
 
             {next ? (
               <Button asChild className="h-auto py-3 justify-end text-right">
-                <Link href={`/novels/${novel.slug}/${next.chapter_number}`}>
+                <Link href={`/novels/${novelRow.slug}/${next.chapter_number}`}>
                   <div className="min-w-0">
-                    <div className="text-[10px] uppercase tracking-wider opacity-80">
-                      Cap {next.chapter_number} · Próximo
-                    </div>
+                    <div className="text-[10px] uppercase tracking-wider opacity-80">Cap {next.chapter_number} · Próximo</div>
                     <div className="font-medium text-sm truncate">{next.title}</div>
                   </div>
                   <ArrowRight className="h-4 w-4 ml-2 flex-shrink-0" />
@@ -172,7 +175,7 @@ export default async function ChapterPage({
               </Button>
             ) : (
               <Button variant="outline" asChild className="h-auto py-3">
-                <Link href={`/novels/${novel.slug}`}>
+                <Link href={`/novels/${novelRow.slug}`}>
                   <BookOpen className="h-4 w-4 mr-2" />
                   Voltar à página
                 </Link>
@@ -182,65 +185,71 @@ export default async function ChapterPage({
         </div>
       </div>
 
-      {/* Comentários */}
       <div id="comments" className="container mx-auto max-w-3xl px-4 py-12">
         <div className="flex items-center gap-2 mb-6">
           <MessageCircle className="h-5 w-5 text-primary" />
-          <h2 className="font-heading text-2xl font-bold">
-            Comentários ({mockComments.length})
-          </h2>
+          <h2 className="font-heading text-2xl font-bold">Comentários ({comments.length})</h2>
         </div>
 
-        {/* Form de comentário */}
-        <Card className="mb-6">
-          <CardContent className="pt-6 space-y-3">
-            <div className="flex gap-3">
-              <Avatar className="h-9 w-9 flex-shrink-0">
-                <AvatarFallback className="bg-muted text-muted-foreground">
-                  <UserIcon className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 space-y-2">
-                <Textarea
-                  placeholder="O que você achou desse capítulo? Sem spoiler pra quem não leu!"
-                  rows={3}
-                  className="resize-none"
-                />
-                <div className="flex justify-end">
-                  <Button>
-                    <Send className="h-4 w-4 mr-2" />
-                    Comentar
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Lista de comentários */}
-        <div className="space-y-3">
-          {mockComments.map((c, i) => (
-            <Card key={i}>
-              <CardContent className="pt-4">
-                <div className="flex gap-3">
-                  <Avatar className="h-9 w-9 flex-shrink-0">
-                    <AvatarFallback className={`${c.color} text-white text-sm`}>
-                      {c.initial}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium text-sm">{c.name}</span>
-                      <span className="text-xs text-muted-foreground">{c.time}</span>
-                    </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {c.text}
-                    </p>
+        {user ? (
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <form action={postComment} className="flex gap-3">
+                <Avatar className="h-9 w-9 flex-shrink-0">
+                  <AvatarFallback className="bg-primary/20 text-primary text-sm">
+                    {user.display_name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 space-y-2">
+                  <Textarea name="content" placeholder="O que você achou desse capítulo?" rows={3} className="resize-none" required minLength={3} maxLength={1000} />
+                  <div className="flex justify-end">
+                    <Button type="submit">
+                      <Send className="h-4 w-4 mr-2" />
+                      Comentar
+                    </Button>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </form>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="mb-6">
+            <CardContent className="py-6 text-center">
+              <p className="text-sm text-muted-foreground mb-3">Faça login pra comentar</p>
+              <Button asChild>
+                <Link href="/auth/login">Entrar</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="space-y-3">
+          {comments.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8 text-sm">Nenhum comentário ainda. Seja o primeiro!</p>
+          ) : (
+            comments.map((c) => (
+              <Card key={c.id}>
+                <CardContent className="pt-4">
+                  <div className="flex gap-3">
+                    <Avatar className="h-9 w-9 flex-shrink-0">
+                      <AvatarFallback className="bg-primary/20 text-primary text-sm">
+                        {c.display_name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Link href={`/authors/${c.username}`} className="font-medium text-sm hover:text-primary">
+                          {c.display_name}
+                        </Link>
+                        <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleString("pt-BR")}</span>
+                      </div>
+                      <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{c.content}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
       </div>
     </div>

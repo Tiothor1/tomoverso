@@ -1,14 +1,15 @@
-// ===== Tipos do Tomoverso =====
+// Tipos do Tomoverso (frontend)
 
 export type NovelStatus = "ongoing" | "completed" | "hiatus" | "dropped";
 export type NovelType = "light-novel" | "web-novel" | "short";
 
-export interface Author {
+export interface User {
   id: string;
   username: string;
   display_name: string;
   avatar_url?: string;
   bio?: string;
+  role?: "user" | "admin" | "author";
   created_at: string;
 }
 
@@ -20,7 +21,7 @@ export interface Novel {
   synopsis: string;
   cover_url: string;
   author_id: string;
-  author?: Author;
+  author?: User;
   type: NovelType;
   status: NovelStatus;
   genres: string[];
@@ -57,8 +58,8 @@ export interface Review {
   id: string;
   novel_id: string;
   user_id: string;
-  user?: Author;
-  rating: number; // 1-5
+  user?: User;
+  rating: number;
   comment?: string;
   created_at: string;
 }
