@@ -49,11 +49,7 @@ interface NovelRow {
   created_at: string;
 }
 
-export async function generateStaticParams() {
-  const db = getDb();
-  const novels = db.prepare("SELECT slug FROM novels").all() as { slug: string }[];
-  return novels.map((n) => ({ slug: n.slug }));
-}
+export const dynamic = "force-dynamic";
 
 const statusLabels = {
   ongoing: { label: "Em andamento", className: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },

@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tomoverso
 
-## Getting Started
+Plataforma brasileira de **Light Novels** — onde autores iniciantes e leitores apaixonados se encontram.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) + **TypeScript**
+- **Tailwind CSS 4** + **shadcn/ui**
+- **SQLite** (better-sqlite3) — banco local persistente
+- **Auth próprio** com bcrypt + JWT em cookie httpOnly
+- **Vercel** pra deploy
+
+## Funcionalidades
+
+- 📚 **Catálogo** de Light Novels com filtros por gênero
+- ✍️ **Painel do autor** — criar/editar novels e capítulos
+- 💬 **Sistema de comentários** persistente
+- ❤️ **Likes, bookmarks, favoritos, follows** — tudo no DB
+- 📊 **Reading progress** — "continue de onde parou"
+- 🔍 **Busca fuzzy** com Fuse.js
+- ⚡ **Command Palette** (Cmd+K)
+- 🎨 **3 paletas de cor** + dark/light mode
+- 👑 **Painel admin** (`/admin`) — gestão de usuários, novels, reports
+- 🛠️ **API REST** completa
+
+## Setup local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# abre http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Na primeira vez, o banco é auto-populado com admin + 3 novels.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Credenciais do admin (criado pelo seed)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Username:** `fabio_tx`
+- **Email:** `fabio@tomoverso.com`
+- **Senha:** `tomoverso2026`
 
-## Learn More
+## Estrutura
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/              # páginas (App Router)
+│   ├── auth/         # login/signup
+│   ├── admin/        # painel admin
+│   ├── dashboard/    # painel do autor
+│   ├── library/      # estante do leitor
+│   ├── novels/       # páginas de novels/capítulos
+│   └── api/          # API routes
+├── components/       # componentes
+└── lib/
+    ├── db.ts         # SQLite + schema + auto-seed
+    ├── auth.ts       # JWT + bcrypt + sessions
+    └── actions/      # server actions
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Importante sobre o banco em produção
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+No **Vercel**, o SQLite roda em `/tmp` que é **volátil** (limpa entre cold starts). Pra MVP serve perfeitamente. Pra escalar, migrar pra:
+- **Vercel Postgres** (recomendado)
+- **Turso** (SQLite hospedado)
+- **Supabase**
 
-## Deploy on Vercel
+## Deploy
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Push pra `main` → Vercel auto-deploya.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+git push origin main
+```
+
+## Licença
+
+MIT

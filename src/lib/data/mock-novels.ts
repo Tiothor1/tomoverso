@@ -1,4 +1,4 @@
-import type { Novel, Chapter, Author } from "@/lib/types";
+import type { Novel, Chapter, User as Author } from "@/lib/types";
 
 // ===== Autor modelo =====
 export const mockAuthor: Author = {

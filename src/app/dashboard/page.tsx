@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { BookOpen, PenLine, Eye, Users, MessageCircle, Star, TrendingUp, Plus, BarChart3, Sparkles } from "lucide-react";

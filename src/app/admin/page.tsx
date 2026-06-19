@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Users, BookOpen, MessageCircle, Flag, Activity, Shield, Eye, Ban, Check, Trash2 } from "lucide-react";

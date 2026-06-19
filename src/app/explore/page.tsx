@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { ArrowRight, Search, Filter, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";

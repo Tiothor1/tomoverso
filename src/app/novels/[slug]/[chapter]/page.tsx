@@ -13,14 +13,7 @@ import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
-export async function generateStaticParams() {
-  const db = getDb();
-  const rows = db.prepare(`
-    SELECT n.slug, c.chapter_number
-    FROM chapters c JOIN novels n ON n.id = c.novel_id
-  `).all() as { slug: string; chapter_number: number }[];
-  return rows.map((r) => ({ slug: r.slug, chapter: String(r.chapter_number) }));
-}
+export const dynamic = "force-dynamic";
 
 interface ChapterRow {
   id: string;
@@ -38,24 +31,26 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
   const db = getDb();
   const novelRow = db.prepare("SELECT id, slug, title, author_id FROM novels WHERE slug = ?").get(slug) as { id: string; slug: string; title: string; author_id: string } | undefined;
   if (!novelRow) notFound();
+  const safeNovel = novelRow!;
 
   const chapterNumInt = parseInt(chapterNum, 10);
-  const chapter = db.prepare("SELECT * FROM chapters WHERE novel_id = ? AND chapter_number = ?").get(novelRow.id, chapterNumInt) as ChapterRow | undefined;
+  const chapter = db.prepare("SELECT * FROM chapters WHERE novel_id = ? AND chapter_number = ?").get(safeNovel.id, chapterNumInt) as ChapterRow | undefined;
   if (!chapter) notFound();
+  const safeChapter = chapter!;
 
-  const allChapters = db.prepare("SELECT id, chapter_number, title FROM chapters WHERE novel_id = ? ORDER BY chapter_number ASC").all(novelRow.id) as { id: string; chapter_number: number; title: string }[];
-  const idx = allChapters.findIndex((c) => c.chapter_number === chapter.chapter_number);
+  const allChapters = db.prepare("SELECT id, chapter_number, title FROM chapters WHERE novel_id = ? ORDER BY chapter_number ASC").all(safeNovel.id) as { id: string; chapter_number: number; title: string }[];
+  const idx = allChapters.findIndex((c) => c.chapter_number === safeChapter.chapter_number);
   const prev = idx > 0 ? allChapters[idx - 1] : null;
   const next = idx < allChapters.length - 1 ? allChapters[idx + 1] : null;
 
   // Incrementa views
-  db.prepare("UPDATE chapters SET views = views + 1 WHERE id = ?").run(chapter.id);
-  db.prepare("UPDATE novels SET views = views + 1 WHERE id = ?").run(novelRow.id);
+  db.prepare("UPDATE chapters SET views = COALESCE(views, 0) + 1 WHERE id = ?").run(safeChapter.id);
+  db.prepare("UPDATE novels SET views = COALESCE(views, 0) + 1 WHERE id = ?").run(safeNovel.id);
 
   const user = await getCurrentUser();
-  const isLiked = user ? !!db.prepare("SELECT 1 FROM likes WHERE user_id = ? AND chapter_id = ?").get(user.id, chapter.id) : false;
-  const isBookmarked = user ? !!db.prepare("SELECT 1 FROM bookmarks WHERE user_id = ? AND chapter_id = ?").get(user.id, chapter.id) : false;
-  const likesCount = (db.prepare("SELECT COUNT(*) as c FROM likes WHERE chapter_id = ?").get(chapter.id) as { c: number }).c;
+  const isLiked = user ? !!db.prepare("SELECT 1 FROM likes WHERE user_id = ? AND chapter_id = ?").get(user.id, safeChapter.id) : false;
+  const isBookmarked = user ? !!db.prepare("SELECT 1 FROM bookmarks WHERE user_id = ? AND chapter_id = ?").get(user.id, safeChapter.id) : false;
+  const likesCount = (db.prepare("SELECT COUNT(*) as c FROM likes WHERE chapter_id = ?").get(safeChapter.id) as { c: number }).c;
 
   // Comentários
   const comments = db.prepare(`
@@ -63,7 +58,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
     FROM comments c JOIN users u ON u.id = c.user_id
     WHERE c.chapter_id = ? AND c.is_hidden = 0
     ORDER BY c.created_at DESC LIMIT 50
-  `).all(chapter.id) as Array<{
+  `).all(safeChapter.id) as Array<{
     id: string;
     content: string;
     display_name: string;
@@ -73,7 +68,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
   }>;
 
   // Author info
-  const author = db.prepare("SELECT display_name FROM users WHERE id = ?").get(novelRow.author_id) as { display_name: string } | undefined;
+  const author = db.prepare("SELECT display_name FROM users WHERE id = ?").get(safeNovel.author_id) as { display_name: string } | undefined;
 
   async function postComment(formData: FormData) {
     "use server";
@@ -84,7 +79,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
     const dbase = getDb();
     dbase.prepare(
       "INSERT INTO comments (id, novel_id, chapter_id, user_id, content) VALUES (?, ?, ?, ?, ?)"
-    ).run(crypto.randomUUID(), novelRow.id, chapter.id, currentUser.id, content.slice(0, 1000));
+    ).run(crypto.randomUUID(), safeNovel.id, safeChapter.id, currentUser.id, content.slice(0, 1000));
     revalidatePath(`/novels/${slug}/${chapterNum}`);
   }
 
@@ -97,13 +92,13 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
         <div className="container mx-auto max-w-3xl px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             <Button variant="ghost" asChild size="sm" className="-ml-2">
-              <Link href={`/novels/${novelRow.slug}`}>
+              <Link href={`/novels/${safeNovel.slug}`}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                <span className="truncate max-w-[200px]">{novelRow.title}</span>
+                <span className="truncate max-w-[200px]">{safeNovel.title}</span>
               </Link>
             </Button>
             <Badge variant="outline" className="font-mono">
-              Cap {chapter.chapter_number} / {allChapters.length}
+              Cap {safeChapter.chapter_number} / {allChapters.length}
             </Badge>
           </div>
         </div>
@@ -111,19 +106,19 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
 
       <article className="container mx-auto max-w-3xl px-4 py-10">
         <header className="mb-10 space-y-4">
-          <Badge className="text-xs">Capítulo {chapter.chapter_number}</Badge>
-          <h1 className="font-heading text-3xl md:text-4xl font-bold tracking-tight">{chapter.title}</h1>
+          <Badge className="text-xs">Capítulo {safeChapter.chapter_number}</Badge>
+          <h1 className="font-heading text-3xl md:text-4xl font-bold tracking-tight">{safeChapter.title}</h1>
           <ChapterActions
-            chapterId={chapter.id}
-            novelSlug={novelRow.slug}
-            chapterNumber={chapter.chapter_number}
-            wordCount={chapter.word_count}
-            viewCount={chapter.views}
+            chapterId={safeChapter.id}
+            novelSlug={safeNovel.slug}
+            chapterNumber={safeChapter.chapter_number}
+            wordCount={safeChapter.word_count}
+            viewCount={safeChapter.views}
           />
         </header>
 
         <div className="prose-ln">
-          {chapter.content.split("\n\n").map((paragraph, i) => (
+          {safeChapter.content.split("\n\n").map((paragraph, i) => (
             <p key={i}>{paragraph}</p>
           ))}
         </div>
@@ -153,7 +148,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
           <div className="grid grid-cols-2 gap-3">
             {prev ? (
               <Button variant="outline" asChild className="h-auto py-3 justify-start">
-                <Link href={`/novels/${novelRow.slug}/${prev.chapter_number}`} className="text-left">
+                <Link href={`/novels/${safeNovel.slug}/${prev.chapter_number}`} className="text-left">
                   <ArrowLeft className="h-4 w-4 mr-2 flex-shrink-0" />
                   <div className="min-w-0">
                     <div className="text-[10px] uppercase tracking-wider text-muted-foreground">Cap {prev.chapter_number} · Anterior</div>
@@ -165,7 +160,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
 
             {next ? (
               <Button asChild className="h-auto py-3 justify-end text-right">
-                <Link href={`/novels/${novelRow.slug}/${next.chapter_number}`}>
+                <Link href={`/novels/${safeNovel.slug}/${next.chapter_number}`}>
                   <div className="min-w-0">
                     <div className="text-[10px] uppercase tracking-wider opacity-80">Cap {next.chapter_number} · Próximo</div>
                     <div className="font-medium text-sm truncate">{next.title}</div>
@@ -175,7 +170,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
               </Button>
             ) : (
               <Button variant="outline" asChild className="h-auto py-3">
-                <Link href={`/novels/${novelRow.slug}`}>
+                <Link href={`/novels/${safeNovel.slug}`}>
                   <BookOpen className="h-4 w-4 mr-2" />
                   Voltar à página
                 </Link>

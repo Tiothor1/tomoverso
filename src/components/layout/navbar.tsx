@@ -54,7 +54,15 @@ export async function Navbar() {
           <ColorThemePicker />
           <ThemeToggle />
           {user ? (
-            <UserMenu user={user} />
+            <UserMenu
+              user={{
+                id: user.id,
+                username: user.username,
+                display_name: user.display_name,
+                avatar_url: user.avatar_url || undefined,
+                role: user.role,
+              }}
+            />
           ) : (
             <>
               <Button variant="ghost" asChild className="hidden md:flex">
