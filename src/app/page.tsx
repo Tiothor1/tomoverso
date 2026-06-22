@@ -20,7 +20,7 @@ interface NovelRow {
   synopsis: string;
   cover_url: string;
   author_id: string;
-  type: "light-novel" | "web-novel" | "short";
+  type: "light-novel" | "web-novel" | "short" | "visual-novel";
   status: "ongoing" | "completed" | "hiatus" | "dropped";
   genres: string;
   tags: string;
@@ -47,10 +47,11 @@ function parseNovel(r: NovelRow) {
 
 export default function HomePage() {
   const db = getDb();
-  const allNovels = (db.prepare("SELECT * FROM novels ORDER BY created_at DESC").all() as NovelRow[]).map(parseNovel);
-  const featured = allNovels.filter((n) => n.is_featured);
+  // Limita a 12 novels pra evitar HTML gigante (21MB antes)
+  const topNovels = (db.prepare("SELECT * FROM novels ORDER BY created_at DESC LIMIT 12").all() as NovelRow[]).map(parseNovel);
+  const featured = topNovels.filter((n) => n.is_featured);
   const top3 = featured.slice(0, 3);
-  const restFeatured = featured.slice(3);
+  const restFeatured = featured.slice(3, 12);
 
   return (
     <div className="min-h-screen">
@@ -95,21 +96,22 @@ export default function HomePage() {
 
       <TrendingTags />
 
-      {allNovels.length > 0 && (
-        <section className="container mx-auto max-w-7xl px-4 py-16">
-          <div className="flex items-end justify-between mb-8">
-            <div>
-              <h2 className="font-heading text-3xl md:text-4xl font-bold">Comece por aqui</h2>
-              <p className="text-muted-foreground mt-1">Novels perfeitas pra quem tá chegando agora.</p>
-            </div>
+      <section className="container mx-auto max-w-7xl px-4 py-16">
+        <div className="flex items-end justify-between mb-8">
+          <div>
+            <h2 className="font-heading text-3xl md:text-4xl font-bold">Adicionadas recentemente</h2>
+            <p className="text-muted-foreground mt-1">As últimas novidades do nosso catálogo.</p>
           </div>
-          <div className="space-y-4">
-            {allNovels.map((novel) => (
-              <NovelCard key={novel.id} novel={novel as any} variant="horizontal" />
-            ))}
-          </div>
-        </section>
-      )}
+          <Button variant="ghost" asChild>
+            <Link href="/explore">Ver todas <ArrowRight className="h-4 w-4 ml-1" /></Link>
+          </Button>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {topNovels.map((novel) => (
+            <NovelCard key={novel.id} novel={novel as any} variant="compact" />
+          ))}
+        </div>
+      </section>
 
       <Testimonials />
       <HowItWorks />

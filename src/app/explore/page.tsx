@@ -1,17 +1,18 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { ArrowRight, Search, Filter, TrendingUp } from "lucide-react";
+import { Search, Filter, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NovelCard } from "@/components/novel/novel-card";
 import { getDb } from "@/lib/db";
 
 export const metadata = {
   title: "Explorar — Tomoverso",
 };
+
+const PAGE_SIZE = 60; // novels por página
 
 interface NovelRow {
   id: string;
@@ -46,78 +47,114 @@ function parseNovel(r: NovelRow) {
   };
 }
 
-export default function ExplorePage({ searchParams }: { searchParams: Promise<{ genre?: string; type?: string }> }) {
-  const params = searchParams as any; // ignore
+interface SearchParams {
+  genre?: string;
+  type?: string;
+  page?: string;
+}
+
+function buildQuery(filters: { type?: string; genre?: string }): { where: string; params: any[] } {
+  const conditions: string[] = [];
+  const params: any[] = [];
+  if (filters.type) {
+    conditions.push("type = ?");
+    params.push(filters.type);
+  }
+  if (filters.genre) {
+    // genres é JSON array; busca simples via LIKE
+    conditions.push("genres LIKE ?");
+    params.push(`%"${filters.genre}"%`);
+  }
+  const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
+  return { where, params };
+}
+
+function buildHref(filters: SearchParams, page: number): string {
+  const params = new URLSearchParams();
+  if (filters.type) params.set("type", filters.type);
+  if (filters.genre) params.set("genre", filters.genre);
+  if (page > 1) params.set("page", String(page));
+  const qs = params.toString();
+  return `/explore${qs ? `?${qs}` : ""}`;
+}
+
+export default function ExplorePage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   return <ExploreContent searchParams={searchParams} />;
 }
 
-async function ExploreContent({ searchParams }: { searchParams: Promise<{ genre?: string; type?: string }> }) {
+async function ExploreContent({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;
   const db = getDb();
-  const allRows = db.prepare("SELECT * FROM novels ORDER BY created_at DESC").all() as NovelRow[];
-  const allNovels = allRows.map(parseNovel);
+  const page = Math.max(1, parseInt(sp.page || "1", 10) || 1);
+  const offset = (page - 1) * PAGE_SIZE;
 
-  let novels = allNovels;
-  if (sp.genre) {
-    novels = allNovels.filter((n) => n.genres.includes(sp.genre!));
+  // Contagem total por filtro (para paginação)
+  const { where, params } = buildQuery({ type: sp.type, genre: sp.genre });
+  const countRow = db.prepare(`SELECT COUNT(*) as c FROM novels ${where}`).get(...params) as { c: number };
+  const totalFiltered = countRow.c;
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
+
+  // Página atual
+  const pageRows = db.prepare(`
+    SELECT * FROM novels ${where}
+    ORDER BY created_at DESC
+    LIMIT ? OFFSET ?
+  `).all(...params, PAGE_SIZE, offset) as NovelRow[];
+  const novels = pageRows.map(parseNovel);
+
+  // Contagens por tipo (para badges de filtro) — só uma vez, sem filtro
+  const allTypeRows = db.prepare(`SELECT type, COUNT(*) as c FROM novels GROUP BY type`).all() as Array<{ type: string; c: number }>;
+  const typeCounts: Record<string, number> = { all: 0, "light-novel": 0, "web-novel": 0, "visual-novel": 0, "short": 0 };
+  for (const r of allTypeRows) {
+    typeCounts[r.type] = r.c;
+    typeCounts.all += r.c;
   }
-  if (sp.type) {
-    novels = novels.filter((n) => n.type === sp.type);
+
+  // Gêneros — só os top 20 (em vez de TODOS) pra não inchar a página
+  const allGenresRaw = db.prepare(`
+    SELECT genres FROM novels WHERE genres != '[]' LIMIT 500
+  `).all() as Array<{ genres: string }>;
+  const genreFreq = new Map<string, number>();
+  for (const r of allGenresRaw) {
+    try {
+      const gs = JSON.parse(r.genres) as string[];
+      for (const g of gs) {
+        genreFreq.set(g, (genreFreq.get(g) ?? 0) + 1);
+      }
+    } catch {}
   }
+  const topGenres = Array.from(genreFreq.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 25)
+    .map(([g]) => g);
 
-  const featured = novels.filter((n) => n.is_featured);
-  const popular = [...novels].sort((a, b) => b.views - a.views);
-  const recent = [...novels].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-  const allGenres = Array.from(new Set(allNovels.flatMap((n) => n.genres)));
-
-  // Contagem por tipo pra mostrar nos badges de filtro
-  const typeCounts = {
-    "all": allNovels.length,
-    "light-novel": allNovels.filter((n) => n.type === "light-novel").length,
-    "web-novel": allNovels.filter((n) => n.type === "web-novel").length,
-    "visual-novel": allNovels.filter((n) => n.type === "visual-novel").length,
-    "short": allNovels.filter((n) => n.type === "short").length,
+  // Type label
+  const typeLabel: Record<string, string> = {
+    "light-novel": "Light Novels",
+    "web-novel": "Web Novels",
+    "visual-novel": "Visual Novels",
+    "short": "Curtas",
   };
 
+  const h1 = sp.genre
+    ? sp.genre
+    : sp.type
+    ? typeLabel[sp.type] ?? "Explorar"
+    : "Explorar";
+
   return (
-    <div className="container mx-auto max-w-7xl px-4 py-10 space-y-8">
-      <div className="space-y-3">
-        <Badge variant="secondary">Catálogo</Badge>
-        <h1 className="font-heading text-4xl md:text-5xl font-bold tracking-tight">
-          {sp.genre
-            ? sp.genre
-            : sp.type === "light-novel" ? "Light Novels"
-            : sp.type === "web-novel" ? "Web Novels"
-            : (sp.type as string) === "visual-novel" ? "Visual Novels"
-            : sp.type === "short" ? "Curtas"
-            : "Explorar"}
-        </h1>
-        <p className="text-muted-foreground text-lg max-w-2xl">
-          {sp.genre
-            ? `Novels do gênero ${sp.genre}`
-            : sp.type
-            ? `Catálogo focado em ${sp.type === "visual-novel" ? "visual novels" : String(sp.type).replace("-", " ")}s`
-            : "Descubra a próxima história que vai te prender por horas"}
-        </p>
+    <div className="container mx-auto max-w-7xl px-4 py-10 space-y-6">
+      {/* Header */}
+      <div className="space-y-2">
+        <Badge variant="secondary">Catálogo · {totalFiltered.toLocaleString("pt-BR")} obras</Badge>
+        <h1 className="font-heading text-4xl md:text-5xl font-bold tracking-tight">{h1}</h1>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 sticky top-16 z-30 py-3 bg-background/80 backdrop-blur-md -mx-4 px-4 border-b border-border/40">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Buscar por título, autor ou tag..." className="pl-9 h-11" />
-        </div>
-        <Button variant="outline" className="h-11">
-          <Filter className="h-4 w-4 mr-2" />
-          Filtros
-        </Button>
-      </div>
-
-      {/* ── Filtro por tipo ──────────────────────────────────── */}
+      {/* Filtro por tipo */}
       <div className="space-y-2">
         <div className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5">
           <Filter className="h-4 w-4 text-primary" />
-          Tipo de obra
+          Tipo
         </div>
         <div className="flex flex-wrap gap-2">
           <Link href={sp.genre ? `/explore?genre=${encodeURIComponent(sp.genre)}` : "/explore"}>
@@ -150,58 +187,71 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<{ genre?
         </div>
       </div>
 
-      <div className="space-y-2">
-        <div className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5">
-          <TrendingUp className="h-4 w-4 text-primary" />
-          Gêneros
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Link href={sp.type ? `/explore?type=${sp.type}` : "/explore"}>
-            <Badge variant={!sp.genre ? "default" : "outline"} className="cursor-pointer">Todos</Badge>
-          </Link>
-          {allGenres.map((g) => (
-            <Link key={g} href={`/explore?genre=${encodeURIComponent(g)}${sp.type ? `&type=${sp.type}` : ""}`}>
-              <Badge variant={sp.genre === g ? "default" : "outline"} className="cursor-pointer hover:bg-primary/10">
-                {g}
-              </Badge>
+      {/* Filtro por gênero (top 25) */}
+      {topGenres.length > 0 && (
+        <div className="space-y-2">
+          <div className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5">
+            <TrendingUp className="h-4 w-4 text-primary" />
+            Gêneros populares
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Link href={sp.type ? `/explore?type=${sp.type}` : "/explore"}>
+              <Badge variant={!sp.genre ? "default" : "outline"} className="cursor-pointer">Todos</Badge>
             </Link>
+            {topGenres.map((g) => (
+              <Link key={g} href={`/explore?genre=${encodeURIComponent(g)}${sp.type ? `&type=${sp.type}` : ""}`}>
+                <Badge variant={sp.genre === g ? "default" : "outline"} className="cursor-pointer hover:bg-primary/10">
+                  {g}
+                </Badge>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Grid de novels — só 60 por página */}
+      {novels.length === 0 ? (
+        <p className="text-center text-muted-foreground py-12">
+          Nenhuma novel encontrada com esses filtros.
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {novels.map((n) => (
+            <NovelCard key={n.id} novel={n as any} variant="compact" />
           ))}
         </div>
-      </div>
+      )}
 
-      <Tabs defaultValue="todos" className="w-full">
-        <TabsList>
-          <TabsTrigger value="todos">Todos ({novels.length})</TabsTrigger>
-          <TabsTrigger value="destaque">Destaque ({featured.length})</TabsTrigger>
-          <TabsTrigger value="populares">Populares</TabsTrigger>
-          <TabsTrigger value="recentes">Recentes</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="todos" className="mt-6">
-          {novels.length === 0 ? (
-            <p className="text-center text-muted-foreground py-12">Nenhuma novel encontrada. <Link href="/dashboard/novels/new" className="text-primary">Seja o primeiro a publicar!</Link></p>
+      {/* Paginação */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-4">
+          {page > 1 ? (
+            <Button asChild variant="outline" size="sm">
+              <Link href={buildHref(sp, page - 1)}>
+                <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
+              </Link>
+            </Button>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {novels.map((n) => <NovelCard key={n.id} novel={n as any} variant="compact" />)}
-            </div>
+            <Button variant="outline" size="sm" disabled>
+              <ChevronLeft className="h-4 w-4 mr-1" /> Anterior
+            </Button>
           )}
-        </TabsContent>
-        <TabsContent value="destaque" className="mt-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {featured.map((n) => <NovelCard key={n.id} novel={n as any} variant="compact" />)}
-          </div>
-        </TabsContent>
-        <TabsContent value="populares" className="mt-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {popular.map((n) => <NovelCard key={n.id} novel={n as any} variant="compact" />)}
-          </div>
-        </TabsContent>
-        <TabsContent value="recentes" className="mt-6">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {recent.map((n) => <NovelCard key={n.id} novel={n as any} variant="compact" />)}
-          </div>
-        </TabsContent>
-      </Tabs>
+          <span className="text-sm text-muted-foreground px-3">
+            Página <strong>{page}</strong> de {totalPages}
+          </span>
+          {page < totalPages ? (
+            <Button asChild variant="outline" size="sm">
+              <Link href={buildHref(sp, page + 1)}>
+                Próxima <ChevronRight className="h-4 w-4 ml-1" />
+              </Link>
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" disabled>
+              Próxima <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 }
