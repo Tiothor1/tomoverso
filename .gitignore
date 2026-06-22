@@ -20,7 +20,14 @@
 # production
 
 # database local (SQLite)
-/data/
+# (Mas o SEED inicial é commitado no repo pra popular /tmp em cold starts do Vercel)
+!/data/tomoverso.seed.db
+/data/tomoverso.seed.db-shm
+/data/tomoverso.seed.db-wal
+/data/tomoverso.db
+/data/tomoverso.db-shm
+/data/tomoverso.db-wal
+/data/backups/
 *.db
 *.db-shm
 *.db-wal

@@ -1,5 +1,5 @@
 import Database from "better-sqlite3";
-import { mkdirSync, existsSync } from "fs";
+import { copyFileSync, existsSync, mkdirSync } from "fs";
 import path from "path";
 
 function getDbDir(): string {
@@ -13,6 +13,12 @@ function getDbDir(): string {
 const DB_DIR = getDbDir();
 const DB_PATH = path.join(DB_DIR, "tomoverso.db");
 
+// Em produção (Vercel): o caminho bundled é o "seed" commitado no repo
+// (data/tomoverso.seed.db). Em dev: não tem seed, usa o DB local.
+const SEED_PATH = (process.env.VERCEL || process.env.NODE_ENV === "production")
+  ? path.join(process.cwd(), "data", "tomoverso.seed.db")
+  : "";
+
 declare global {
   // eslint-disable-next-line no-var
   var __tomoverso_db: Database.Database | undefined;
@@ -24,6 +30,22 @@ function createDb() {
       mkdirSync(DB_DIR, { recursive: true });
     } catch (e) {
       // ignore em ambiente read-only
+    }
+  }
+
+  // Em produção (Vercel), se /tmp/tomoverso.db não existe (cold start),
+  // copia o seed bundled no repo. Isso faz o site funcionar SEM precisar
+  // do usuário clicar nada: cada cold start repopula com os 2018 novels.
+  if ((process.env.VERCEL || process.env.NODE_ENV === "production") && !existsSync(DB_PATH)) {
+    if (SEED_PATH && existsSync(SEED_PATH)) {
+      try {
+        console.log(`[db] Cold start: copying seed ${SEED_PATH} → ${DB_PATH}`);
+        copyFileSync(SEED_PATH, DB_PATH);
+      } catch (e) {
+        console.error("[db] Seed copy failed:", e);
+      }
+    } else {
+      console.warn(`[db] No seed file at ${SEED_PATH} — will run auto-seed (3 novels)`);
     }
   }
 
