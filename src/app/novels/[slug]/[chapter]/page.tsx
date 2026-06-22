@@ -104,23 +104,23 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
         </div>
       </div>
 
-      <article className="container mx-auto max-w-3xl px-4 py-10">
-        <header className="mb-10 space-y-4">
+      <article className="container mx-auto max-w-4xl px-4 md:px-8 py-12 md:py-16">
+        <header className="mb-10 md:mb-12 space-y-4 text-center">
           <Badge className="text-xs">Capítulo {safeChapter.chapter_number}</Badge>
-          <h1 className="font-heading text-3xl md:text-4xl font-bold tracking-tight">{safeChapter.title}</h1>
-          <ChapterActions
-            chapterId={safeChapter.id}
-            novelSlug={safeNovel.slug}
-            chapterNumber={safeChapter.chapter_number}
-            wordCount={safeChapter.word_count}
-            viewCount={safeChapter.views}
-          />
+          <h1 className="font-heading text-3xl md:text-4xl font-bold tracking-tight">
+            {safeChapter.title}
+          </h1>
+          <div className="text-xs text-muted-foreground">
+            ~{Math.ceil(safeChapter.word_count / 250)} min de leitura
+          </div>
         </header>
 
-        <div className="prose-ln">
-          {safeChapter.content.split("\n\n").map((paragraph, i) => (
-            <p key={i}>{paragraph}</p>
-          ))}
+        <div className="prose-ln mx-auto">
+          {safeChapter.content.split(/\n\n+/).map((paragraph, i) => {
+            const trimmed = paragraph.trim();
+            if (!trimmed) return null;
+            return <p key={i}>{trimmed}</p>;
+          })}
         </div>
 
         {author && (

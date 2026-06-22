@@ -284,13 +284,28 @@
     @apply font-heading tracking-tight;
   }
   .prose-ln {
-    @apply font-serif text-lg leading-relaxed;
+    @apply font-serif text-lg md:text-xl leading-loose text-foreground/90;
+    max-width: 68ch; /* ~720px, ideal pra leitura longa */
   }
   .prose-ln p {
-    @apply mb-6 indent-8;
+    @apply mb-8 text-justify hyphens-auto;
+    text-indent: 1.5em;
+  }
+  .prose-ln p:first-child {
+    text-indent: 0; /* sem indent no primeiro parágrafo (depois do drop cap) */
   }
   .prose-ln p:first-child::first-letter {
-    @apply text-5xl font-bold float-left mr-2 mt-1 leading-none text-primary;
+    @apply text-6xl font-bold float-left mr-3 mt-1 leading-none text-primary font-serif;
+  }
+  /* Dialog: linhas que começam com aspas/abertura de diálogo ficam
+     com leve destaque (sem mudar HTML — heurística por primeira char) */
+  .prose-ln p:has(> em:first-child),
+  .prose-ln p > em:first-child {
+    @apply not-italic font-medium text-foreground;
+  }
+  /* Capítulo simples (sem drop cap, sem indent) */
+  .prose-ln-simple p {
+    @apply mb-6 indent-0 text-left;
   }
 }
 
