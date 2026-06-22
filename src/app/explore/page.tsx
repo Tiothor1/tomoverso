@@ -21,7 +21,7 @@ interface NovelRow {
   synopsis: string;
   cover_url: string;
   author_id: string;
-  type: "light-novel" | "web-novel" | "short";
+  type: "light-novel" | "web-novel" | "short" | "visual-novel";
   status: "ongoing" | "completed" | "hiatus" | "dropped";
   genres: string;
   tags: string;
@@ -46,12 +46,12 @@ function parseNovel(r: NovelRow) {
   };
 }
 
-export default function ExplorePage({ searchParams }: { searchParams: Promise<{ genre?: string }> }) {
+export default function ExplorePage({ searchParams }: { searchParams: Promise<{ genre?: string; type?: string }> }) {
   const params = searchParams as any; // ignore
   return <ExploreContent searchParams={searchParams} />;
 }
 
-async function ExploreContent({ searchParams }: { searchParams: Promise<{ genre?: string }> }) {
+async function ExploreContent({ searchParams }: { searchParams: Promise<{ genre?: string; type?: string }> }) {
   const sp = await searchParams;
   const db = getDb();
   const allRows = db.prepare("SELECT * FROM novels ORDER BY created_at DESC").all() as NovelRow[];
@@ -61,6 +61,9 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<{ genre?
   if (sp.genre) {
     novels = allNovels.filter((n) => n.genres.includes(sp.genre!));
   }
+  if (sp.type) {
+    novels = novels.filter((n) => n.type === sp.type);
+  }
 
   const featured = novels.filter((n) => n.is_featured);
   const popular = [...novels].sort((a, b) => b.views - a.views);
@@ -68,15 +71,34 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<{ genre?
 
   const allGenres = Array.from(new Set(allNovels.flatMap((n) => n.genres)));
 
+  // Contagem por tipo pra mostrar nos badges de filtro
+  const typeCounts = {
+    "all": allNovels.length,
+    "light-novel": allNovels.filter((n) => n.type === "light-novel").length,
+    "web-novel": allNovels.filter((n) => n.type === "web-novel").length,
+    "visual-novel": allNovels.filter((n) => n.type === "visual-novel").length,
+    "short": allNovels.filter((n) => n.type === "short").length,
+  };
+
   return (
     <div className="container mx-auto max-w-7xl px-4 py-10 space-y-8">
       <div className="space-y-3">
         <Badge variant="secondary">Catálogo</Badge>
         <h1 className="font-heading text-4xl md:text-5xl font-bold tracking-tight">
-          {sp.genre ? sp.genre : "Explorar"}
+          {sp.genre
+            ? sp.genre
+            : sp.type === "light-novel" ? "Light Novels"
+            : sp.type === "web-novel" ? "Web Novels"
+            : (sp.type as string) === "visual-novel" ? "Visual Novels"
+            : sp.type === "short" ? "Curtas"
+            : "Explorar"}
         </h1>
         <p className="text-muted-foreground text-lg max-w-2xl">
-          {sp.genre ? `Novels do gênero ${sp.genre}` : "Descubra a próxima história que vai te prender por horas"}
+          {sp.genre
+            ? `Novels do gênero ${sp.genre}`
+            : sp.type
+            ? `Catálogo focado em ${sp.type === "visual-novel" ? "visual novels" : String(sp.type).replace("-", " ")}s`
+            : "Descubra a próxima história que vai te prender por horas"}
         </p>
       </div>
 
@@ -91,17 +113,54 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<{ genre?
         </Button>
       </div>
 
+      {/* ── Filtro por tipo ──────────────────────────────────── */}
+      <div className="space-y-2">
+        <div className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5">
+          <Filter className="h-4 w-4 text-primary" />
+          Tipo de obra
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link href={sp.genre ? `/explore?genre=${encodeURIComponent(sp.genre)}` : "/explore"}>
+            <Badge variant={!sp.type ? "default" : "outline"} className="cursor-pointer">
+              Todas ({typeCounts.all})
+            </Badge>
+          </Link>
+          <Link href={sp.genre ? `/explore?genre=${encodeURIComponent(sp.genre)}&type=light-novel` : "/explore?type=light-novel"}>
+            <Badge variant={sp.type === "light-novel" ? "default" : "outline"} className="cursor-pointer hover:bg-emerald-500/10">
+              Light Novel ({typeCounts["light-novel"]})
+            </Badge>
+          </Link>
+          <Link href={sp.genre ? `/explore?genre=${encodeURIComponent(sp.genre)}&type=web-novel` : "/explore?type=web-novel"}>
+            <Badge variant={sp.type === "web-novel" ? "default" : "outline"} className="cursor-pointer hover:bg-blue-500/10">
+              Web Novel ({typeCounts["web-novel"]})
+            </Badge>
+          </Link>
+          <Link href={sp.genre ? `/explore?genre=${encodeURIComponent(sp.genre)}&type=visual-novel` : "/explore?type=visual-novel"}>
+            <Badge variant={sp.type === "visual-novel" ? "default" : "outline"} className="cursor-pointer hover:bg-purple-500/10">
+              Visual Novel ({typeCounts["visual-novel"]})
+            </Badge>
+          </Link>
+          {typeCounts.short > 0 && (
+            <Link href={sp.genre ? `/explore?genre=${encodeURIComponent(sp.genre)}&type=short` : "/explore?type=short"}>
+              <Badge variant={sp.type === "short" ? "default" : "outline"} className="cursor-pointer hover:bg-amber-500/10">
+                Curta ({typeCounts.short})
+              </Badge>
+            </Link>
+          )}
+        </div>
+      </div>
+
       <div className="space-y-2">
         <div className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5">
           <TrendingUp className="h-4 w-4 text-primary" />
           Gêneros
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link href="/explore">
+          <Link href={sp.type ? `/explore?type=${sp.type}` : "/explore"}>
             <Badge variant={!sp.genre ? "default" : "outline"} className="cursor-pointer">Todos</Badge>
           </Link>
           {allGenres.map((g) => (
-            <Link key={g} href={`/explore?genre=${encodeURIComponent(g)}`}>
+            <Link key={g} href={`/explore?genre=${encodeURIComponent(g)}${sp.type ? `&type=${sp.type}` : ""}`}>
               <Badge variant={sp.genre === g ? "default" : "outline"} className="cursor-pointer hover:bg-primary/10">
                 {g}
               </Badge>

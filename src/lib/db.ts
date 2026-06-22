@@ -32,6 +32,13 @@ function createDb() {
   db.pragma("foreign_keys = ON");
 
   db.exec(`
+    -- Tabela de controle de migrations (idempotente)
+    CREATE TABLE IF NOT EXISTS migrations (
+      name TEXT PRIMARY KEY,
+      applied_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    -- Users
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       email TEXT UNIQUE NOT NULL,
@@ -62,6 +69,7 @@ function createDb() {
     CREATE INDEX IF NOT EXISTS idx_sessions_token ON sessions(token);
     CREATE INDEX IF NOT EXISTS idx_sessions_user ON sessions(user_id);
 
+    -- Novels (com type='visual-novel' + colunas de origem)
     CREATE TABLE IF NOT EXISTS novels (
       id TEXT PRIMARY KEY,
       slug TEXT UNIQUE NOT NULL,
@@ -69,16 +77,23 @@ function createDb() {
       alternative_titles TEXT DEFAULT '[]',
       synopsis TEXT NOT NULL DEFAULT '',
       cover_url TEXT,
+      cover_source_url TEXT,
+      cover_local_path TEXT,
       author_id TEXT NOT NULL,
-      type TEXT NOT NULL DEFAULT 'light-novel' CHECK (type IN ('light-novel', 'web-novel', 'short')),
+      source TEXT,
+      source_id TEXT,
+      source_url TEXT,
+      type TEXT NOT NULL DEFAULT 'light-novel' CHECK (type IN ('light-novel', 'web-novel', 'short', 'visual-novel')),
       status TEXT NOT NULL DEFAULT 'ongoing' CHECK (status IN ('ongoing', 'completed', 'hiatus', 'dropped')),
       genres TEXT NOT NULL DEFAULT '[]',
       tags TEXT NOT NULL DEFAULT '[]',
       views INTEGER NOT NULL DEFAULT 0,
       rating_sum INTEGER NOT NULL DEFAULT 0,
       rating_count INTEGER NOT NULL DEFAULT 0,
+      external_score REAL,
       is_featured INTEGER NOT NULL DEFAULT 0,
       is_approved INTEGER NOT NULL DEFAULT 1,
+      last_synced_at TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now')),
       FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
@@ -86,21 +101,28 @@ function createDb() {
     CREATE INDEX IF NOT EXISTS idx_novels_slug ON novels(slug);
     CREATE INDEX IF NOT EXISTS idx_novels_author ON novels(author_id);
     CREATE INDEX IF NOT EXISTS idx_novels_featured ON novels(is_featured);
+    CREATE INDEX IF NOT EXISTS idx_novels_source ON novels(source, source_id);
+    CREATE INDEX IF NOT EXISTS idx_novels_last_synced ON novels(last_synced_at);
+    CREATE INDEX IF NOT EXISTS idx_novels_external_score ON novels(external_score);
 
     CREATE TABLE IF NOT EXISTS chapters (
       id TEXT PRIMARY KEY,
       novel_id TEXT NOT NULL,
+      volume_id TEXT,
       chapter_number INTEGER NOT NULL,
       title TEXT NOT NULL,
       content TEXT NOT NULL DEFAULT '',
       word_count INTEGER NOT NULL DEFAULT 0,
       views INTEGER NOT NULL DEFAULT 0,
+      source_url TEXT,
       published_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now')),
       UNIQUE (novel_id, chapter_number),
-      FOREIGN KEY (novel_id) REFERENCES novels(id) ON DELETE CASCADE
+      FOREIGN KEY (novel_id) REFERENCES novels(id) ON DELETE CASCADE,
+      FOREIGN KEY (volume_id) REFERENCES volumes(id) ON DELETE SET NULL
     );
     CREATE INDEX IF NOT EXISTS idx_chapters_novel ON chapters(novel_id);
+    CREATE INDEX IF NOT EXISTS idx_chapters_volume ON chapters(volume_id);
 
     CREATE TABLE IF NOT EXISTS comments (
       id TEXT PRIMARY KEY,
@@ -175,6 +197,107 @@ function createDb() {
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       FOREIGN KEY (reporter_id) REFERENCES users(id) ON DELETE CASCADE
     );
+
+    -- Tabelas de ingestão (catálogo externo)
+    CREATE TABLE IF NOT EXISTS sources (
+      id TEXT PRIMARY KEY,
+      name TEXT UNIQUE NOT NULL,
+      display_name TEXT NOT NULL,
+      type TEXT NOT NULL CHECK (type IN ('api', 'scrape')),
+      base_url TEXT,
+      rate_limit_per_sec REAL NOT NULL DEFAULT 1.0,
+      enabled INTEGER NOT NULL DEFAULT 1,
+      last_run_at TEXT,
+      last_run_status TEXT,
+      config TEXT NOT NULL DEFAULT '{}',
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS source_links (
+      id TEXT PRIMARY KEY,
+      novel_id TEXT NOT NULL,
+      source_id TEXT NOT NULL,
+      external_id TEXT NOT NULL,
+      external_url TEXT,
+      match_confidence REAL NOT NULL DEFAULT 1.0,
+      last_synced_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (source_id, external_id),
+      FOREIGN KEY (novel_id) REFERENCES novels(id) ON DELETE CASCADE,
+      FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_source_links_novel ON source_links(novel_id);
+    CREATE INDEX IF NOT EXISTS idx_source_links_source ON source_links(source_id, external_id);
+
+    CREATE TABLE IF NOT EXISTS volumes (
+      id TEXT PRIMARY KEY,
+      novel_id TEXT NOT NULL,
+      volume_number REAL NOT NULL,
+      title TEXT,
+      status TEXT NOT NULL DEFAULT 'ongoing' CHECK (status IN ('ongoing', 'completed')),
+      chapter_count INTEGER NOT NULL DEFAULT 0,
+      source_url TEXT,
+      last_synced_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (novel_id, volume_number),
+      FOREIGN KEY (novel_id) REFERENCES novels(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_volumes_novel ON volumes(novel_id);
+
+    CREATE TABLE IF NOT EXISTS tags (
+      id TEXT PRIMARY KEY,
+      slug TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      category TEXT NOT NULL CHECK (category IN ('genre', 'tag', 'theme')),
+      source TEXT,
+      external_id TEXT,
+      count INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_tags_category ON tags(category);
+
+    CREATE TABLE IF NOT EXISTS novel_tags (
+      novel_id TEXT NOT NULL,
+      tag_id TEXT NOT NULL,
+      PRIMARY KEY (novel_id, tag_id),
+      FOREIGN KEY (novel_id) REFERENCES novels(id) ON DELETE CASCADE,
+      FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS sync_runs (
+      id TEXT PRIMARY KEY,
+      source_id TEXT,
+      source_name TEXT NOT NULL,
+      mode TEXT NOT NULL CHECK (mode IN ('initial', 'weekly', 'daily', 'manual')),
+      status TEXT NOT NULL DEFAULT 'running' CHECK (status IN ('running', 'success', 'partial', 'failed')),
+      started_at TEXT NOT NULL DEFAULT (datetime('now')),
+      finished_at TEXT,
+      duration_ms INTEGER,
+      items_found INTEGER NOT NULL DEFAULT 0,
+      items_imported INTEGER NOT NULL DEFAULT 0,
+      items_updated INTEGER NOT NULL DEFAULT 0,
+      items_skipped INTEGER NOT NULL DEFAULT 0,
+      items_failed INTEGER NOT NULL DEFAULT 0,
+      metadata TEXT NOT NULL DEFAULT '{}',
+      FOREIGN KEY (source_id) REFERENCES sources(id) ON DELETE SET NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_sync_runs_source ON sync_runs(source_id);
+    CREATE INDEX IF NOT EXISTS idx_sync_runs_started ON sync_runs(started_at);
+    CREATE INDEX IF NOT EXISTS idx_sync_runs_status ON sync_runs(status);
+
+    CREATE TABLE IF NOT EXISTS sync_errors (
+      id TEXT PRIMARY KEY,
+      run_id TEXT NOT NULL,
+      external_id TEXT,
+      error_type TEXT,
+      error_message TEXT NOT NULL,
+      stack_trace TEXT,
+      context TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (run_id) REFERENCES sync_runs(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_sync_errors_run ON sync_errors(run_id);
 
     CREATE TABLE IF NOT EXISTS activity_log (
       id TEXT PRIMARY KEY,

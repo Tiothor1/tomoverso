@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Users, BookOpen, MessageCircle, Flag, Activity, Shield, Eye, Ban, Check, Trash2 } from "lucide-react";
+import { Users, BookOpen, MessageCircle, Flag, Activity, Shield, Eye, Ban, Check, Trash2, Database, BarChart3 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -117,6 +117,20 @@ export default async function AdminPage() {
           <p className="text-muted-foreground mt-1">
             Gerencie usuários, novels, comentários e reports
           </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link href="/admin/imports">
+              <Database className="h-4 w-4 mr-2" />
+              Importações
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/admin/stats">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Estatísticas
+            </Link>
+          </Button>
         </div>
       </div>
 

@@ -9,5 +9,15 @@
     "env": {
       "NEXT_TELEMETRY_DISABLED": "1"
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/sync-chapters",
+      "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/sync-weekly",
+      "schedule": "0 3 * * 4"
+    }
+  ]
 }

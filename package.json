@@ -6,7 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "migrate": "tsx scripts/migrate.ts up",
+    "migrate:status": "tsx scripts/migrate.ts status",
+    "migrate:down": "tsx scripts/migrate.ts down",
+    "import:vndb": "tsx scripts/import-vndb.ts",
+    "import:jikan": "tsx scripts/import-jikan.ts",
+    "import:mangadex": "tsx scripts/import-mangadex.ts",
+    "import:anilist": "tsx scripts/import-anilist.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -42,6 +49,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "tailwindcss": "^4",
+    "tsx": "^4.19.2",
     "typescript": "^5"
   }
 }
