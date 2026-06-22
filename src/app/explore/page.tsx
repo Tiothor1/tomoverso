@@ -51,9 +51,11 @@ interface SearchParams {
   genre?: string;
   type?: string;
   page?: string;
+  /** Quando "1", mostra só novels com pelo menos 1 capítulo */
+  readable?: string;
 }
 
-function buildQuery(filters: { type?: string; genre?: string }): { where: string; params: any[] } {
+function buildQuery(filters: { type?: string; genre?: string; readable?: boolean }): { where: string; params: any[] } {
   const conditions: string[] = [];
   const params: any[] = [];
   if (filters.type) {
@@ -61,9 +63,12 @@ function buildQuery(filters: { type?: string; genre?: string }): { where: string
     params.push(filters.type);
   }
   if (filters.genre) {
-    // genres é JSON array; busca simples via LIKE
     conditions.push("genres LIKE ?");
     params.push(`%"${filters.genre}"%`);
+  }
+  if (filters.readable) {
+    // Pega novels com pelo menos 1 capítulo
+    conditions.push("id IN (SELECT novel_id FROM chapters)");
   }
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
   return { where, params };
@@ -73,6 +78,7 @@ function buildHref(filters: SearchParams, page: number): string {
   const params = new URLSearchParams();
   if (filters.type) params.set("type", filters.type);
   if (filters.genre) params.set("genre", filters.genre);
+  if (filters.readable) params.set("readable", "1");
   if (page > 1) params.set("page", String(page));
   const qs = params.toString();
   return `/explore${qs ? `?${qs}` : ""}`;
@@ -89,7 +95,7 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
   const offset = (page - 1) * PAGE_SIZE;
 
   // Contagem total por filtro (para paginação)
-  const { where, params } = buildQuery({ type: sp.type, genre: sp.genre });
+  const { where, params } = buildQuery({ type: sp.type, genre: sp.genre, readable: sp.readable === "1" });
   const countRow = db.prepare(`SELECT COUNT(*) as c FROM novels ${where}`).get(...params) as { c: number };
   const totalFiltered = countRow.c;
   const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
@@ -144,6 +150,22 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-10 space-y-6">
+      {/* Banner honesto: só 3 novels têm conteúdo pra ler */}
+      <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 md:p-5 text-sm">
+        <div className="flex gap-3">
+          <span className="text-amber-500 text-lg">📚</span>
+          <div>
+            <p className="font-semibold text-amber-200">
+              Catálogo de metadados — a maioria das obras é só pra "marcar"
+            </p>
+            <p className="text-amber-200/80 mt-1 text-xs md:text-sm">
+              Das {totalFiltered.toLocaleString("pt-BR")} obras listadas, <strong>apenas 3 têm capítulos para leitura agora</strong> (novels do Fábio).
+              As outras {Math.max(0, totalFiltered - 3).toLocaleString("pt-BR")} são importados de VNDB / JIKAN / MangaDex / AniList e contêm só capa, sinopse, tags — servem pra descobrir obras e saber que existem. <Link href="/explore?readable=1" className="underline font-semibold">Clique aqui pra ver só as que dá pra ler →</Link>
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="space-y-2">
         <Badge variant="secondary">Catálogo · {totalFiltered.toLocaleString("pt-BR")} obras</Badge>
@@ -185,6 +207,20 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
             </Link>
           )}
         </div>
+      </div>
+
+      {/* Filtro "só com capítulos" */}
+      <div className="flex flex-wrap gap-2">
+        <Link href={buildHref({ ...sp, readable: undefined } as any, 1)}>
+          <Badge variant={!sp.readable ? "default" : "outline"} className="cursor-pointer">
+            📚 Todas ({typeCounts.all})
+          </Badge>
+        </Link>
+        <Link href={buildHref({ ...sp, readable: "1" } as any, 1)}>
+          <Badge variant={sp.readable ? "default" : "outline"} className="cursor-pointer bg-emerald-500/10 hover:bg-emerald-500/20">
+            📖 Só as que dá pra ler (3)
+          </Badge>
+        </Link>
       </div>
 
       {/* Filtro por gênero (top 25) */}
