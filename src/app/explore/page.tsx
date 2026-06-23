@@ -116,6 +116,9 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
     typeCounts.all += r.c;
   }
 
+  // Quantas novels têm capítulos
+  const readableCount = (db.prepare(`SELECT COUNT(DISTINCT novel_id) as c FROM chapters`).get() as { c: number }).c;
+
   // Gêneros — só os top 20 (em vez de TODOS) pra não inchar a página
   const allGenresRaw = db.prepare(`
     SELECT genres FROM novels WHERE genres != '[]' LIMIT 500
@@ -160,7 +163,7 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
                 O Tomoverso é uma plataforma de <em>publicação</em> brasileira.
               </p>
               <p className="text-muted-foreground mt-1 text-sm">
-                As 2018 obras listadas são <strong>metadados importados</strong> (capa, sinopse, tags) — sem capítulos. O conteúdo pra ler vem de autores que publicam aqui pelo painel. <Link href="/explore?readable=1" className="text-primary underline font-semibold">Ver o que dá pra ler agora</Link>.
+                As {typeCounts.all} obras do catálogo têm <strong>metadados importados</strong> (capa, sinopse, tags). O conteúdo pra ler vem de autores que publicam aqui pelo painel ou de fontes como NovelMania. <Link href="/explore?readable=1" className="text-primary underline font-semibold">Ver o que dá pra ler agora</Link>.
               </p>
             </div>
           </div>
@@ -224,7 +227,7 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
         </Link>
         <Link href={buildHref({ ...sp, readable: "1" } as any, 1)}>
           <Badge variant={sp.readable ? "default" : "outline"} className="cursor-pointer bg-emerald-500/10 hover:bg-emerald-500/20">
-            📖 Só as que dá pra ler (3)
+            📖 Só as que dá pra ler ({readableCount})
           </Badge>
         </Link>
       </div>
