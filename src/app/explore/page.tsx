@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import Link from "next/link";
-import { Search, Filter, TrendingUp, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, Filter, TrendingUp, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -150,19 +150,25 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
 
   return (
     <div className="container mx-auto max-w-7xl px-4 py-10 space-y-6">
-      {/* Banner honesto: só 3 novels têm conteúdo pra ler */}
-      <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 md:p-5 text-sm">
-        <div className="flex gap-3">
-          <span className="text-amber-500 text-lg">📚</span>
-          <div>
-            <p className="font-semibold text-amber-200">
-              Catálogo de metadados — a maioria das obras é só pra "marcar"
-            </p>
-            <p className="text-amber-200/80 mt-1 text-xs md:text-sm">
-              Das {totalFiltered.toLocaleString("pt-BR")} obras listadas, <strong>apenas 3 têm capítulos para leitura agora</strong> (novels do Fábio).
-              As outras {Math.max(0, totalFiltered - 3).toLocaleString("pt-BR")} são importados de VNDB / JIKAN / MangaDex / AniList e contêm só capa, sinopse, tags — servem pra descobrir obras e saber que existem. <Link href="/explore?readable=1" className="underline font-semibold">Clique aqui pra ver só as que dá pra ler →</Link>
-            </p>
+      {/* Banner: plataforma de publicação BR */}
+      <div className="rounded-lg border border-primary/40 bg-primary/5 p-5 md:p-6">
+        <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between">
+          <div className="flex gap-3">
+            <span className="text-2xl">✍️</span>
+            <div>
+              <p className="font-heading font-semibold text-base md:text-lg">
+                O Tomoverso é uma plataforma de <em>publicação</em> brasileira.
+              </p>
+              <p className="text-muted-foreground mt-1 text-sm">
+                As 2018 obras listadas são <strong>metadados importados</strong> (capa, sinopse, tags) — sem capítulos. O conteúdo pra ler vem de autores que publicam aqui pelo painel. <Link href="/explore?readable=1" className="text-primary underline font-semibold">Ver o que dá pra ler agora</Link>.
+              </p>
+            </div>
           </div>
+          <Button asChild size="lg" className="shrink-0">
+            <Link href="/dashboard/novels/new">
+              <BookOpen className="h-4 w-4 mr-2" /> Publicar minha novel
+            </Link>
+          </Button>
         </div>
       </div>
 
