@@ -285,7 +285,7 @@
   }
   .prose-ln {
     @apply font-serif text-lg md:text-xl leading-loose text-foreground/90;
-    max-width: 68ch; /* ~720px, ideal pra leitura longa */
+    max-width: 100ch; /* wider, mais confortável */
   }
   .prose-ln p {
     @apply mb-8 text-justify hyphens-auto;

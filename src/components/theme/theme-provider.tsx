@@ -27,7 +27,7 @@ const ThemeProviderContext = createContext<ThemeProviderState | undefined>(
 export function ThemeProvider({
   children,
   defaultTheme = "dark",
-  defaultColor = "purple",
+  defaultColor = "sepia",
   storageKey = "tomoverso-ui-theme",
   ...props
 }: ThemeProviderProps) {
