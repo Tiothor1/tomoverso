@@ -119,7 +119,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
               </Link>
             </Button>
             <Badge variant="outline" className="font-mono">
-              Cap {safeChapter.chapter_number} / {allChapters.length}
+              Cap {idx + 1} / {allChapters.length}
             </Badge>
           </div>
         </div>

@@ -284,7 +284,8 @@
     @apply font-heading tracking-tight;
   }
   .prose-ln {
-   color: inherit !important;
+   text-align: justify !important;
+   text-justify: inter-word !important;
    font-family: var(--font-lora), Georgia, serif !important;
     font-size: 18px !important;
     line-height: 1.8 !important;
@@ -304,7 +305,8 @@
     width: 100% !important;
     line-height: 1.8 !important;
     font-size: 18px !important;
-    text-align: left !important;
+    text-align: justify !important;
+    text-justify: inter-word !important;
     hyphens: none !important;
     word-break: normal !important;
     overflow-wrap: normal !important;
