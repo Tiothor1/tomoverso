@@ -15,6 +15,31 @@ import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
 
+/** Remove junk text de importação/paginação e notas técnicas do conteúdo */
+function cleanChapterContent(text: string): string {
+  return text
+    // Remove "CAPÍTULO MUITO LONGO" e avisos similares
+    .replace(/^\[CAPÍTULO MUITO LONGO.*?\]\s*/gmi, "")
+    .replace(/^\[.*?\d+(?:\.\d+)?[kK]?[bB].*?\]\s*/gmi, "")
+    // Remove "49.253 chars", "842+ linhas", etc.
+    .replace(/^\d+[+-]?\s*linhas?\s*.*$/gmi, "")
+    .replace(/^\d+(?:\.\d+)?\s*(?:chars|caracteres|palavras|words).*$/gmi, "")
+    // Remove "Nota do autor", "Mensagem do autor", "Author's Note"
+    .replace(/^Nota do autor:?.*$/gmi, "")
+    .replace(/^Mensagem do autor:?.*$/gmi, "")
+    .replace(/^Author'?s?\s*Note:?.*$/gmi, "")
+    // Remove linhas de asteriscos/separadores (***, ---, etc) — mas só linhas solitárias
+    .replace(/^\s*[\*\-_=]{3,}\s*$/gm, "")
+    // Remove linhas de "extraído via browser" etc
+    .replace(/^[-–—].*?(?:extraído|browser|via).*$/gmi, "")
+    // Remove metadados de tradução (Tradução: X, Revisão: Y)
+    .replace(/^Tradução:.*$/gmi, "")
+    .replace(/^Revisão:.*$/gmi, "")
+    // Limpa espaços extras
+    .replace(/\n{4,}/g, "\n\n")
+    .trim();
+}
+
 interface ChapterRow {
   id: string;
   novel_id: string;
@@ -67,8 +92,6 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
     created_at: string;
   }>;
 
-  // Author info
-  const author = db.prepare("SELECT display_name FROM users WHERE id = ?").get(safeNovel.author_id) as { display_name: string } | undefined;
 
   async function postComment(formData: FormData) {
     "use server";
@@ -104,7 +127,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
         </div>
       </div>
 
-      <article className="container mx-auto max-w-7xl px-4 md:px-8 py-12 md:py-16">
+      <article className="mx-auto py-12 md:py-16">
         <header className="mb-10 md:mb-12 space-y-4 text-center">
           <Badge className="text-xs">Capítulo {safeChapter.chapter_number}</Badge>
           <h1 className="font-heading text-3xl md:text-4xl font-bold tracking-tight">
@@ -116,31 +139,12 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
         </header>
 
         <div className="prose-ln mx-auto">
-          {safeChapter.content.split(/\n\n+/).map((paragraph, i) => {
+          {cleanChapterContent(safeChapter.content).split(/\n\n+/).map((paragraph, i) => {
             const trimmed = paragraph.trim();
             if (!trimmed) return null;
             return <p key={i}>{trimmed}</p>;
           })}
         </div>
-
-        {author && (
-          <div className="mt-16 p-6 rounded-lg border border-dashed border-border/60 bg-muted/20">
-            <div className="flex items-center gap-2 mb-2">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-primary/20 text-primary text-sm">
-                  {author.display_name.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <div className="text-sm font-semibold">Nota do autor</div>
-                <div className="text-xs text-muted-foreground">{author.display_name}</div>
-              </div>
-            </div>
-            <p className="text-sm text-muted-foreground italic leading-relaxed">
-              Esse capítulo foi um dos mais difíceis de escrever até agora. Obrigado por ler até aqui. O próximo vai ser ainda mais intenso.
-            </p>
-          </div>
-        )}
       </article>
 
       <div className="border-t border-border/40 bg-muted/20">

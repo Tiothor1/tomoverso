@@ -284,12 +284,18 @@
     @apply font-heading tracking-tight;
   }
   .prose-ln {
-    @apply font-serif text-lg md:text-xl leading-loose text-foreground/90;
-    max-width: none; /* sem limite — ocupa o container inteiro */
+    @apply font-serif text-lg md:text-xl leading-relaxed text-foreground/90;
+    width: min(100%, 820px);
+    margin: 0 auto;
+    padding: 0 24px;
+    hyphens: none;
+    word-break: normal;
+    overflow-wrap: normal;
   }
   .prose-ln p {
-    @apply mb-8 text-justify hyphens-auto;
+    @apply mb-7;
     text-indent: 1.5em;
+    line-height: 1.9;
   }
   .prose-ln p:first-child {
     text-indent: 0; /* sem indent no primeiro parágrafo (depois do drop cap) */
@@ -298,6 +304,20 @@
     @apply text-6xl font-bold float-left mr-3 mt-1 leading-none text-primary font-serif;
   }
   /* Dialog: linhas que começam com aspas/abertura de diálogo ficam
+     SEM indentação pra parecer natural */
+  .prose-ln p:has(> strong:first-child:empty) {
+    text-indent: 0;
+  }
+
+@media (max-width: 768px) {
+  .prose-ln {
+    padding: 0 18px;
+    font-size: 17px;
+  }
+  .prose-ln p {
+    line-height: 1.8;
+  }
+}
      com leve destaque (sem mudar HTML — heurística por primeira char) */
   .prose-ln p:has(> em:first-child),
   .prose-ln p > em:first-child {
