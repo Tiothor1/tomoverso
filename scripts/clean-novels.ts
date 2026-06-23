@@ -13,7 +13,7 @@ console.log(`Novels sem capitulos: ${toDelete.length}`);
 
 // Delete them
 const del = db.prepare("DELETE FROM novels WHERE id NOT IN (SELECT DISTINCT novel_id FROM chapters)");
-const result = del.run();
+const result = del.run() as { changes: number };
 console.log(`Removidas: ${result.changes}`);
 
 // Verify
@@ -22,7 +22,7 @@ const withCh = (db.prepare("SELECT COUNT(DISTINCT novel_id) c FROM chapters").ge
 console.log(`Agora: ${remaining} novels, ${withCh} com capitulos`);
 
 // List remaining
-const list = db.prepare("SELECT id, title FROM novels ORDER BY title").all();
+const list = db.prepare("SELECT id, title FROM novels ORDER BY title").all() as Array<{ id: string; title: string }>;
 list.forEach(n => console.log(` - ${n.id}: ${n.title}`));
 
 db.pragma("wal_checkpoint(TRUNCATE)");
