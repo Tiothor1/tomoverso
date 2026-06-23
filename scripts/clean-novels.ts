@@ -17,9 +17,9 @@ const result = del.run();
 console.log(`Removidas: ${result.changes}`);
 
 // Verify
-const remaining = db.prepare("SELECT COUNT(*) c FROM novels").get();
-const withCh = db.prepare("SELECT COUNT(DISTINCT novel_id) c FROM chapters").get();
-console.log(`Agora: ${remaining.c} novels, ${withCh.c} com capitulos`);
+const remaining = (db.prepare("SELECT COUNT(*) c FROM novels").get() as { c: number }).c;
+const withCh = (db.prepare("SELECT COUNT(DISTINCT novel_id) c FROM chapters").get() as { c: number }).c;
+console.log(`Agora: ${remaining} novels, ${withCh} com capitulos`);
 
 // List remaining
 const list = db.prepare("SELECT id, title FROM novels ORDER BY title").all();
