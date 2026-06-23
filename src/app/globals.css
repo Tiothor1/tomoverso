@@ -284,38 +284,52 @@
     @apply font-heading tracking-tight;
   }
   .prose-ln {
-    @apply font-serif text-lg md:text-xl leading-relaxed text-foreground/90;
-    width: min(100%, 820px);
-    margin: 0 auto;
-    padding: 0 24px;
-    hyphens: none;
-    word-break: normal;
-    overflow-wrap: normal;
+   color: inherit !important;
+   font-family: var(--font-lora), Georgia, serif !important;
+    font-size: 18px !important;
+    line-height: 1.8 !important;
+    width: min(100% - 48px, 860px) !important;
+    max-width: 860px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding: 0 24px !important;
+    hyphens: none !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    text-align: left !important;
   }
   .prose-ln p {
-    @apply mb-7;
+    margin-bottom: 1.8rem !important;
+    max-width: none !important;
+    width: 100% !important;
+    line-height: 1.8 !important;
+    font-size: 18px !important;
+    text-align: left !important;
+    hyphens: none !important;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
     text-indent: 1.5em;
-    line-height: 1.9;
   }
   .prose-ln p:first-child {
-    text-indent: 0; /* sem indent no primeiro parágrafo (depois do drop cap) */
+    text-indent: 0;
   }
   .prose-ln p:first-child::first-letter {
-    @apply text-6xl font-bold float-left mr-3 mt-1 leading-none text-primary font-serif;
-  }
-  /* Dialog: linhas que começam com aspas/abertura de diálogo ficam
-     SEM indentação pra parecer natural */
-  .prose-ln p:has(> strong:first-child:empty) {
-    text-indent: 0;
+    float: left;
+    font-size: 4rem;
+    font-weight: 700;
+    margin-right: 0.75rem;
+    margin-top: 0.25rem;
+    line-height: 1;
+    font-family: var(--font-lora), Georgia, serif;
   }
 
 @media (max-width: 768px) {
   .prose-ln {
-    padding: 0 18px;
-    font-size: 17px;
-  }
-  .prose-ln p {
-    line-height: 1.8;
+    width: calc(100% - 32px) !important;
+    max-width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    font-size: 17px !important;
   }
 }
      com leve destaque (sem mudar HTML — heurística por primeira char) */

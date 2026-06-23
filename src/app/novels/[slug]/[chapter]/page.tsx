@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ReadingProgress } from "@/components/reader/reading-progress";
 import { ChapterActions } from "@/components/reader/chapter-actions";
-import { ReaderSettings } from "@/components/reader/reader-settings";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -109,7 +108,6 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
   return (
     <div className="min-h-screen">
       <ReadingProgress />
-      <ReaderSettings />
 
       <div className="border-b border-border/40 bg-muted/20 sticky top-16 z-30 backdrop-blur-md">
         <div className="container mx-auto max-w-3xl px-4 py-4">
