@@ -104,7 +104,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
         </div>
       </div>
 
-      <article className="container mx-auto max-w-4xl px-4 md:px-8 py-12 md:py-16">
+      <article className="container mx-auto max-w-7xl px-4 md:px-8 py-12 md:py-16">
         <header className="mb-10 md:mb-12 space-y-4 text-center">
           <Badge className="text-xs">Capítulo {safeChapter.chapter_number}</Badge>
           <h1 className="font-heading text-3xl md:text-4xl font-bold tracking-tight">
