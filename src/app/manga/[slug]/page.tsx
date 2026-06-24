@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft, BookOpen, User, Pencil, Hash, ExternalLink, Calendar, Layers,
+  ArrowLeft, BookOpen, User, Pencil, Hash, Calendar, Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -177,19 +177,7 @@ export default async function MangaDetailPage({
                   <span className="text-muted-foreground flex items-center gap-1 text-xs">
                     <Hash className="h-3 w-3" /> Fonte
                   </span>
-                  {manga.source_url ? (
-                    <a
-                      href={manga.source_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-primary hover:underline flex items-center gap-1 truncate"
-                    >
-                      {manga.source}
-                      <ExternalLink className="h-3 w-3 shrink-0" />
-                    </a>
-                  ) : (
-                    <span className="text-xs">{manga.source}</span>
-                  )}
+                  <span className="text-xs text-muted-foreground">{manga.source}</span>
                 </div>
               )}
             </div>
