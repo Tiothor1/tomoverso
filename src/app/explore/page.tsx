@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { NovelCard } from "@/components/novel/novel-card";
 import { getDb } from "@/lib/db";
+import { readableTitle } from "@/lib/display-title";
 
 export const metadata = {
   title: "Explorar — Tomoverso",
@@ -34,9 +35,16 @@ interface NovelRow {
 }
 
 function parseNovel(r: NovelRow) {
+  const alternative_titles = JSON.parse(r.alternative_titles || "[]");
   return {
     ...r,
-    alternative_titles: JSON.parse(r.alternative_titles || "[]"),
+    title: readableTitle({
+      title: r.title,
+      alternative_titles,
+      type: r.type,
+      slug: r.slug,
+    }),
+    alternative_titles,
     genres: JSON.parse(r.genres || "[]"),
     tags: JSON.parse(r.tags || "[]"),
     rating_avg: r.rating_count > 0 ? r.rating_sum / r.rating_count : 0,

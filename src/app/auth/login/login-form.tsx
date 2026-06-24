@@ -46,12 +46,12 @@ export function LoginForm() {
           <CardContent className="pt-6">
             <form action={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email ou username</Label>
+                <Label htmlFor="login">Email ou username</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
-                    id="email"
-                    name="email"
+                    id="login"
+                    name="login"
                     type="text"
                     placeholder="seu@email.com ou @username"
                     required

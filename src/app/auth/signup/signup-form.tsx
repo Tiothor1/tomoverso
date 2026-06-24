@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { signupAction } from "@/lib/actions/auth-actions";
 export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   return (
@@ -36,7 +37,12 @@ export function SignupForm() {
             <form
               action={async (formData) => {
                 setLoading(true);
-                await signupAction(formData);
+                setError(null);
+                const result = await signupAction(formData);
+                if (!result.ok && result.error) {
+                  setError(result.error);
+                  setLoading(false);
+                }
               }}
               className="space-y-4"
             >
@@ -113,6 +119,12 @@ export function SignupForm() {
                   </button>
                 </div>
               </div>
+
+              {error && (
+                <div className="text-sm text-red-500 bg-red-500/10 border border-red-500/30 rounded-md p-3">
+                  {error}
+                </div>
+              )}
 
               <Button type="submit" size="lg" className="w-full" disabled={loading}>
                 {loading ? "Criando..." : "Criar conta"}

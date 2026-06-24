@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { BookOpen, PenLine, Library, Shield } from "lucide-react";
+import { BookOpen, PenLine, Library, Shield, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { ColorThemePicker } from "@/components/theme/color-theme-picker";
-import { CommandPalette } from "@/components/layout/command-palette";
+import { HeaderSearch } from "@/components/layout/header-search";
 import { UserMenu } from "@/components/auth/user-menu";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -23,8 +23,8 @@ export async function Navbar() {
           </span>
         </Link>
 
-        <div className="flex-1 max-w-md mx-2">
-          <CommandPalette />
+        <div className="hidden flex-1 md:block max-w-md mx-2">
+          <HeaderSearch />
         </div>
 
         <nav className="hidden lg:flex items-center gap-1">
@@ -54,6 +54,11 @@ export async function Navbar() {
         </nav>
 
         <div className="ml-auto flex items-center gap-1">
+          <Button variant="ghost" size="icon" asChild className="md:hidden">
+            <Link href="/search" aria-label="Buscar">
+              <Search className="h-4 w-4" />
+            </Link>
+          </Button>
           <ColorThemePicker />
           <ThemeToggle />
           {user ? (

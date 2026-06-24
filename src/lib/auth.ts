@@ -1,15 +1,18 @@
-import { SignJWT, jwtVerify } from "jose";
+import { SignJWT, jwtVerify, EncryptJWT, jwtDecrypt } from "jose";
 import bcrypt from "bcryptjs";
 import { cookies } from "next/headers";
 import { getDb } from "./db";
 import type { User } from "./types";
-import { randomUUID } from "crypto";
+import { createHash, randomUUID } from "crypto";
+import type Database from "better-sqlite3";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.AUTH_SECRET || "tomoverso-dev-secret-change-in-production-min-32-chars"
-);
+const AUTH_SECRET = process.env.AUTH_SECRET || "tomoverso-dev-secret-change-in-production-min-32-chars";
+const JWT_SECRET = new TextEncoder().encode(AUTH_SECRET);
+const JWE_SECRET = createHash("sha256").update(AUTH_SECRET).digest();
 const SESSION_DURATION_DAYS = 30;
-const COOKIE_NAME = "tomoverso-session";
+const ACCOUNT_BACKUP_DAYS = 365;
+export const COOKIE_NAME = "tomoverso-session";
+const ACCOUNT_COOKIE_NAME = "tomoverso-account";
 
 export interface SessionPayload {
   userId: string;
@@ -31,8 +34,31 @@ export interface UserRecord {
   updated_at: string;
 }
 
+export interface AccountBackupPayload {
+  userId: string;
+  email: string;
+  username: string;
+  passwordHash: string;
+  displayName: string;
+  role: "user" | "admin" | "author";
+  createdAt: string;
+}
+
 export function generateId(): string {
   return randomUUID();
+}
+
+export function normalizeEmail(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+export function normalizeUsername(username: string): string {
+  return username.trim().replace(/^@+/, "").toLowerCase();
+}
+
+export function normalizeLogin(login: string): string {
+  const value = login.trim().toLowerCase();
+  return value.startsWith("@") ? normalizeUsername(value) : value;
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -59,9 +85,36 @@ export async function verifySessionToken(
 ): Promise<SessionPayload | null> {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
+    if (!payload.userId || !payload.sessionId) return null;
     return {
       userId: payload.userId as string,
       sessionId: payload.sessionId as string,
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function createAccountBackupToken(payload: AccountBackupPayload): Promise<string> {
+  return new EncryptJWT({ ...payload })
+    .setProtectedHeader({ alg: "dir", enc: "A256GCM" })
+    .setIssuedAt()
+    .setExpirationTime(`${ACCOUNT_BACKUP_DAYS}d`)
+    .encrypt(JWE_SECRET);
+}
+
+export async function verifyAccountBackupToken(token: string): Promise<AccountBackupPayload | null> {
+  try {
+    const { payload } = await jwtDecrypt(token, JWE_SECRET);
+    if (!payload.userId || !payload.email || !payload.username || !payload.passwordHash) return null;
+    return {
+      userId: String(payload.userId),
+      email: String(payload.email),
+      username: String(payload.username),
+      passwordHash: String(payload.passwordHash),
+      displayName: String(payload.displayName || payload.username),
+      role: (payload.role as AccountBackupPayload["role"]) || "user",
+      createdAt: String(payload.createdAt || new Date().toISOString()),
     };
   } catch {
     return null;
@@ -84,6 +137,49 @@ export async function clearSessionCookie() {
   cookieStore.delete(COOKIE_NAME);
 }
 
+export async function setAccountBackupCookie(payload: AccountBackupPayload) {
+  const token = await createAccountBackupToken(payload);
+  const cookieStore = await cookies();
+  cookieStore.set(ACCOUNT_COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: ACCOUNT_BACKUP_DAYS * 24 * 60 * 60,
+  });
+}
+
+export async function getAccountBackupFromCookie(): Promise<AccountBackupPayload | null> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(ACCOUNT_COOKIE_NAME)?.value;
+  if (!token) return null;
+  return verifyAccountBackupToken(token);
+}
+
+export function restoreUserFromBackup(db: Database.Database, backup: AccountBackupPayload): UserRecord {
+  const existing = db
+    .prepare("SELECT * FROM users WHERE id = ? OR lower(email) = ? OR lower(username) = ? LIMIT 1")
+    .get(backup.userId, backup.email, backup.username) as UserRecord | undefined;
+
+  if (existing) return existing;
+
+  db.prepare(
+    `INSERT INTO users (id, email, username, password_hash, display_name, role, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(
+    backup.userId,
+    backup.email,
+    backup.username,
+    backup.passwordHash,
+    backup.displayName,
+    backup.role,
+    backup.createdAt,
+    new Date().toISOString()
+  );
+
+  return db.prepare("SELECT * FROM users WHERE id = ?").get(backup.userId) as UserRecord;
+}
+
 export async function getCurrentUser(): Promise<UserRecord | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(COOKIE_NAME)?.value;
@@ -93,9 +189,16 @@ export async function getCurrentUser(): Promise<UserRecord | null> {
   if (!payload) return null;
 
   const db = getDb();
-  const user = db
+  let user = db
     .prepare("SELECT * FROM users WHERE id = ?")
     .get(payload.userId) as UserRecord | undefined;
+
+  if (!user) {
+    const backup = await getAccountBackupFromCookie();
+    if (backup && backup.userId === payload.userId) {
+      user = restoreUserFromBackup(db, backup);
+    }
+  }
 
   return user || null;
 }
