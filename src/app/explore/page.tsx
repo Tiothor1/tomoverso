@@ -116,7 +116,7 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
 
   // Contagens por tipo (para badges de filtro) — só uma vez, sem filtro
   const allTypeRows = db.prepare(`SELECT type, COUNT(*) as c FROM novels GROUP BY type`).all() as Array<{ type: string; c: number }>;
-  const typeCounts: Record<string, number> = { all: 0, "light-novel": 0, "web-novel": 0, "visual-novel": 0, "short": 0 };
+  const typeCounts: Record<string, number> = { all: 0, "light-novel": 0, "web-novel": 0, "short": 0 };
   for (const r of allTypeRows) {
     typeCounts[r.type] = r.c;
     typeCounts.all += r.c;

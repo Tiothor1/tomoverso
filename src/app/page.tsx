@@ -7,27 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { NovelCard } from "@/components/novel/novel-card";
 import { getDb } from "@/lib/db";
 import { HeroSection } from "@/components/landing/hero-section";
-import { TrendingTags } from "@/components/landing/trending-tags";
-import { Testimonials } from "@/components/landing/testimonials";
-import { Newsletter } from "@/components/landing/newsletter";
-import { HowItWorks } from "@/components/landing/how-it-works";
 
 interface NovelRow {
-  id: string;
-  slug: string;
-  title: string;
-  alternative_titles: string;
-  synopsis: string;
-  cover_url: string;
-  author_id: string;
+  id: string; slug: string; title: string; alternative_titles: string;
+  synopsis: string; cover_url: string; author_id: string;
   type: "light-novel" | "web-novel" | "short" | "visual-novel";
   status: "ongoing" | "completed" | "hiatus" | "dropped";
-  genres: string;
-  tags: string;
-  views: number;
-  rating_sum: number;
-  rating_count: number;
-  is_featured: number;
+  genres: string; tags: string; views: number;
+  rating_sum: number; rating_count: number; is_featured: number;
   created_at: string;
 }
 
@@ -38,20 +25,15 @@ function parseNovel(r: NovelRow) {
     genres: JSON.parse(r.genres || "[]"),
     tags: JSON.parse(r.tags || "[]"),
     rating_avg: r.rating_count > 0 ? r.rating_sum / r.rating_count : 0,
-    chapter_count: 0,
-    is_featured: !!r.is_featured,
-    is_approved: true,
-    updated_at: r.created_at,
+    chapter_count: 0, is_featured: !!r.is_featured, is_approved: true, updated_at: r.created_at,
   };
 }
 
 export default function HomePage() {
   const db = getDb();
-  // Limita a 12 novels pra evitar HTML gigante (21MB antes)
   const topNovels = (db.prepare("SELECT * FROM novels ORDER BY created_at DESC LIMIT 12").all() as NovelRow[]).map(parseNovel);
   const featured = topNovels.filter((n) => n.is_featured);
   const top3 = featured.slice(0, 3);
-  const restFeatured = featured.slice(3, 12);
 
   return (
     <div className="min-h-screen">
@@ -73,28 +55,17 @@ export default function HomePage() {
         </div>
 
         {top3.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {top3.map((novel) => (
-                <NovelCard key={novel.id} novel={novel as any} />
-              ))}
-            </div>
-            {restFeatured.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mt-6">
-                {restFeatured.map((novel) => (
-                  <NovelCard key={novel.id} novel={novel as any} variant="compact" />
-                ))}
-              </div>
-            )}
-          </>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {top3.map((novel) => (
+              <NovelCard key={novel.id} novel={novel as any} />
+            ))}
+          </div>
         ) : (
-          <Card className="text-center py-12">
-            <p className="text-muted-foreground">Nenhuma novel publicada ainda. <Link href="/auth/signup" className="text-primary">Seja o primeiro!</Link></p>
-          </Card>
+          <div className="text-center py-12 text-muted-foreground border border-dashed border-border/40 rounded-2xl">
+            <p>Nenhuma novel publicada ainda. <Link href="/auth/signup" className="text-primary">Seja o primeiro!</Link></p>
+          </div>
         )}
       </section>
-
-      <TrendingTags />
 
       <section className="container mx-auto max-w-7xl px-4 py-16">
         <div className="flex items-end justify-between mb-8">
@@ -113,10 +84,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Testimonials />
-      <HowItWorks />
-      <Newsletter />
-
       <section className="container mx-auto max-w-5xl px-4 py-20 text-center">
         <div className="rounded-2xl border border-border/40 bg-gradient-to-br from-primary/10 to-primary/5 p-8 md:p-12">
           <BookOpen className="h-12 w-12 text-primary mx-auto mb-4" />
@@ -132,5 +99,3 @@ export default function HomePage() {
     </div>
   );
 }
-
-import { Card } from "@/components/ui/card";
