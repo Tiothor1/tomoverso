@@ -155,15 +155,19 @@ function parseMangaDetail(html: string, mangaSlug: string): ParsedMangaDetail {
     ),
   ].slice(0, 10);
 
-  // Chapters — links para /manga/{slug}/capitulo-{N} ou /manga/{slug}/capitulo-{N}-pt-br/
+  // Chapters — capítulos com vários formatos de URL:
+  //   /manga/{slug}/capitulo-{N}/
+  //   /manga/{slug}/capitulo-{N}-pt-br/
+  //   /manga/{slug}/capitulo-{N}_-texto-qualquer/
+  //   /manga/{slug}/capitulo-{N}-texto-qualquer/
   const chapters: ParsedMangaDetail["chapters"] = [];
   const chapterRegex = new RegExp(
-    `<a[^>]*href="https?://mangaonline\\.blue/manga/${escapeRegex(mangaSlug)}/(capitulo-[0-9.]+(?:-[a-z-]+)?)/?"[^>]*>([\\s\\S]*?)</a>`,
+    `<a[^>]*href="https?://mangaonline\\.blue/manga/${escapeRegex(mangaSlug)}/(capitulo-[0-9.]+(?:[_-][a-z0-9-]+)?)/?"[^>]*>([\\s\\S]*?)</a>`,
     "g"
   );
   const chapterMatches = [...html.matchAll(chapterRegex)];
   for (const m of chapterMatches) {
-    const slugPart = m[1]; // "capitulo-407" ou "capitulo-407-pt-br"
+    const slugPart = m[1]; // "capitulo-407-pt-br", "capitulo-106_-captura"
     const numMatch = slugPart.match(/capitulo-([0-9.]+)/);
     if (!numMatch) continue;
     const number = parseFloat(numMatch[1]);
@@ -173,7 +177,7 @@ function parseMangaDetail(html: string, mangaSlug: string): ParsedMangaDetail {
     chapters.push({
       number,
       title,
-      slug: slugPart, // mantém o slug completo, incluindo "-pt-br" se houver
+      slug: slugPart,
       sourceUrl: `${BASE}/manga/${mangaSlug}/${slugPart}/`,
     });
   }
