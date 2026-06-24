@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
-import { copyFileSync, existsSync, mkdirSync } from "fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "fs";
 import path from "path";
+import { gunzipSync } from "zlib";
 
 function getDbDir(): string {
   // Em Vercel, o filesystem é read-only fora de /tmp
@@ -34,18 +35,35 @@ function createDb() {
   }
 
   // Em produção (Vercel), se /tmp/tomoverso.db não existe (cold start),
-  // copia o seed bundled no repo. Isso faz o site funcionar SEM precisar
-  // do usuário clicar nada: cada cold start repopula com os 2018 novels.
+  // tenta copiar do seed (binário ou .gz comprimido).
   if ((process.env.VERCEL || process.env.NODE_ENV === "production") && !existsSync(DB_PATH)) {
     if (SEED_PATH && existsSync(SEED_PATH)) {
-      try {
-        console.log(`[db] Cold start: copying seed ${SEED_PATH} → ${DB_PATH}`);
-        copyFileSync(SEED_PATH, DB_PATH);
-      } catch (e) {
-        console.error("[db] Seed copy failed:", e);
+      // Verifica se seed é LFS pointer (muito pequeno pra ser DB real)
+      const seedStat = statSync(SEED_PATH);
+      if (seedStat.size > 1024) {
+        // Seed real
+        try {
+          console.log(`[db] Cold start: copying seed ${SEED_PATH} → ${DB_PATH}`);
+          copyFileSync(SEED_PATH, DB_PATH);
+        } catch (e) {
+          console.error("[db] Seed copy failed:", e);
+        }
       }
-    } else {
-      console.warn(`[db] No seed file at ${SEED_PATH} — will run auto-seed (3 novels)`);
+    }
+    // Fallback: tenta .gz comprimido
+    const gzPath = SEED_PATH + ".gz";
+    if (!existsSync(DB_PATH) && existsSync(gzPath)) {
+      try {
+        console.log(`[db] Cold start: decompressing ${gzPath} → ${DB_PATH}`);
+        const raw = gunzipSync(readFileSync(gzPath));
+        writeFileSync(DB_PATH, raw);
+        console.log(`[db] Decompressed ${(raw.length / 1024 / 1024).toFixed(0)}MB`);
+      } catch (e) {
+        console.error("[db] Gzip decompress failed:", e);
+      }
+    }
+    if (!existsSync(DB_PATH)) {
+      console.warn(`[db] No seed file — will auto-seed with empty DB`);
     }
   }
 
