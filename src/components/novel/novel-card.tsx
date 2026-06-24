@@ -76,7 +76,7 @@ export function NovelCard({
         </div>
 
         <CardContent className="p-4 space-y-2">
-          <h3 className="font-heading text-lg font-semibold line-clamp-2 group-hover:text-primary transition-colors min-h-[3.5rem]">
+          <h3 className="font-heading text-lg font-semibold line-clamp-3 group-hover:text-primary transition-colors min-h-[4rem]">
             {title}
           </h3>
 

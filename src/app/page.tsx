@@ -407,7 +407,7 @@ function Shelf({
                 )}
               </div>
               <div className="space-y-2 p-3">
-                <h3 className="line-clamp-2 min-h-[2.5rem] font-heading text-sm font-bold leading-tight group-hover:text-primary">
+                <h3 className="line-clamp-3 min-h-[3.5rem] font-heading text-sm font-bold leading-tight group-hover:text-primary">
                   {item.title}
                 </h3>
                 <p className="line-clamp-1 text-xs text-muted-foreground">{item.subtitle}</p>
