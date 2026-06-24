@@ -7,7 +7,7 @@ import { getDb } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 interface PageProps {
-  searchParams: Promise<{ genre?: string }>;
+  searchParams: Promise<{ genre?: string; page?: string }>;
 }
 
 const ALL_GENRES = [
@@ -24,12 +24,25 @@ const statusColors: Record<string, string> = {
   dropped: "bg-red-500/20 text-red-400 border-red-500/30",
 };
 
+const PAGE_SIZE = 60;
+
+function buildHref(genre: string | null, page: number): string {
+  const params = new URLSearchParams();
+  if (genre) params.set("genre", genre);
+  if (page > 1) params.set("page", String(page));
+  const qs = params.toString();
+  return `/manga${qs ? `?${qs}` : ""}`;
+}
+
 export default async function MangaCatalogPage({ searchParams }: PageProps) {
   const sp = await searchParams;
   const activeGenre = sp.genre || null;
+  const page = Math.max(1, parseInt(sp.page || "1", 10) || 1);
+  const offset = (page - 1) * PAGE_SIZE;
 
   let rows: any[] = [];
   let allTags: Array<{ tag: string; count: number }> = [];
+  let totalFiltered = 0;
 
   try {
     const db = getDb();
@@ -51,6 +64,13 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
     allTags = db.prepare("SELECT tag, COUNT(*) as count FROM manga_tags GROUP BY tag ORDER BY count DESC, tag ASC").all() as any[];
     const topTags = allTags.slice(0, 12).map(t => t.tag);
 
+    // Count total (for pagination)
+    const countSql = activeGenre
+      ? "SELECT COUNT(*) as c FROM mangas m INNER JOIN manga_tags mt ON mt.manga_id = m.id AND mt.tag = ?"
+      : "SELECT COUNT(*) as c FROM mangas m";
+    totalFiltered = (db.prepare(countSql).get(activeGenre ? activeGenre : undefined) as any).c;
+    const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
+
     // Query mangas with optional genre filter
     const genreJoin = activeGenre
       ? `INNER JOIN manga_tags mt ON mt.manga_id = m.id AND mt.tag = ?`
@@ -64,8 +84,8 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
       FROM mangas m
       ${genreJoin}
       ORDER BY chapter_count DESC, m.updated_at DESC
-      LIMIT 500
-    `).all(activeGenre ? activeGenre : undefined) as any[];
+      LIMIT ? OFFSET ?
+    `).all(activeGenre ? activeGenre : undefined, PAGE_SIZE, offset) as any[];
 
     // Get tags for displayed mangas
     const mangaIds = rows.map(r => r.id);
@@ -214,6 +234,47 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
                   );
                 })}
               </div>
+
+              {/* Paginação */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 pt-8 pb-4">
+                  {page > 1 && (
+                    <Link href={buildHref(activeGenre, page - 1)}>
+                      <Button variant="outline" size="sm">Anterior</Button>
+                    </Link>
+                  )}
+                  <div className="flex items-center gap-1">
+                    {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                      let pageNum: number;
+                      if (totalPages <= 7) {
+                        pageNum = i + 1;
+                      } else if (page <= 4) {
+                        pageNum = i + 1;
+                      } else if (page >= totalPages - 3) {
+                        pageNum = totalPages - 6 + i;
+                      } else {
+                        pageNum = page - 3 + i;
+                      }
+                      return (
+                        <Link key={pageNum} href={buildHref(activeGenre, pageNum)}>
+                          <Button
+                            variant={pageNum === page ? "default" : "ghost"}
+                            size="sm"
+                            className="min-w-[2rem]"
+                          >
+                            {pageNum}
+                          </Button>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                  {page < totalPages && (
+                    <Link href={buildHref(activeGenre, page + 1)}>
+                      <Button variant="outline" size="sm">Próxima</Button>
+                    </Link>
+                  )}
+                </div>
+              )}
             </>
           )}
         </div>
