@@ -1,23 +1,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm run build",
+  "buildCommand": "git lfs pull && npm run build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "regions": ["gru1"],
-  "build": {
-    "env": {
-      "NEXT_TELEMETRY_DISABLED": "1"
+  "outputDirectory": ".next",
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 30
     }
-  },
-  "crons": [
-    {
-      "path": "/api/cron/sync-chapters",
-      "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/sync-weekly",
-      "schedule": "0 3 * * 4"
-    }
-  ]
+  }
 }
