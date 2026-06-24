@@ -93,7 +93,7 @@ function extractChapters(html: string, slug: string): Array<{num:number;slug:str
     const num = parseFloat(numMatch[1]);
     if (isNaN(num)) continue;
     const title = inner.length > 1 && inner.length < 200 ? inner : null;
-    chapters.push({ num, slug: path, title });
+    chapters.push({ num, slug: path.replace(/\/+$/, ""), title });
   }
   
   // Dedup e ordena
