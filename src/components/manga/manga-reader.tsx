@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, List, ArrowLeft } from "lucide-react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { ChevronLeft, ChevronRight, List, ArrowLeft, Maximize, Minimize, Bookmark, BookmarkCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -30,63 +31,205 @@ interface MangaReaderProps {
   allChapters: MangaReaderChapter[];
 }
 
-/**
- * MangaReader — leitor vertical de mangá.
- *
- * Features:
- * - Páginas em coluna única, largura natural, sem cortar/esticar
- * - Lazy loading (loading="lazy") em todas as imagens
- * - Skeleton enquanto imagem carrega
- * - Botões fixos inferior: prev/next chapter + abrir lista
- * - Topbar: voltar pro mangá + indicador de progresso
- * - Lista lateral de capítulos (drawer simples em mobile)
- */
 export function MangaReader({
-  manga,
-  chapter,
-  pages,
-  prevChapter,
-  nextChapter,
-  allChapters,
+  manga, chapter, pages, prevChapter, nextChapter, allChapters,
 }: MangaReaderProps) {
+  const [mode, setMode] = useState<"scroll" | "page">("scroll");
+  const [pageIdx, setPageIdx] = useState(0);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const firstPageRef = useRef<HTMLDivElement>(null);
+
+  // Check bookmark on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(`manga-bookmark-${manga.slug}-${chapter.chapter_number}`);
+    if (saved) {
+      setBookmarked(true);
+      const idx = parseInt(saved, 10);
+      if (!isNaN(idx) && idx >= 0 && idx < pages.length) setPageIdx(idx);
+    }
+  }, [manga.slug, chapter.chapter_number, pages.length]);
+
+  const toggleBookmark = useCallback(() => {
+    const key = `manga-bookmark-${manga.slug}-${chapter.chapter_number}`;
+    if (bookmarked) {
+      localStorage.removeItem(key);
+      setBookmarked(false);
+    } else {
+      localStorage.setItem(key, String(pageIdx));
+      setBookmarked(true);
+    }
+  }, [bookmarked, manga.slug, chapter.chapter_number, pageIdx]);
+
+  const toggleFullscreen = useCallback(() => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => setFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen().then(() => setFullscreen(false)).catch(() => {});
+    }
+  }, []);
+
+  // Save page position on change
+  useEffect(() => {
+    if (bookmarked) {
+      localStorage.setItem(`manga-bookmark-${manga.slug}-${chapter.chapter_number}`, String(pageIdx));
+    }
+  }, [pageIdx, bookmarked, manga.slug, chapter.chapter_number]);
+
+  // Keyboard nav
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (mode === "page") {
+        if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); goNext(); }
+        if (e.key === "ArrowLeft") { e.preventDefault(); goPrev(); }
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  });
+
+  const goNext = useCallback(() => {
+    if (pageIdx < pages.length - 1) setPageIdx((i) => i + 1);
+    else if (nextChapter) window.location.href = `/manga/${manga.slug}/${nextChapter.slug}`;
+  }, [pageIdx, pages.length, nextChapter, manga.slug]);
+
+  const goPrev = useCallback(() => {
+    if (pageIdx > 0) setPageIdx((i) => i - 1);
+    else if (prevChapter) window.location.href = `/manga/${manga.slug}/${prevChapter.slug}`;
+  }, [pageIdx, prevChapter, manga.slug]);
+
+  // Click handler for page mode
+  const handlePageClick = useCallback((e: React.MouseEvent) => {
+    if (mode !== "page") return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const third = rect.width / 3;
+    if (x > third * 2) goNext();
+    else if (x < third) goPrev();
+  }, [mode, goNext, goPrev]);
+
+  // Scroll mode scroll detection
+  useEffect(() => {
+    if (mode !== "scroll" || !firstPageRef.current) return;
+    // On mount in scroll mode, scroll to top
+    window.scrollTo(0, 0);
+  }, [mode, chapter.chapter_number]);
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-foreground">
+    <div ref={containerRef} className="min-h-screen bg-[#0a0a0a] text-foreground">
       {/* Topbar */}
       <div className="sticky top-0 z-40 bg-[#0a0a0a]/95 backdrop-blur border-b border-white/10">
-        <div className="container mx-auto max-w-7xl px-4 h-14 flex items-center justify-between gap-4">
-          <Button variant="ghost" size="sm" asChild className="text-white hover:bg-white/10">
+        <div className="container mx-auto max-w-7xl px-4 h-14 flex items-center justify-between gap-2">
+          <Button variant="ghost" size="sm" asChild className="text-white hover:bg-white/10 shrink-0">
             <Link href={`/manga/${manga.slug}`}>
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              <span className="hidden sm:inline">{manga.title}</span>
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline truncate max-w-[120px]">{manga.title}</span>
               <span className="sm:hidden">Voltar</span>
             </Link>
           </Button>
-          <div className="flex items-center gap-2 min-w-0">
-            <Badge variant="outline" className="text-white border-white/20 shrink-0">
+          <div className="flex items-center gap-1 min-w-0">
+            <Badge variant="outline" className="text-white border-white/20 shrink-0 text-xs">
               Cap {chapter.chapter_number}
             </Badge>
-            <span className="text-sm text-white/70 truncate">
-              {chapter.title || `Capítulo ${chapter.chapter_number}`}
-            </span>
+            {/* Mode toggle */}
+            <button
+              onClick={() => { setMode(mode === "scroll" ? "page" : "scroll"); setPageIdx(0); }}
+              className="px-2 py-1 text-[10px] rounded bg-white/10 text-white/70 hover:bg-white/20 whitespace-nowrap"
+              title={mode === "scroll" ? "Modo página" : "Modo scroll"}
+            >
+              {mode === "scroll" ? "📄 Pág" : "📜 Scroll"}
+            </button>
+            {/* Fullscreen */}
+            <button
+              onClick={toggleFullscreen}
+              className="p-1.5 rounded text-white/70 hover:bg-white/10"
+              title={fullscreen ? "Sair da tela cheia" : "Tela cheia"}
+            >
+              {fullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
+            </button>
+            {/* Bookmark */}
+            <button
+              onClick={toggleBookmark}
+              className={`p-1.5 rounded ${bookmarked ? "text-yellow-400" : "text-white/70"} hover:bg-white/10`}
+              title={bookmarked ? "Remover marcador" : "Marcar página"}
+            >
+              {bookmarked ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
+            </button>
           </div>
           <ChapterListButton manga={manga} allChapters={allChapters} currentChapterId={chapter.id} />
         </div>
       </div>
 
-      {/* Páginas — coluna única, largura natural, lazy load */}
-      <div className="flex flex-col items-center py-4">
-        {pages.length === 0 && (
-          <div className="py-20 text-center text-white/50">
-            <p>Nenhuma página disponível neste capítulo.</p>
-          </div>
-        )}
-        {pages.map((page, idx) => (
-          <PageImage key={page.id} page={page} index={idx} total={pages.length} />
-        ))}
-      </div>
+      {mode === "scroll" ? (
+        /* ═══ SCROLL MODE (original) ═══ */
+        <div className="flex flex-col items-center py-4">
+          {pages.length === 0 && (
+            <div className="py-20 text-center text-white/50">
+              <p>Nenhuma página disponível neste capítulo.</p>
+            </div>
+          )}
+          {pages.map((page, idx) => (
+            <PageImage key={page.id} page={page} index={idx} total={pages.length} />
+          ))}
+        </div>
+      ) : (
+        /* ═══ PAGE MODE (virar página) ═══ */
+        <div
+          className="flex items-center justify-center min-h-[calc(100vh-3.5rem)] select-none cursor-pointer relative"
+          onClick={handlePageClick}
+        >
+          {pages.length === 0 ? (
+            <div className="text-center text-white/50">
+              <p>Nenhuma página disponível.</p>
+            </div>
+          ) : (
+            <div className="relative w-full max-w-4xl mx-auto flex items-center justify-center">
+              {/* Current page */}
+              <div className="flex flex-col items-center w-full max-h-[calc(100vh-4rem)]">
+                <img
+                  src={pages[pageIdx].image_url}
+                  alt={`Página ${pages[pageIdx].page_number}`}
+                  className="max-w-full max-h-[calc(100vh-4rem)] w-auto h-auto object-contain select-none"
+                  draggable={false}
+                  style={{ aspectRatio: "auto" }}
+                />
+              </div>
+              {/* Navigation indicators */}
+              <div className="absolute inset-0 flex pointer-events-none">
+                <div className="w-1/3 h-full" />
+                <div className="w-1/3 h-full" />
+                <div className="w-1/3 h-full" />
+              </div>
+            </div>
+          )}
 
-      {/* Footer com prev/next */}
-      <div className="border-t border-white/10 bg-[#0a0a0a]/95 backdrop-blur sticky bottom-0 z-40">
+          {/* Page counter / overlay bottom */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-3 pointer-events-none">
+            <span>{pageIdx + 1} / {pages.length}</span>
+            {prevChapter && pageIdx === 0 && (
+              <span className="text-white/50 text-[10px]">« Anterior</span>
+            )}
+            {nextChapter && pageIdx >= pages.length - 1 && (
+              <span className="text-white/50 text-[10px]">Próximo »</span>
+            )}
+          </div>
+
+          {/* Tap zone indicators — subtle */}
+          <div className="absolute inset-0 flex pointer-events-none" aria-hidden="true">
+            <div className="w-1/3 h-full flex items-center justify-start pl-4 opacity-0 group-hover:opacity-30">
+              <ChevronLeft className="h-8 w-8 text-white/30" />
+            </div>
+            <div className="w-1/3 h-full" />
+            <div className="w-1/3 h-full flex items-center justify-end pr-4 opacity-0 group-hover:opacity-30">
+              <ChevronRight className="h-8 w-8 text-white/30" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Footer navigation (both modes) */}
+      <div className="border-t border-white/10 bg-[#0a0a0a]/95 backdrop-blur">
         <div className="container mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-3">
           {prevChapter ? (
             <Button asChild variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
@@ -98,8 +241,7 @@ export function MangaReader({
             </Button>
           ) : (
             <Button variant="outline" size="sm" disabled className="border-white/10 text-white/30">
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Primeiro
+              <ChevronLeft className="h-4 w-4 mr-1" /> Primeiro
             </Button>
           )}
           <div className="text-xs text-white/60 hidden sm:block">
@@ -124,18 +266,9 @@ export function MangaReader({
   );
 }
 
-/** Imagem individual — usa <img> em vez de next/image pra evitar otimização agressiva */
 function PageImage({ page, index, total }: { page: MangaReaderPage; index: number; total: number }) {
-  // Fallback para width/height se null
-  const aspectRatio =
-    page.width && page.height ? page.height / page.width : 1.4; // proporção típica de página de mangá
-
   return (
-    <div
-      className="w-full max-w-3xl mx-auto"
-      style={{ aspectRatio: `${1} / ${aspectRatio}` }}
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
+    <div className="w-full max-w-3xl mx-auto">
       <img
         src={page.image_url}
         alt={`Página ${page.page_number}`}
@@ -143,12 +276,8 @@ function PageImage({ page, index, total }: { page: MangaReaderPage; index: numbe
         decoding="async"
         className="w-full h-auto block mx-auto select-none"
         draggable={false}
-        onError={(e) => {
-          e.currentTarget.style.opacity = "0.3";
-          e.currentTarget.alt = `❌ Página ${page.page_number} falhou ao carregar`;
-        }}
+        onError={(e) => { e.currentTarget.style.opacity = "0.3"; }}
       />
-      {/* Indicador discreto de página, lado direito */}
       <div className="text-center text-xs text-white/30 py-2">
         {page.page_number} / {total}
       </div>
@@ -156,12 +285,7 @@ function PageImage({ page, index, total }: { page: MangaReaderPage; index: numbe
   );
 }
 
-/** Botão que abre drawer com lista de capítulos */
-function ChapterListButton({
-  manga,
-  allChapters,
-  currentChapterId,
-}: {
+function ChapterListButton({ manga, allChapters, currentChapterId }: {
   manga: { slug: string };
   allChapters: MangaReaderChapter[];
   currentChapterId: string;

@@ -94,8 +94,14 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
   const page = Math.max(1, parseInt(sp.page || "1", 10) || 1);
   const offset = (page - 1) * PAGE_SIZE;
 
-  // Contagem total por filtro (para paginação)
-  const { where, params } = buildQuery({ type: sp.type, genre: sp.genre, readable: sp.readable === "1" });
+  // Default: mostrar só obras com capítulos (readable = true)
+  const readableDefault = sp.readable !== "0"; // default true: só com capítulos
+
+  const { where, params } = buildQuery({
+    type: sp.type,
+    genre: sp.genre,
+    readable: readableDefault,
+  });
   const countRow = db.prepare(`SELECT COUNT(*) as c FROM novels ${where}`).get(...params) as { c: number };
   const totalFiltered = countRow.c;
   const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
