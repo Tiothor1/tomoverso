@@ -23,12 +23,16 @@ const UA = "Tomoverso/1.0";
 
 function sleep(ms: number) { return new Promise(r=>setTimeout(r, ms)); }
 
-let calls = 0, lastReset = Date.now();
+let calls=0, lastReset=Date.now();
 async function mdGet(url:string) {
-  calls++;
-  if (calls >= 4) { const w = Math.max(0, lastReset - Date.now() + 300); if (w > 0) await sleep(w); calls = 0; lastReset = Date.now()+1000; }
-  const r = await fetch(url, {headers:{"User-Agent":UA}});
-  return r.json();
+calls++;
+if (calls >= 4) { const w = Math.max(0, lastReset - Date.now() + 300); if (w > 0) await sleep(w); calls = 0; lastReset = Date.now()+1000; }
+const r = await fetch(url,{headers:{"User-Agent":UA,"Accept":"application/json"}});
+const text = await r.text();
+if (!text.trim().startsWith("{") && !text.trim().startsWith("[")) {
+  throw new Error(`Non-JSON response: ${text.slice(0,150)}`);
+}
+return JSON.parse(text);
 }
 
 function safeStr(v:any,f="") {
