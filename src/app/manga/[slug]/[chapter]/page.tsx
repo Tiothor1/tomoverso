@@ -44,7 +44,7 @@ export default async function MangaChapterPage({
     .prepare(
       `SELECT id, chapter_number, title, slug, page_count
        FROM manga_chapters
-       WHERE manga_id = ? AND (slug = ? OR CAST(chapter_number AS TEXT) = ?)
+       WHERE manga_id = ? AND (slug = ? OR CAST(CAST(chapter_number AS INTEGER) AS TEXT) = ?)
        LIMIT 1`
     )
     .get(manga.id, chapterSlug, chapterSlug) as ChapterRow | undefined;
