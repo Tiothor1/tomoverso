@@ -13,7 +13,12 @@
     "import:vndb": "tsx scripts/import-vndb.ts",
     "import:jikan": "tsx scripts/import-jikan.ts",
     "import:mangadex": "tsx scripts/import-mangadex.ts",
-    "import:anilist": "tsx scripts/import-anilist.ts"
+        "import:anilist": "tsx scripts/import-anilist.ts",
+        "import:mangaonline": "tsx scripts/import-mangaonline.ts",
+        "import:mangaonline:bulk": "tsx scripts/import-mangaonline-bulk.ts",
+        "import:centralnovel": "tsx scripts/import-centralnovel.ts",
+        "import:kakuyomu": "tsx scripts/import-kakuyomu.ts",
+        "manga:check": "tsx scripts/check-manga.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",

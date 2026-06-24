@@ -50,7 +50,8 @@ export function Footer() {
           <div>
             <h3 className="font-heading font-semibold mb-3 text-sm">Ler</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/explore" className="hover:text-primary transition-colors">Explorar</Link></li>
+              <li><Link href="/explore" className="hover:text-primary transition-colors">Explorar novels</Link></li>
+              <li><Link href="/manga" className="hover:text-primary transition-colors">Catálogo de mangás</Link></li>
               <li><Link href="/explore?filter=populares" className="hover:text-primary transition-colors">Populares</Link></li>
               <li><Link href="/explore?filter=recentes" className="hover:text-primary transition-colors">Recentes</Link></li>
               <li><Link href="/explore?filter=destaque" className="hover:text-primary transition-colors">Em destaque</Link></li>

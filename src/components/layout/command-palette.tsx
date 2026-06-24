@@ -62,6 +62,7 @@ export function CommandPalette() {
     const list: CommandItem[] = [
       { id: "home", title: "Início", icon: Home, action: () => router.push("/"), group: "Página" },
       { id: "explore", title: "Explorar novels", icon: Compass, action: () => router.push("/explore"), group: "Página" },
+      { id: "manga", title: "Catálogo de mangás", icon: BookOpen, action: () => router.push("/manga"), group: "Página" },
       { id: "search", title: "Buscar", icon: Search, action: () => router.push("/search"), group: "Página" },
       { id: "how-to", title: "Como criar uma LN", icon: BookOpen, action: () => router.push("/how-to"), group: "Página" },
       { id: "sobre", title: "Sobre o Tomoverso", icon: Heart, action: () => router.push("/sobre"), group: "Página" },

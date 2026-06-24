@@ -334,7 +334,7 @@
     font-size: 17px !important;
   }
 }
-     com leve destaque (sem mudar HTML — heurística por primeira char) */
+     /* Capítulo com drop cap (heurística por primeira char) */
   .prose-ln p:has(> em:first-child),
   .prose-ln p > em:first-child {
     @apply not-italic font-medium text-foreground;

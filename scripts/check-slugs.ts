@@ -1,16 +1,19 @@
 import Database from "better-sqlite3";
-import * as path from "path";
 
-const db = new Database(path.join(process.cwd(), "data", "tomoverso.db"), { readonly: true });
+const c = new Database("data/tomoverso.db");
+const r = c
+  .prepare(
+    "SELECT slug, chapter_number FROM manga_chapters WHERE manga_id = (SELECT id FROM mangas WHERE slug = 'solo-max-level-newbie') ORDER BY chapter_number LIMIT 3"
+  )
+  .all();
+console.log("Solo Max Level caps:");
+console.log(r);
 
-console.log("Slugs de algumas VNs conhecidas:");
-for (const title of ["Saya no Uta", "Fate/stay night", "Doki Doki Literature Club!", "STEINS;GATE", "Katawa Shoujo"]) {
-  const row = db.prepare("SELECT slug, title FROM novels WHERE title LIKE ?").get(`%${title}%`) as any;
-  console.log(`  "${title}": slug = ${row?.slug ?? "(não encontrada)"}`);
-}
-
-console.log("\nTotal visual-novel:", (db.prepare("SELECT COUNT(*) c FROM novels WHERE type='visual-novel'").get() as any).c);
-console.log("Total com cover_url:", (db.prepare("SELECT COUNT(*) c FROM novels WHERE cover_url IS NOT NULL").get() as any).c);
-console.log("Total com synopsis:", (db.prepare("SELECT COUNT(*) c FROM novels WHERE synopsis IS NOT NULL AND synopsis != ''").get() as any).c);
-
-db.close();
+console.log("\nBlue Lock caps:");
+console.log(
+  c
+    .prepare(
+      "SELECT slug, chapter_number FROM manga_chapters WHERE manga_id = (SELECT id FROM mangas WHERE slug = 'blue-lock-manga-pt-br') ORDER BY chapter_number LIMIT 3"
+    )
+    .all()
+);
