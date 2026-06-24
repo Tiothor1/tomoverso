@@ -12,8 +12,8 @@ export default function MangaCatalogPage() {
     count = tables.length;
     const mangaTable = tables.find((t: any) => t.name === "mangas");
     if (mangaTable) {
-      count = db.prepare("SELECT COUNT(*) as n FROM mangas").get() as any;
-      count = count.n;
+      const row = db.prepare("SELECT COUNT(*) as n FROM mangas").get() as any;
+      count = row.n;
     }
   } catch (e: any) {
     error = e.message?.slice(0, 200) || String(e);
