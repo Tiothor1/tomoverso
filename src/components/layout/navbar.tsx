@@ -5,6 +5,7 @@ import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { ColorThemePicker } from "@/components/theme/color-theme-picker";
 import { HeaderSearch } from "@/components/layout/header-search";
 import { UserMenu } from "@/components/auth/user-menu";
+import { LangSelector } from "@/components/layout/novel-lang-selector";
 import { getCurrentUser } from "@/lib/auth";
 
 export async function Navbar() {
@@ -54,6 +55,7 @@ export async function Navbar() {
         </nav>
 
         <div className="ml-auto flex items-center gap-1">
+          <LangSelector />
           <Button variant="ghost" size="icon" asChild className="md:hidden">
             <Link href="/search" aria-label="Buscar">
               <Search className="h-4 w-4" />

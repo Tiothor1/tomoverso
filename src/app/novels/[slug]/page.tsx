@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { NovelCover } from "@/components/novel/novel-cover";
 import { NovelCard } from "@/components/novel/novel-card";
+import { NovelTitle } from "@/components/novel/novel-title";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -34,6 +35,8 @@ interface NovelRow {
   id: string;
   slug: string;
   title: string;
+  title_en: string | null;
+  title_jp: string | null;
   alternative_titles: string;
   synopsis: string;
   cover_url: string;
@@ -68,6 +71,8 @@ export default async function NovelPage({ params }: { params: Promise<{ slug: st
 
   const novel = {
     ...novelRow,
+    title_en: novelRow.title_en || null,
+    title_jp: novelRow.title_jp || null,
     alternative_titles: JSON.parse(novelRow.alternative_titles || "[]"),
     genres: JSON.parse(novelRow.genres || "[]"),
     tags: JSON.parse(novelRow.tags || "[]"),
@@ -190,7 +195,7 @@ export default async function NovelPage({ params }: { params: Promise<{ slug: st
                   </Link>
                 ))}
               </div>
-              <h1 className="font-heading text-4xl md:text-5xl font-bold tracking-tight">{novelRow.title}</h1>
+              <h1 className="font-heading text-4xl md:text-5xl font-bold tracking-tight"><NovelTitle novel={novel as any} /></h1>
               {novel.alternative_titles.length > 0 && (
                 <p className="text-muted-foreground mt-2 text-sm">também: {novel.alternative_titles.join(", ")}</p>
               )}

@@ -6,11 +6,12 @@ import { ArrowRight, BookOpen, PenLine, Search, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { hasCjk, readableTitle } from "@/lib/display-title";
+import { NovelTitle } from "@/components/novel/novel-title";
 import { getDb } from "@/lib/db";
-import { readableTitle, hasCjk } from "@/lib/display-title";
 
 interface NovelRow {
-  id: string; slug: string; title: string; alternative_titles: string;
+  id: string; slug: string; title: string; title_en: string | null; title_jp: string | null; alternative_titles: string;
   synopsis: string; cover_url: string | null; cover_local_path?: string | null;
   type: string; genres: string;
 }
@@ -55,7 +56,7 @@ export default function HomePage() {
 
     // Novels com texto real (hide CJK titles)
     novels = (db.prepare(`
-      SELECT n.id, n.slug, n.title, n.alternative_titles, n.synopsis, n.cover_url, n.cover_local_path,
+      SELECT n.id, n.slug, n.title, n.title_en, n.title_jp, n.alternative_titles, n.synopsis, n.cover_url, n.cover_local_path,
              n.type, n.genres
       FROM novels n
       WHERE EXISTS (
@@ -143,12 +144,12 @@ export default function HomePage() {
                       <img src={getCover(n)} alt={n.title} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/15 to-secondary/20 p-3 text-center text-xs text-muted-foreground">
-                        {n.title}
+                        <NovelTitle novel={n} />
                       </div>
                     )}
                   </div>
                   <CardContent className="p-2.5 space-y-1">
-                    <h3 className="font-heading text-xs font-bold line-clamp-2 leading-tight group-hover:text-primary">{readableTitle({ title: n.title, alternative_titles: n.alternative_titles, type: n.type })}</h3>
+                    <NovelTitle novel={n} as="h3" className="font-heading text-xs font-bold line-clamp-2 leading-tight group-hover:text-primary" />
                     <div className="flex flex-wrap gap-1">
                       {safeJsonArray(n.genres).slice(0, 2).map(g => (
                         <span key={g} className="rounded-full bg-muted px-1.5 py-0.5 text-[9px] text-muted-foreground">{g}</span>

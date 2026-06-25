@@ -19,6 +19,8 @@ interface NovelRow {
   id: string;
   slug: string;
   title: string;
+  title_en: string | null;
+  title_jp: string | null;
   alternative_titles: string;
   synopsis: string;
   cover_url: string;
@@ -38,8 +40,12 @@ function parseNovel(r: NovelRow) {
   const alternative_titles = JSON.parse(r.alternative_titles || "[]");
   return {
     ...r,
+    title_en: r.title_en || null,
+    title_jp: r.title_jp || null,
     title: readableTitle({
       title: r.title,
+      title_en: r.title_en,
+      title_jp: r.title_jp,
       alternative_titles,
       type: r.type,
       slug: r.slug,

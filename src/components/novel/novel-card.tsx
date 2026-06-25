@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { NovelCover } from "@/components/novel/novel-cover";
 import type { Novel } from "@/lib/types";
-import { readableTitle } from "@/lib/display-title";
+import { NovelTitle } from "@/components/novel/novel-title";
 
 interface NovelCardProps {
   novel: Novel;
@@ -18,8 +18,6 @@ export function NovelCard({
   variant = "default",
   showAuthor = true,
 }: NovelCardProps) {
-  const title = readableTitle(novel);
-
   if (variant === "horizontal") {
     return (
       <Link href={`/novels/${novel.slug}`} className="group block">
@@ -30,7 +28,7 @@ export function NovelCard({
             </div>
             <div className="flex-1 min-w-0 space-y-1.5">
               <h3 className="font-heading font-semibold line-clamp-1 group-hover:text-primary transition-colors">
-                {title}
+                <NovelTitle novel={novel} />
               </h3>
               {showAuthor && novel.author && (
                 <p className="text-xs text-muted-foreground">
@@ -77,7 +75,7 @@ export function NovelCard({
 
         <CardContent className="p-4 space-y-2">
           <h3 className="font-heading text-lg font-semibold line-clamp-3 group-hover:text-primary transition-colors min-h-[4rem]">
-            {title}
+            <NovelTitle novel={novel} />
           </h3>
 
           {showAuthor && novel.author && (
