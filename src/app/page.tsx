@@ -1,4 +1,5 @@
 export const dynamic = "force-dynamic";
+export const revalidate = 60; // cache por 60s para evitar timeout no cold start
 
 import Link from "next/link";
 import { ArrowRight, BookOpen, PenLine, Search, Sparkles } from "lucide-react";
