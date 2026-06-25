@@ -58,9 +58,7 @@ function safeJsonArray(v: string | null | undefined): string[] {
 
 function getCover(r: { cover_local_path?: string | null; cover_url?: string | null }) {
   return r.cover_local_path || r.cover_url || "";
-}
-
-function buildHref(params: Record<string, string | null | undefined>, overrides: Record<string, string | null> = {}): string {
+}function buildHref(params: Record<string, string | null | undefined>, overrides: Record<string, string | null> = {}): string {
   const merged = { ...params, ...overrides };
   const usp = new URLSearchParams();
   for (const [k, v] of Object.entries(merged)) {

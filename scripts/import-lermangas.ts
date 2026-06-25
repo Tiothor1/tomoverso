@@ -37,7 +37,7 @@ async function fetchHtml(url: string, retries = 3): Promise<string> {
       return await r.text();
     } catch (e: any) {
       if (attempt === retries) throw e;
-      await sleep(1000 * attempt);
+      await sleep(1500 * attempt);
     }
   }
   throw new Error("unreachable");
