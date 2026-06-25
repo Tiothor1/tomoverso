@@ -369,10 +369,16 @@ export async function importManga(
       log(`  + Cap ${ch.number} criado`);
     }
 
-    // Pula se já tem páginas e skipExistingPages
-    if (skipExistingPages && existingCh && existingCh.page_count > 0) {
+    // Pula se já tem páginas suficientes e skipExistingPages
+    if (skipExistingPages && existingCh && existingCh.page_count > 1) {
       log(`  · Cap ${ch.number}: já tem ${existingCh.page_count} páginas — pulando`);
       continue;
+    }
+
+    // Se capítulo já existe com 1 página (provavelmente capa), limpa e refaz
+    if (existingCh && existingCh.page_count === 1) {
+      db.prepare(`DELETE FROM manga_pages WHERE chapter_id = ?`).run(chapterId);
+      log(`  ~ Cap ${ch.number}: limpando 1 página existente para re-importar`);
     }
 
     // Fetch e parse das páginas

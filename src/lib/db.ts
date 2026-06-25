@@ -464,6 +464,65 @@ function createDb() {
       FOREIGN KEY (product_id) REFERENCES store_products(id) ON DELETE CASCADE
     );
     CREATE INDEX IF NOT EXISTS idx_store_collection_items_sort ON store_collection_items(collection_id, sort_order);
+
+    -- Planos de assinatura
+    CREATE TABLE IF NOT EXISTS subscription_plans (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      price_cents INTEGER NOT NULL,
+      currency TEXT NOT NULL DEFAULT 'BRL',
+      interval TEXT NOT NULL DEFAULT 'month' CHECK (interval IN ('month', 'year')),
+      features TEXT NOT NULL DEFAULT '[]',
+      role_granted TEXT NOT NULL DEFAULT 'subscriber',
+      badge_label TEXT,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS user_subscriptions (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      plan_id TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'canceled', 'expired', 'past_due', 'trialing')),
+      current_period_start TEXT NOT NULL,
+      current_period_end TEXT NOT NULL,
+      cancel_at_period_end INTEGER NOT NULL DEFAULT 0,
+      mp_preference_id TEXT,
+      mp_payment_id TEXT,
+      mp_payer_email TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (plan_id) REFERENCES subscription_plans(id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_user_subscriptions_user ON user_subscriptions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_user_subscriptions_status ON user_subscriptions(status);
+
+    CREATE TABLE IF NOT EXISTS payment_transactions (
+      id TEXT PRIMARY KEY,
+      user_id TEXT,
+      subscription_id TEXT,
+      plan_name TEXT,
+      amount_cents INTEGER NOT NULL,
+      currency TEXT NOT NULL DEFAULT 'BRL',
+      payment_method TEXT,
+      mp_payment_id TEXT,
+      mp_status TEXT,
+      mp_status_detail TEXT,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'refunded', 'cancelled')),
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_payment_transactions_user ON payment_transactions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_payment_transactions_mp ON payment_transactions(mp_payment_id);
+
+    -- Seed planos padrao
+    INSERT OR IGNORE INTO subscription_plans (id, name, description, price_cents, interval, features, role_granted, badge_label, sort_order)
+    VALUES
+      ('pro-monthly', 'Tomoverso Pro', 'Leitura sem anuncios, acesso antecipado a capitulos e badge exclusivo de apoiador.', 990, 'month', '[\"Sem anuncios\",\"Acesso antecipado\",\"Badge Pro\",\"Suporte prioritario\"]', 'subscriber', 'Pro', 1),
+      ('pro-yearly', 'Tomoverso Pro Anual', 'Todos os beneficios do Pro com 2 meses de desconto. Economia de R$ 23,80/ano.', 9490, 'year', '[\"Sem anuncios\",\"Acesso antecipado\",\"Badge Pro\",\"Suporte prioritario\",\"2 meses gratis\"]', 'subscriber', 'Pro', 2),
+      ('author-monthly', 'Tomoverso Autor', 'Tudo do Pro + ferramentas de publicacao, analytics detalhados e prioridade em destaques.', 1990, 'month', '[\"Sem anuncios\",\"Ferramentas de autor\",\"Analytics\",\"Destaques prioritarios\",\"Badge Autor Verificado\"]', 'author', 'Autor Verificado', 3);
   `);
 
   const settingsRow = db.prepare("SELECT id FROM site_settings WHERE id = 'default'").get() as { id: string } | undefined;

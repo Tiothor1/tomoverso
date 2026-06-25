@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, PenLine, Library, Shield, Search, Store } from "lucide-react";
+import { BookOpen, Crown, Library, PenLine, Search, Shield, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { ColorThemePicker } from "@/components/theme/color-theme-picker";
@@ -8,10 +8,14 @@ import { UserMenu } from "@/components/auth/user-menu";
 import { LangSelector } from "@/components/layout/novel-lang-selector";
 import { getCurrentUser } from "@/lib/auth";
 import { getSiteConfig } from "@/lib/site-config";
+import { getDb } from "@/lib/db";
+import { getUserActiveSubscription } from "@/lib/subscriptions";
 
 export async function Navbar() {
   const user = await getCurrentUser();
   const config = getSiteConfig();
+  const db = getDb();
+  const sub = user ? getUserActiveSubscription(db, user.id) : null;
 
   return (
     <>
@@ -55,6 +59,19 @@ export async function Navbar() {
               </Link>
             </Button>
             <Button variant="ghost" asChild><Link href="/how-to">Como criar</Link></Button>
+            {sub ? (
+              <span className="flex items-center gap-1 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-400">
+                <Crown className="h-3 w-3" />
+                {sub.badge_label || "Pro"}
+              </span>
+            ) : (
+              <Button variant="ghost" asChild>
+                <Link href="/store/plans" className="text-amber-400 hover:text-amber-300">
+                  <Crown className="h-4 w-4 mr-1" />
+                  Pro
+                </Link>
+              </Button>
+            )}
             {user?.role === "admin" && (
               <Button variant="ghost" asChild>
                 <Link href="/admin" className="text-red-400">
