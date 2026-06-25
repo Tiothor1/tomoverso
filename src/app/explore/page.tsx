@@ -70,7 +70,7 @@ interface SearchParams {
 }
 
 function buildQuery(filters: { type?: string; genre?: string; readable?: boolean }): { where: string; params: any[] } {
-  const conditions: string[] = [];
+  const conditions: string[] = ["NOT EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type = 'novel' AND cc.item_id = novels.id AND cc.is_hidden = 1)"];
   const params: any[] = [];
   if (filters.type) {
     conditions.push("type = ?");
@@ -129,7 +129,7 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
   const novels = pageRows.map(parseNovel);
 
   // Contagens por tipo (para badges de filtro) — só uma vez, sem filtro
-  const allTypeRows = db.prepare(`SELECT type, COUNT(*) as c FROM novels GROUP BY type`).all() as Array<{ type: string; c: number }>;
+  const allTypeRows = db.prepare(`SELECT type, COUNT(*) as c FROM novels WHERE NOT EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type = 'novel' AND cc.item_id = novels.id AND cc.is_hidden = 1) GROUP BY type`).all() as Array<{ type: string; c: number }>;
   const typeCounts: Record<string, number> = { all: 0, "light-novel": 0, "web-novel": 0, "visual-novel": 0, "short": 0 };
   for (const r of allTypeRows) {
     typeCounts[r.type] = r.c;
@@ -145,7 +145,10 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
 
   // Gêneros — só os top 20 (em vez de TODOS) pra não inchar a página
   const allGenresRaw = db.prepare(`
-    SELECT genres FROM novels WHERE genres != '[]' LIMIT 500
+    SELECT genres FROM novels
+    WHERE genres != '[]'
+      AND NOT EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type = 'novel' AND cc.item_id = novels.id AND cc.is_hidden = 1)
+    LIMIT 500
   `).all() as Array<{ genres: string }>;
   const genreFreq = new Map<string, number>();
   for (const r of allGenresRaw) {

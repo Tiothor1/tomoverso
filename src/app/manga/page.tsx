@@ -106,7 +106,7 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
     const db = getDb();
     db.pragma("max_variables_count = 100000");
 
-    const where: string[] = [READABLE_MANGA_EXISTS];
+    const where: string[] = [READABLE_MANGA_EXISTS, "NOT EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type = 'manga' AND cc.item_id = m.id AND cc.is_hidden = 1)"];
     const queryParams: any[] = [];
     if (search) {
       where.push("(m.title LIKE ? OR m.synopsis LIKE ? OR m.author LIKE ?)");

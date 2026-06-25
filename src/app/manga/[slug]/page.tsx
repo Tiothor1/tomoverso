@@ -51,7 +51,7 @@ export default async function MangaDetailPage({
   const { slug } = await params;
   const db = getDb();
   const manga = db
-    .prepare(`SELECT * FROM mangas WHERE slug = ?`)
+    .prepare(`SELECT * FROM mangas WHERE slug = ? AND NOT EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type='manga' AND cc.item_id = mangas.id AND cc.is_hidden = 1)`)
     .get(slug) as MangaRow | undefined;
   if (!manga) notFound();
 

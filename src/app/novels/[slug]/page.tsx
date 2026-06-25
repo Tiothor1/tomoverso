@@ -64,7 +64,7 @@ const statusLabels = {
 export default async function NovelPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const db = getDb();
-  const novelRow = db.prepare("SELECT * FROM novels WHERE slug = ?").get(slug) as NovelRow | undefined;
+  const novelRow = db.prepare(`SELECT * FROM novels WHERE slug = ? AND NOT EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type='novel' AND cc.item_id = novels.id AND cc.is_hidden = 1)`).get(slug) as NovelRow | undefined;
   if (!novelRow) notFound();
 
   const author = db.prepare("SELECT username, display_name, avatar_url, bio FROM users WHERE id = ?").get(novelRow.author_id) as AuthorRow | undefined;

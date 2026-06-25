@@ -351,7 +351,148 @@ function createDb() {
     );
     CREATE INDEX IF NOT EXISTS idx_activity_user ON activity_log(user_id);
     CREATE INDEX IF NOT EXISTS idx_activity_created ON activity_log(created_at);
+
+    CREATE TABLE IF NOT EXISTS site_settings (
+      id TEXT PRIMARY KEY,
+      site_name TEXT NOT NULL,
+      site_tagline TEXT NOT NULL,
+      hero_badge TEXT NOT NULL,
+      hero_title TEXT NOT NULL,
+      hero_highlight TEXT NOT NULL,
+      hero_description TEXT NOT NULL,
+      primary_cta_label TEXT NOT NULL,
+      primary_cta_href TEXT NOT NULL,
+      secondary_cta_label TEXT NOT NULL,
+      secondary_cta_href TEXT NOT NULL,
+      publish_cta_label TEXT NOT NULL,
+      publish_cta_href TEXT NOT NULL,
+      footer_tagline TEXT NOT NULL,
+      support_email TEXT NOT NULL,
+      github_url TEXT,
+      discord_url TEXT,
+      telegram_url TEXT,
+      maintenance_mode INTEGER NOT NULL DEFAULT 0,
+      maintenance_message TEXT NOT NULL DEFAULT '',
+      storefront_enabled INTEGER NOT NULL DEFAULT 0,
+      storefront_title TEXT NOT NULL DEFAULT 'Loja',
+      storefront_description TEXT NOT NULL DEFAULT '',
+      storefront_href TEXT NOT NULL DEFAULT '/store',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS catalog_controls (
+      id TEXT PRIMARY KEY,
+      item_type TEXT NOT NULL CHECK (item_type IN ('novel', 'manga')),
+      item_id TEXT NOT NULL,
+      is_hidden INTEGER NOT NULL DEFAULT 0,
+      is_featured INTEGER NOT NULL DEFAULT 0,
+      show_on_home INTEGER NOT NULL DEFAULT 0,
+      storefront_enabled INTEGER NOT NULL DEFAULT 0,
+      storefront_label TEXT,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (item_type, item_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_catalog_controls_lookup ON catalog_controls(item_type, item_id);
+    CREATE INDEX IF NOT EXISTS idx_catalog_controls_home ON catalog_controls(item_type, show_on_home, is_featured, is_hidden);
+
+    CREATE TABLE IF NOT EXISTS user_access_controls (
+      user_id TEXT PRIMARY KEY,
+      is_suspended INTEGER NOT NULL DEFAULT 0,
+      suspension_reason TEXT,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS admin_integrations (
+      provider TEXT PRIMARY KEY,
+      label TEXT NOT NULL,
+      project_id TEXT,
+      project_name TEXT,
+      team_id TEXT,
+      production_url TEXT,
+      access_token TEXT,
+      token_hint TEXT,
+      status_json TEXT,
+      last_checked_at TEXT,
+      last_error TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS store_products (
+      id TEXT PRIMARY KEY,
+      slug TEXT UNIQUE NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      product_type TEXT NOT NULL CHECK (product_type IN ('book', 'manga', 'bundle', 'merch', 'digital')),
+      source_type TEXT NOT NULL DEFAULT 'manual' CHECK (source_type IN ('manual', 'novel', 'manga')),
+      source_id TEXT,
+      status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'active', 'archived')),
+      price_cents INTEGER NOT NULL DEFAULT 0,
+      compare_at_cents INTEGER,
+      currency TEXT NOT NULL DEFAULT 'BRL',
+      stock_qty INTEGER NOT NULL DEFAULT 0,
+      sku TEXT,
+      cover_url TEXT,
+      cover_local_path TEXT,
+      is_featured INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_store_products_status ON store_products(status, is_featured, updated_at);
+    CREATE INDEX IF NOT EXISTS idx_store_products_source ON store_products(source_type, source_id);
+
+    CREATE TABLE IF NOT EXISTS store_collections (
+      id TEXT PRIMARY KEY,
+      slug TEXT UNIQUE NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      is_featured INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS store_collection_items (
+      collection_id TEXT NOT NULL,
+      product_id TEXT NOT NULL,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (collection_id, product_id),
+      FOREIGN KEY (collection_id) REFERENCES store_collections(id) ON DELETE CASCADE,
+      FOREIGN KEY (product_id) REFERENCES store_products(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_store_collection_items_sort ON store_collection_items(collection_id, sort_order);
   `);
+
+  const settingsRow = db.prepare("SELECT id FROM site_settings WHERE id = 'default'").get() as { id: string } | undefined;
+  if (!settingsRow) {
+    db.prepare(`
+      INSERT INTO site_settings (
+        id, site_name, site_tagline, hero_badge, hero_title, hero_highlight, hero_description,
+        primary_cta_label, primary_cta_href, secondary_cta_label, secondary_cta_href,
+        publish_cta_label, publish_cta_href, footer_tagline, support_email, github_url,
+        discord_url, telegram_url, maintenance_mode, maintenance_message,
+        storefront_enabled, storefront_title, storefront_description, storefront_href
+      ) VALUES (
+        'default', 'Tomoverso', 'ler sem frescura.', 'Catálogo BR com leitura real', 'Tomoverso', 'ler sem frescura.',
+        'Catálogo brasileiro com leitor por páginas, busca rápida e conteúdo que realmente dá pra ler.',
+        'Ler mangás', '/manga', 'Explorar novels', '/explore', 'Publicar', '/auth/signup',
+        'Onde Light Novels brasileiras ganham vida. Pra autores iniciantes e leitores apaixonados.',
+        'contato@tomoverso.com', NULL, NULL, NULL, 0,
+        'Estamos fazendo ajustes no painel e na loja. Algumas áreas podem mudar ao longo do dia.',
+        1, 'Loja Tomoverso',
+        'Prepare o catálogo para vender livros, mangás, bundles e edições digitais a partir do mesmo painel.',
+        '/store'
+      )
+    `).run();
+  }
+
+  const vercelIntegration = db.prepare("SELECT provider FROM admin_integrations WHERE provider = 'vercel'").get() as { provider: string } | undefined;
+  if (!vercelIntegration) {
+    db.prepare(`INSERT INTO admin_integrations (provider, label) VALUES ('vercel', 'Vercel')`).run();
+  }
 
   // Auto-seed se banco vazio (em produção, na primeira vez)
   if (process.env.SEED !== "false" && (db.prepare("SELECT COUNT(*) as c FROM users").get() as { c: number }).c === 0) {

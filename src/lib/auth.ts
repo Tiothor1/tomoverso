@@ -200,6 +200,15 @@ export async function getCurrentUser(): Promise<UserRecord | null> {
     }
   }
 
+  if (user) {
+    const access = db
+      .prepare("SELECT is_suspended FROM user_access_controls WHERE user_id = ?")
+      .get(user.id) as { is_suspended: number } | undefined;
+    if (access?.is_suspended) {
+      return null;
+    }
+  }
+
   return user || null;
 }
 
