@@ -46,6 +46,8 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
 
   try {
     const db = getDb();
+  // Aumentar limite de parametros (padrao SQLite = 999)
+  try { db.pragma("max_variables_count = 100000"); } catch {}
     const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='mangas'").get();
     if (!tableExists) {
       return (
@@ -95,11 +97,28 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
     const mangaIds = rows.map(r => r.id);
     const tagsMap = new Map<string, string[]>();
     if (mangaIds.length > 0) {
+      // SQLite tem limite padrao de 999 placeholders. LIMIT/OFFSET ja comem 2, 
+      // entao para 60 mangas + LIMIT/OFFSET, nao excede.
+      // Mas se aparecer "too many parameters", chunkamos.
       const placeholders = mangaIds.map(() => "?").join(",");
-      const tagRows = db.prepare(`SELECT manga_id, tag FROM manga_tags WHERE manga_id IN (${placeholders}) ORDER BY tag`).all(...mangaIds) as any[];
-      for (const tr of tagRows) {
-        if (!tagsMap.has(tr.manga_id)) tagsMap.set(tr.manga_id, []);
-        tagsMap.get(tr.manga_id)!.push(tr.tag);
+      try {
+        const tagRows = db.prepare(`SELECT manga_id, tag FROM manga_tags WHERE manga_id IN (${placeholders})`).all(...mangaIds) as any[];
+        for (const tr of tagRows) {
+          if (!tagsMap.has(tr.manga_id)) tagsMap.set(tr.manga_id, []);
+          tagsMap.get(tr.manga_id)!.push(tr.tag);
+        }
+      } catch (e: any) {
+        // Fallback: chunked query
+        const chunkSize = 100;
+        for (let i = 0; i < mangaIds.length; i += chunkSize) {
+          const chunk = mangaIds.slice(i, i + chunkSize);
+          const ph = chunk.map(() => "?").join(",");
+          const tagRows = db.prepare(`SELECT manga_id, tag FROM manga_tags WHERE manga_id IN (${ph})`).all(...chunk) as any[];
+          for (const tr of tagRows) {
+            if (!tagsMap.has(tr.manga_id)) tagsMap.set(tr.manga_id, []);
+            tagsMap.get(tr.manga_id)!.push(tr.tag);
+          }
+        }
       }
     }
 
