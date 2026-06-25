@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { getDb } from "@/lib/db";
+import { readableTitle, hasCjk } from "@/lib/display-title";
 
 interface NovelRow {
   id: string; slug: string; title: string; alternative_titles: string;
@@ -20,19 +21,6 @@ function safeJsonArray(val: string | null | undefined): string[] {
 
 function getCover(r: { cover_local_path?: string | null; cover_url?: string | null }) {
   return r.cover_local_path || r.cover_url || "";
-}
-
-function hasCjk(v: string | null | undefined): boolean {
-  return /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/.test(v || "");
-}
-
-function readableTitle(input: { title: string; alternative_titles?: string[] | string | null; type?: string | null }) {
-  const alts = Array.isArray(input.alternative_titles)
-    ? input.alternative_titles
-    : safeJsonArray(input.alternative_titles);
-  if (!hasCjk(input.title)) return input.title;
-  const alt = alts.find(a => a && !hasCjk(a) && /[a-z0-9]/i.test(a));
-  return alt || (input.type === "web-novel" ? "WebNovel" : "Light Novel");
 }
 
 export default function HomePage() {
