@@ -57,9 +57,16 @@ export default async function MangaDetailPage({
 
   const chapters = db
     .prepare(
-      `SELECT id, chapter_number, title, slug, page_count, published_at
-       FROM manga_chapters WHERE manga_id = ?
-       ORDER BY chapter_number DESC`
+      `SELECT ch.id, ch.chapter_number, ch.title, ch.slug,
+              (SELECT COUNT(*) FROM manga_pages p WHERE p.chapter_id = ch.id AND coalesce(p.image_url, p.local_path, '') <> '') AS page_count,
+              ch.published_at
+       FROM manga_chapters ch
+       WHERE ch.manga_id = ?
+         AND EXISTS (
+           SELECT 1 FROM manga_pages p
+           WHERE p.chapter_id = ch.id AND coalesce(p.image_url, p.local_path, '') <> ''
+         )
+       ORDER BY ch.chapter_number DESC`
     )
     .all(manga.id) as ChapterRow[];
 

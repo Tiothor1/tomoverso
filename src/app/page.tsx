@@ -34,27 +34,34 @@ export default function HomePage() {
     db.pragma("max_variables_count = 100000");
 
     stats = {
-      novels: (db.prepare("SELECT COUNT(DISTINCT novel_id) AS c FROM chapters").get() as any).c,
-      mangas: (db.prepare("SELECT COUNT(*) AS c FROM mangas").get() as any).c,
-      chapters: (db.prepare("SELECT COUNT(*) AS c FROM manga_chapters").get() as any).c,
+      novels: (db.prepare("SELECT COUNT(DISTINCT novel_id) AS c FROM chapters WHERE length(trim(coalesce(content, ''))) > 30 OR coalesce(word_count, 0) > 5").get() as any).c,
+      mangas: (db.prepare("SELECT COUNT(DISTINCT m.id) AS c FROM mangas m JOIN manga_chapters ch ON ch.manga_id = m.id JOIN manga_pages p ON p.chapter_id = ch.id WHERE coalesce(p.image_url, p.local_path, '') <> ''").get() as any).c,
+      chapters: (db.prepare("SELECT COUNT(*) AS c FROM manga_chapters ch WHERE EXISTS (SELECT 1 FROM manga_pages p WHERE p.chapter_id = ch.id AND coalesce(p.image_url, p.local_path, '') <> '')").get() as any).c,
     };
 
-    // Top 5 mangas
+    // Top mangás com páginas reais
     topMangas = db.prepare(`
       SELECT m.id, m.slug, m.title, m.cover_url, m.cover_local_path,
-             (SELECT COUNT(*) FROM manga_chapters WHERE manga_id = m.id) AS chapter_count
+             (SELECT COUNT(*) FROM manga_chapters ch WHERE ch.manga_id = m.id AND EXISTS (SELECT 1 FROM manga_pages p WHERE p.chapter_id = ch.id AND coalesce(p.image_url, p.local_path, '') <> '')) AS chapter_count
       FROM mangas m
-      WHERE (SELECT COUNT(*) FROM manga_chapters WHERE manga_id = m.id) > 0
+      WHERE EXISTS (
+        SELECT 1 FROM manga_chapters ch
+        JOIN manga_pages p ON p.chapter_id = ch.id
+        WHERE ch.manga_id = m.id AND coalesce(p.image_url, p.local_path, '') <> ''
+      )
       ORDER BY chapter_count DESC
       LIMIT 5
     `).all() as any[];
 
-    // Novels with chapters (hide CJK titles)
+    // Novels com texto real (hide CJK titles)
     novels = (db.prepare(`
       SELECT n.id, n.slug, n.title, n.alternative_titles, n.synopsis, n.cover_url, n.cover_local_path,
              n.type, n.genres
       FROM novels n
-      WHERE (SELECT COUNT(*) FROM chapters c WHERE c.novel_id = n.id) > 0
+      WHERE EXISTS (
+        SELECT 1 FROM chapters c
+        WHERE c.novel_id = n.id AND (length(trim(coalesce(c.content, ''))) > 30 OR coalesce(c.word_count, 0) > 5)
+      )
       ORDER BY n.is_featured DESC, n.views DESC
       LIMIT 20
     `).all() as NovelRow[]).filter(n => !hasCjk(n.title)).slice(0, 6);

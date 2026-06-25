@@ -75,8 +75,8 @@ function buildQuery(filters: { type?: string; genre?: string; readable?: boolean
     params.push(`%"${filters.genre}"%`);
   }
   if (filters.readable) {
-    // Pega novels com pelo menos 1 capítulo
-    conditions.push("id IN (SELECT novel_id FROM chapters)");
+    // Só novels/LNs/VNs com pelo menos 1 capítulo textual real.
+    conditions.push("id IN (SELECT novel_id FROM chapters WHERE length(trim(coalesce(content, ''))) > 30 OR coalesce(word_count, 0) > 5)");
   }
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
   return { where, params };
@@ -124,14 +124,18 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
 
   // Contagens por tipo (para badges de filtro) — só uma vez, sem filtro
   const allTypeRows = db.prepare(`SELECT type, COUNT(*) as c FROM novels GROUP BY type`).all() as Array<{ type: string; c: number }>;
-  const typeCounts: Record<string, number> = { all: 0, "light-novel": 0, "web-novel": 0, "short": 0 };
+  const typeCounts: Record<string, number> = { all: 0, "light-novel": 0, "web-novel": 0, "visual-novel": 0, "short": 0 };
   for (const r of allTypeRows) {
     typeCounts[r.type] = r.c;
     typeCounts.all += r.c;
   }
 
   // Quantas novels têm capítulos
-  const readableCount = (db.prepare(`SELECT COUNT(DISTINCT novel_id) as c FROM chapters`).get() as { c: number }).c;
+  const readableCount = (db.prepare(`
+    SELECT COUNT(DISTINCT novel_id) as c
+    FROM chapters
+    WHERE length(trim(coalesce(content, ''))) > 30 OR coalesce(word_count, 0) > 5
+  `).get() as { c: number }).c;
 
   // Gêneros — só os top 20 (em vez de TODOS) pra não inchar a página
   const allGenresRaw = db.prepare(`
