@@ -68,13 +68,17 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
     const countSql = activeGenre
       ? "SELECT COUNT(*) as c FROM mangas m INNER JOIN manga_tags mt ON mt.manga_id = m.id AND mt.tag = ?"
       : "SELECT COUNT(*) as c FROM mangas m";
-    totalFiltered = (db.prepare(countSql).get(activeGenre ? activeGenre : undefined) as any).c;
+    totalFiltered = (db.prepare(countSql).get(activeGenre ? activeGenre : null) as any).c;
     const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
 
     // Query mangas with optional genre filter
     const genreJoin = activeGenre
       ? `INNER JOIN manga_tags mt ON mt.manga_id = m.id AND mt.tag = ?`
       : "";
+
+    const params: any[] = [];
+    if (activeGenre) params.push(activeGenre);
+    params.push(PAGE_SIZE, offset);
 
     rows = db.prepare(`
       SELECT m.id, m.slug, m.title, m.synopsis,
@@ -85,7 +89,7 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
       ${genreJoin}
       ORDER BY chapter_count DESC, m.updated_at DESC
       LIMIT ? OFFSET ?
-    `).all(activeGenre ? activeGenre : undefined, PAGE_SIZE, offset) as any[];
+    `).all(...params) as any[];
 
     // Get tags for displayed mangas
     const mangaIds = rows.map(r => r.id);
