@@ -7,6 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ReadingProgress } from "@/components/reader/reading-progress";
+import { PremiumReaderControls } from "@/components/reader/premium-controls";
 import { ChapterActions } from "@/components/reader/chapter-actions";
 import { getDb } from "@/lib/db";
 import { publicReadableNovelSql, readableNovelChapterSql } from "@/lib/public-catalog";
@@ -161,6 +162,8 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
           })}
         </div>
       </article>
+
+      <PremiumReaderControls />
 
       <div className="border-t border-border/40 bg-muted/20">
         <div className="container mx-auto max-w-3xl px-4 py-8">
