@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getCurrentUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { publicReadableNovelSql, readableNovelChapterSql } from "@/lib/public-catalog";
 import { revalidatePath } from "next/cache";
 
 export const metadata = {
@@ -29,7 +30,7 @@ export default async function LibraryPage() {
     FROM reading_progress rp
     JOIN novels n ON n.id = rp.novel_id
     LEFT JOIN users u ON u.id = n.author_id
-    WHERE rp.user_id = ?
+    WHERE rp.user_id = ? AND ${publicReadableNovelSql("n")}
     GROUP BY n.id
     ORDER BY last_read DESC
   `).all(user.id) as any[];
@@ -40,7 +41,7 @@ export default async function LibraryPage() {
     FROM favorites f
     JOIN novels n ON n.id = f.novel_id
     LEFT JOIN users u ON u.id = n.author_id
-    WHERE f.user_id = ?
+    WHERE f.user_id = ? AND ${publicReadableNovelSql("n")}
     ORDER BY f.created_at DESC
   `).all(user.id) as any[];
 
@@ -50,7 +51,7 @@ export default async function LibraryPage() {
     FROM bookmarks b
     JOIN chapters c ON c.id = b.chapter_id
     JOIN novels n ON n.id = c.novel_id
-    WHERE b.user_id = ?
+    WHERE b.user_id = ? AND ${publicReadableNovelSql("n")} AND ${readableNovelChapterSql("c")}
     ORDER BY b.created_at DESC
     LIMIT 50
   `).all(user.id) as any[];

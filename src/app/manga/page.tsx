@@ -4,9 +4,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getDb } from "@/lib/db";
+import { publicVisibleMangaSql } from "@/lib/public-catalog";
 
-export const dynamic = "force-dynamic";
-export const revalidate = 60;
+export const revalidate = 120;
 
 interface PageProps {
   searchParams: Promise<{
@@ -17,7 +17,7 @@ interface PageProps {
   }>;
 }
 
-const PAGE_SIZE = 40;
+const PAGE_SIZE = 24;
 
 const SORTS = [
   { id: "popular", label: "Populares" },
@@ -38,6 +38,8 @@ const READABLE_MANGA_EXISTS = `EXISTS (
   JOIN manga_pages p ON p.chapter_id = ch.id
   WHERE ch.manga_id = m.id AND coalesce(p.image_url, p.local_path, '') <> ''
 )`;
+
+const PUBLIC_MANGA_SQL = publicVisibleMangaSql("m");
 
 const CHAPTER_COUNT_SQL = `(SELECT COUNT(*) FROM manga_chapters ch
   WHERE ch.manga_id = m.id
@@ -106,7 +108,7 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
     const db = getDb();
     db.pragma("max_variables_count = 100000");
 
-    const where: string[] = [READABLE_MANGA_EXISTS, "NOT EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type = 'manga' AND cc.item_id = m.id AND cc.is_hidden = 1)"];
+    const where: string[] = [PUBLIC_MANGA_SQL];
     const queryParams: any[] = [];
     if (search) {
       where.push("(m.title LIKE ? OR m.synopsis LIKE ? OR m.author LIKE ?)");
@@ -137,7 +139,7 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
     `).all(...queryParams, PAGE_SIZE, offset) as any[];
 
     const stats = {
-      mangas: (db.prepare(`SELECT COUNT(*) AS c FROM mangas m WHERE ${READABLE_MANGA_EXISTS}`).get() as any).c,
+      mangas: (db.prepare(`SELECT COUNT(*) AS c FROM mangas m WHERE ${PUBLIC_MANGA_SQL}`).get() as any).c,
       chapters: (db.prepare(`SELECT COUNT(*) AS c FROM manga_chapters ch WHERE EXISTS (SELECT 1 FROM manga_pages p WHERE p.chapter_id = ch.id AND coalesce(p.image_url, p.local_path, '') <> '')`).get() as any).c,
     };
 
@@ -146,7 +148,7 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
           SELECT m.id, m.slug, m.title, m.synopsis, m.cover_url, m.cover_local_path, m.author,
                  ${CHAPTER_COUNT_SQL} AS chapter_count
           FROM mangas m
-          WHERE ${READABLE_MANGA_EXISTS}
+          WHERE ${PUBLIC_MANGA_SQL}
           ORDER BY chapter_count DESC LIMIT 1
         `).get() as any
       : null;
@@ -156,7 +158,7 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
           SELECT m.id, m.slug, m.title, m.cover_url, m.cover_local_path, m.author,
                  ${CHAPTER_COUNT_SQL} AS chapter_count
           FROM mangas m
-          WHERE ${READABLE_MANGA_EXISTS}
+          WHERE ${PUBLIC_MANGA_SQL}
           ORDER BY chapter_count DESC, m.title COLLATE NOCASE ASC
           LIMIT 8
         `).all() as any[]
@@ -166,7 +168,7 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
       SELECT mt.tag, COUNT(*) c
       FROM manga_tags mt
       JOIN mangas m ON m.id = mt.manga_id
-      WHERE ${READABLE_MANGA_EXISTS}
+      WHERE ${PUBLIC_MANGA_SQL}
       GROUP BY mt.tag
       ORDER BY c DESC, mt.tag ASC
       LIMIT 18

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { publicReadableNovelSql, publicVisibleMangaSql, readableNovelChapterSql } from "@/lib/public-catalog";
 import { readableTitle } from "@/lib/display-title";
 
 export const runtime = "nodejs";
@@ -123,9 +124,10 @@ export async function GET(req: NextRequest) {
     const topNovels = db.prepare(`
       SELECT n.id, n.slug, n.title, n.synopsis, n.type, n.genres, n.tags, n.cover_url, n.cover_local_path,
              u.display_name AS author_name,
-             (SELECT COUNT(*) FROM chapters c WHERE c.novel_id = n.id) AS chapter_count
+             (SELECT COUNT(*) FROM chapters c WHERE c.novel_id = n.id AND ${readableNovelChapterSql("c")}) AS chapter_count
       FROM novels n
       LEFT JOIN users u ON u.id = n.author_id
+      WHERE ${publicReadableNovelSql("n")}
       ORDER BY n.is_featured DESC, n.views DESC, n.created_at DESC
       LIMIT ?
     `).all(limit) as any[];
@@ -147,6 +149,7 @@ export async function GET(req: NextRequest) {
         SELECT m.id, m.slug, m.title, m.synopsis, m.cover_url, m.cover_local_path, m.author,
                (SELECT COUNT(*) FROM manga_chapters mc WHERE mc.manga_id = m.id) AS chapter_count
         FROM mangas m
+        WHERE ${publicVisibleMangaSql("m")}
         ORDER BY m.updated_at DESC
         LIMIT ?
       `).all(limit) as any[];
@@ -175,7 +178,7 @@ export async function GET(req: NextRequest) {
       SELECT n.id, n.slug, n.title, n.alternative_titles, n.synopsis, n.type, n.genres, n.tags,
              n.cover_url, n.cover_local_path, n.views,
              u.display_name AS author_name,
-             (SELECT COUNT(*) FROM chapters c WHERE c.novel_id = n.id) AS chapter_count,
+             (SELECT COUNT(*) FROM chapters c WHERE c.novel_id = n.id AND ${readableNovelChapterSql("c")}) AS chapter_count,
              CASE
                WHEN lower(n.title) = ? THEN 120
                WHEN lower(n.title) LIKE ? THEN 95
@@ -189,7 +192,7 @@ export async function GET(req: NextRequest) {
              END AS score
       FROM novels n
       LEFT JOIN users u ON u.id = n.author_id
-      WHERE (
+      WHERE ${publicReadableNovelSql("n")} AND (
         lower(n.title) LIKE ? OR lower(n.alternative_titles) LIKE ? OR lower(n.synopsis) LIKE ? OR
         lower(n.genres) LIKE ? OR lower(n.tags) LIKE ? OR lower(COALESCE(u.display_name, '')) LIKE ?
       ) ${typeFilter}
@@ -239,8 +242,8 @@ export async function GET(req: NextRequest) {
                ELSE 1
              END AS score
       FROM mangas m
-      WHERE lower(m.title) LIKE ? OR lower(m.alternative_titles) LIKE ? OR lower(m.synopsis) LIKE ? OR
-            lower(COALESCE(m.author, '')) LIKE ? OR lower(COALESCE(m.artist, '')) LIKE ?
+      WHERE ${publicVisibleMangaSql("m")} AND (lower(m.title) LIKE ? OR lower(m.alternative_titles) LIKE ? OR lower(m.synopsis) LIKE ? OR
+            lower(COALESCE(m.author, '')) LIKE ? OR lower(COALESCE(m.artist, '')) LIKE ?)
       ORDER BY score DESC, m.updated_at DESC
       LIMIT ?
     `).all(exact, starts, like, like, like, like, like, like, like, like, like, like, limit) as any[];
@@ -271,7 +274,7 @@ export async function GET(req: NextRequest) {
              END AS score
       FROM chapters c
       JOIN novels n ON n.id = c.novel_id
-      WHERE lower(c.title) LIKE ? OR lower(c.content) LIKE ? OR lower(n.title) LIKE ?
+      WHERE ${publicReadableNovelSql("n")} AND ${readableNovelChapterSql("c")} AND (lower(c.title) LIKE ? OR lower(c.content) LIKE ? OR lower(n.title) LIKE ?)
       ORDER BY score DESC, c.views DESC, c.published_at DESC
       LIMIT ?
     `).all(exact, starts, like, like, like, like, like, limit) as any[];
@@ -300,7 +303,7 @@ export async function GET(req: NextRequest) {
                END AS score
         FROM manga_chapters mc
         JOIN mangas m ON m.id = mc.manga_id
-        WHERE lower(mc.title) LIKE ? OR lower(m.title) LIKE ? OR CAST(mc.chapter_number AS TEXT) LIKE ?
+        WHERE ${publicVisibleMangaSql("m")} AND EXISTS (SELECT 1 FROM manga_pages p WHERE p.chapter_id = mc.id AND coalesce(p.image_url, p.local_path, '') <> '') AND (lower(mc.title) LIKE ? OR lower(m.title) LIKE ? OR CAST(mc.chapter_number AS TEXT) LIKE ?)
         ORDER BY score DESC, mc.chapter_number DESC
         LIMIT ?
       `).all(exact, starts, like, like, like, like, like, Math.max(3, Math.floor(limit / 2))) as any[];
@@ -323,7 +326,7 @@ export async function GET(req: NextRequest) {
   if (filter === "all" || filter === "authors") {
     const authors = db.prepare(`
       SELECT u.id, u.username, u.display_name, u.bio, u.avatar_url,
-             COUNT(n.id) AS work_count,
+             SUM(CASE WHEN ${publicReadableNovelSql("n")} THEN 1 ELSE 0 END) AS work_count,
              CASE
                WHEN lower(u.username) = ? THEN 100
                WHEN lower(u.display_name) = ? THEN 100
@@ -354,7 +357,7 @@ export async function GET(req: NextRequest) {
   }
 
   if (filter === "all" || filter === "genres") {
-    const rows = db.prepare(`SELECT genres, tags FROM novels WHERE lower(genres) LIKE ? OR lower(tags) LIKE ? LIMIT 500`).all(like, like) as any[];
+    const rows = db.prepare(`SELECT genres, tags FROM novels n WHERE ${publicReadableNovelSql("n")} AND (lower(genres) LIKE ? OR lower(tags) LIKE ?) LIMIT 300`).all(like, like) as any[];
     const found = new Map<string, { kind: "Gênero" | "Tag"; count: number; score: number }>();
     for (const row of rows) {
       for (const value of safeJsonArray(row.genres)) {

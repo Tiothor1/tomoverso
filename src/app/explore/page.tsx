@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 import Link from "next/link";
 import { Search, Filter, TrendingUp, ChevronLeft, ChevronRight, BookOpen } from "lucide-react";
@@ -7,13 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { NovelCard } from "@/components/novel/novel-card";
 import { getDb } from "@/lib/db";
+import { publicReadableNovelSql, publicVisibleNovelSql, readableNovelChapterSql } from "@/lib/public-catalog";
 import { readableTitle } from "@/lib/display-title";
 
 export const metadata = {
   title: "Explorar — Tomoverso",
 };
 
-const PAGE_SIZE = 60; // novels por página
+const PAGE_SIZE = 24; // novels por página
 
 interface NovelRow {
   id: string;
@@ -70,7 +71,7 @@ interface SearchParams {
 }
 
 function buildQuery(filters: { type?: string; genre?: string; readable?: boolean }): { where: string; params: any[] } {
-  const conditions: string[] = ["NOT EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type = 'novel' AND cc.item_id = novels.id AND cc.is_hidden = 1)"];
+  const conditions: string[] = [publicVisibleNovelSql("novels")];
   const params: any[] = [];
   if (filters.type) {
     conditions.push("type = ?");
@@ -81,8 +82,7 @@ function buildQuery(filters: { type?: string; genre?: string; readable?: boolean
     params.push(`%"${filters.genre}"%`);
   }
   if (filters.readable) {
-    // Só novels/LNs/VNs com pelo menos 1 capítulo textual real.
-    conditions.push("id IN (SELECT novel_id FROM chapters WHERE length(trim(coalesce(content, ''))) > 30 OR coalesce(word_count, 0) > 5)");
+    conditions.push(publicReadableNovelSql("novels"));
   }
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
   return { where, params };
@@ -129,7 +129,7 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
   const novels = pageRows.map(parseNovel);
 
   // Contagens por tipo (para badges de filtro) — só uma vez, sem filtro
-  const allTypeRows = db.prepare(`SELECT type, COUNT(*) as c FROM novels WHERE NOT EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type = 'novel' AND cc.item_id = novels.id AND cc.is_hidden = 1) GROUP BY type`).all() as Array<{ type: string; c: number }>;
+  const allTypeRows = db.prepare(`SELECT type, COUNT(*) as c FROM novels WHERE ${publicReadableNovelSql("novels")} GROUP BY type`).all() as Array<{ type: string; c: number }>;
   const typeCounts: Record<string, number> = { all: 0, "light-novel": 0, "web-novel": 0, "visual-novel": 0, "short": 0 };
   for (const r of allTypeRows) {
     typeCounts[r.type] = r.c;
@@ -137,18 +137,13 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
   }
 
   // Quantas novels têm capítulos
-  const readableCount = (db.prepare(`
-    SELECT COUNT(DISTINCT novel_id) as c
-    FROM chapters
-    WHERE length(trim(coalesce(content, ''))) > 30 OR coalesce(word_count, 0) > 5
-  `).get() as { c: number }).c;
+  const readableCount = (db.prepare(`SELECT COUNT(*) as c FROM novels n WHERE ${publicReadableNovelSql("n")}`).get() as { c: number }).c;
 
   // Gêneros — só os top 20 (em vez de TODOS) pra não inchar a página
   const allGenresRaw = db.prepare(`
     SELECT genres FROM novels
-    WHERE genres != '[]'
-      AND NOT EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type = 'novel' AND cc.item_id = novels.id AND cc.is_hidden = 1)
-    LIMIT 500
+    WHERE ${publicReadableNovelSql("novels")}
+    LIMIT 300
   `).all() as Array<{ genres: string }>;
   const genreFreq = new Map<string, number>();
   for (const r of allGenresRaw) {

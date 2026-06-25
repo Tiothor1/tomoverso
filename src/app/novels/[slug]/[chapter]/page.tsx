@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ReadingProgress } from "@/components/reader/reading-progress";
 import { ChapterActions } from "@/components/reader/chapter-actions";
 import { getDb } from "@/lib/db";
+import { publicReadableNovelSql, readableNovelChapterSql } from "@/lib/public-catalog";
 import { getCurrentUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -53,16 +54,16 @@ interface ChapterRow {
 export default async function ChapterPage({ params }: { params: Promise<{ slug: string; chapter: string }> }) {
   const { slug, chapter: chapterNum } = await params;
   const db = getDb();
-  const novelRow = db.prepare("SELECT id, slug, title, author_id FROM novels WHERE slug = ?").get(slug) as { id: string; slug: string; title: string; author_id: string } | undefined;
+  const novelRow = db.prepare(`SELECT id, slug, title, author_id FROM novels WHERE slug = ? AND ${publicReadableNovelSql("novels")}`).get(slug) as { id: string; slug: string; title: string; author_id: string } | undefined;
   if (!novelRow) notFound();
   const safeNovel = novelRow!;
 
   const chapterNumInt = parseInt(chapterNum, 10);
-  const chapter = db.prepare("SELECT * FROM chapters WHERE novel_id = ? AND chapter_number = ?").get(safeNovel.id, chapterNumInt) as ChapterRow | undefined;
+  const chapter = db.prepare(`SELECT * FROM chapters WHERE novel_id = ? AND chapter_number = ? AND ${readableNovelChapterSql("chapters")}`).get(safeNovel.id, chapterNumInt) as ChapterRow | undefined;
   if (!chapter) notFound();
   const safeChapter = chapter!;
 
-  const allChapters = db.prepare("SELECT id, chapter_number, title FROM chapters WHERE novel_id = ? ORDER BY chapter_number ASC").all(safeNovel.id) as { id: string; chapter_number: number; title: string }[];
+  const allChapters = db.prepare(`SELECT id, chapter_number, title FROM chapters WHERE novel_id = ? AND ${readableNovelChapterSql("chapters")} ORDER BY chapter_number ASC`).all(safeNovel.id) as { id: string; chapter_number: number; title: string }[];
   const idx = allChapters.findIndex((c) => c.chapter_number === safeChapter.chapter_number);
   const prev = idx > 0 ? allChapters[idx - 1] : null;
   const next = idx < allChapters.length - 1 ? allChapters[idx + 1] : null;

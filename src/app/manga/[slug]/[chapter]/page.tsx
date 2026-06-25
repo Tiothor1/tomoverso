@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getDb } from "@/lib/db";
+import { publicVisibleMangaSql } from "@/lib/public-catalog";
 import { MangaReader } from "@/components/manga/manga-reader";
 
 interface MangaRow {
@@ -24,7 +25,7 @@ interface PageRow {
   height: number | null;
 }
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 export default async function MangaChapterPage({
   params,
@@ -34,7 +35,7 @@ export default async function MangaChapterPage({
   const { slug, chapter: chapterSlug } = await params;
   const db = getDb();
 
-  const manga = db.prepare(`SELECT id, slug, title FROM mangas WHERE slug = ?`).get(slug) as
+  const manga = db.prepare(`SELECT id, slug, title FROM mangas WHERE slug = ? AND ${publicVisibleMangaSql("mangas")}`).get(slug) as
     | MangaRow
     | undefined;
   if (!manga) notFound();

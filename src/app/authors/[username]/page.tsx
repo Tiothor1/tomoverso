@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NovelCard } from "@/components/novel/novel-card";
 import { getDb } from "@/lib/db";
+import { publicReadableNovelSql, readableNovelChapterSql } from "@/lib/public-catalog";
 import { getCurrentUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -31,8 +32,8 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
   const safeAuthor = author!;
 
   const authorNovels = db.prepare(`
-    SELECT n.*, (SELECT COUNT(*) FROM chapters c WHERE c.novel_id = n.id) as chapter_count
-    FROM novels n WHERE n.author_id = ? ORDER BY n.created_at DESC
+    SELECT n.*, (SELECT COUNT(*) FROM chapters c WHERE c.novel_id = n.id AND ${readableNovelChapterSql("c")}) as chapter_count
+    FROM novels n WHERE n.author_id = ? AND ${publicReadableNovelSql("n")} ORDER BY n.created_at DESC
   `).all(author.id) as any[];
 
   const totalChapters = authorNovels.reduce((acc, n) => acc + (n.chapter_count || 0), 0);

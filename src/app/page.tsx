@@ -1,5 +1,4 @@
-export const dynamic = "force-dynamic";
-export const revalidate = 60;
+export const revalidate = 120;
 
 import Link from "next/link";
 import { ArrowRight, BookOpen, PenLine, Search, ShoppingBag, Sparkles } from "lucide-react";
@@ -9,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { NovelTitle } from "@/components/novel/novel-title";
 import { hasCjk } from "@/lib/display-title";
 import { getDb } from "@/lib/db";
+import { publicReadableNovelSql, publicVisibleMangaSql } from "@/lib/public-catalog";
 import { getSiteConfig } from "@/lib/site-config";
 
 interface NovelRow {
@@ -51,8 +51,8 @@ export default function HomePage() {
     db.pragma("max_variables_count = 100000");
 
     stats = {
-      novels: (db.prepare("SELECT COUNT(DISTINCT novel_id) AS c FROM chapters WHERE length(trim(coalesce(content, ''))) > 30 OR coalesce(word_count, 0) > 5").get() as any).c,
-      mangas: (db.prepare("SELECT COUNT(DISTINCT m.id) AS c FROM mangas m JOIN manga_chapters ch ON ch.manga_id = m.id JOIN manga_pages p ON p.chapter_id = ch.id WHERE coalesce(p.image_url, p.local_path, '') <> '' AND NOT EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type='manga' AND cc.item_id = m.id AND cc.is_hidden = 1)").get() as any).c,
+      novels: (db.prepare(`SELECT COUNT(*) AS c FROM novels n WHERE ${publicReadableNovelSql("n")}`).get() as any).c,
+      mangas: (db.prepare(`SELECT COUNT(*) AS c FROM mangas m WHERE ${publicVisibleMangaSql("m")}`).get() as any).c,
       chapters: (db.prepare("SELECT COUNT(*) AS c FROM manga_chapters ch WHERE EXISTS (SELECT 1 FROM manga_pages p WHERE p.chapter_id = ch.id AND coalesce(p.image_url, p.local_path, '') <> '')").get() as any).c,
     };
 
@@ -63,12 +63,7 @@ export default function HomePage() {
              (SELECT COUNT(*) FROM manga_chapters ch WHERE ch.manga_id = m.id AND EXISTS (SELECT 1 FROM manga_pages p WHERE p.chapter_id = ch.id AND coalesce(p.image_url, p.local_path, '') <> '')) AS chapter_count
       FROM mangas m
       LEFT JOIN catalog_controls cc ON cc.item_type='manga' AND cc.item_id = m.id
-      WHERE EXISTS (
-        SELECT 1 FROM manga_chapters ch
-        JOIN manga_pages p ON p.chapter_id = ch.id
-        WHERE ch.manga_id = m.id AND coalesce(p.image_url, p.local_path, '') <> ''
-      )
-      AND COALESCE(cc.is_hidden, 0) = 0
+      WHERE ${publicVisibleMangaSql("m")}
       ORDER BY show_on_home DESC, is_featured DESC, chapter_count DESC
       LIMIT 5
     `).all() as any[];
@@ -78,13 +73,9 @@ export default function HomePage() {
              n.type, n.genres, COALESCE(cc.is_featured, n.is_featured, 0) as admin_featured, COALESCE(cc.show_on_home, 0) as show_on_home
       FROM novels n
       LEFT JOIN catalog_controls cc ON cc.item_type='novel' AND cc.item_id = n.id
-      WHERE EXISTS (
-        SELECT 1 FROM chapters c
-        WHERE c.novel_id = n.id AND (length(trim(coalesce(c.content, ''))) > 30 OR coalesce(c.word_count, 0) > 5)
-      )
-      AND COALESCE(cc.is_hidden, 0) = 0
+      WHERE ${publicReadableNovelSql("n")}
       ORDER BY show_on_home DESC, admin_featured DESC, n.views DESC
-      LIMIT 20
+      LIMIT 12
     `).all() as NovelRow[]).filter((n) => !hasCjk(n.title)).slice(0, 6);
 
     if (config.storefront_enabled) {

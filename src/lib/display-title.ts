@@ -44,5 +44,8 @@ export function readableTitle(
     .trim();
   if (slugTitle && /[a-z0-9]/i.test(slugTitle) && !hasCjk(slugTitle) && !/^\d+(\s+\d+)*$/.test(slugTitle)) return slugTitle;
 
-  return input.type === "web-novel" ? "WebNovel japonesa" : "Light Novel japonesa";
+  const originalTitle = (input.title_jp || input.title || "").trim();
+  if (originalTitle) return originalTitle;
+
+  return input.type === "web-novel" ? "WebNovel" : "Light Novel";
 }

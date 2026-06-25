@@ -13,6 +13,7 @@ import { NovelCover } from "@/components/novel/novel-cover";
 import { NovelCard } from "@/components/novel/novel-card";
 import { NovelTitle } from "@/components/novel/novel-title";
 import { getDb } from "@/lib/db";
+import { publicReadableNovelSql, readableNovelChapterSql } from "@/lib/public-catalog";
 import { getCurrentUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -64,7 +65,7 @@ const statusLabels = {
 export default async function NovelPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const db = getDb();
-  const novelRow = db.prepare(`SELECT * FROM novels WHERE slug = ? AND NOT EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type='novel' AND cc.item_id = novels.id AND cc.is_hidden = 1)`).get(slug) as NovelRow | undefined;
+  const novelRow = db.prepare(`SELECT * FROM novels WHERE slug = ? AND ${publicReadableNovelSql("novels")}`).get(slug) as NovelRow | undefined;
   if (!novelRow) notFound();
 
   const author = db.prepare("SELECT username, display_name, avatar_url, bio FROM users WHERE id = ?").get(novelRow.author_id) as AuthorRow | undefined;
@@ -87,12 +88,16 @@ export default async function NovelPage({ params }: { params: Promise<{ slug: st
 
   const chapters = db.prepare(`
     SELECT id, chapter_number, title, word_count, published_at
-    FROM chapters WHERE novel_id = ? ORDER BY chapter_number ASC
+    FROM chapters
+    WHERE novel_id = ? AND ${readableNovelChapterSql("chapters")}
+    ORDER BY chapter_number ASC
   `).all(novelRow.id) as ChapterRow[];
   novel.chapter_count = chapters.length;
 
   const related = db.prepare(`
-    SELECT * FROM novels WHERE id != ? AND is_featured = 1 LIMIT 4
+    SELECT * FROM novels n
+    WHERE n.id != ? AND n.is_featured = 1 AND ${publicReadableNovelSql("n")}
+    LIMIT 4
   `).all(novelRow.id) as NovelRow[];
 
   const status = statusLabels[novelRow.status];

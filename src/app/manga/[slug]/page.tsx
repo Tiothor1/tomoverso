@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { MangaCover } from "@/components/manga/manga-cover";
 import { getDb } from "@/lib/db";
+import { publicVisibleMangaSql } from "@/lib/public-catalog";
 
 interface MangaRow {
   id: string;
@@ -34,7 +35,7 @@ interface ChapterRow {
   published_at: string | null;
 }
 
-export const dynamic = "force-dynamic";
+export const revalidate = 120;
 
 const statusLabels = {
   ongoing: { label: "Em andamento", className: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" },
@@ -51,7 +52,7 @@ export default async function MangaDetailPage({
   const { slug } = await params;
   const db = getDb();
   const manga = db
-    .prepare(`SELECT * FROM mangas WHERE slug = ? AND NOT EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type='manga' AND cc.item_id = mangas.id AND cc.is_hidden = 1)`)
+    .prepare(`SELECT * FROM mangas WHERE slug = ? AND ${publicVisibleMangaSql("mangas")}`)
     .get(slug) as MangaRow | undefined;
   if (!manga) notFound();
 
