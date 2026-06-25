@@ -3,10 +3,10 @@ import type { SiteSettings } from "./types";
 export const DEFAULT_SITE_SETTINGS: Omit<SiteSettings, "created_at" | "updated_at"> = {
   id: "default",
   site_name: "Tomoverso",
-  site_tagline: "ler sem frescura.",
+  site_tagline: "onde histórias ganham vida.",
   hero_badge: "Catálogo BR com leitura real",
   hero_title: "Tomoverso",
-  hero_highlight: "ler sem frescura.",
+  hero_highlight: "onde histórias ganham vida.",
   hero_description: "Catálogo brasileiro com leitor por páginas, busca rápida e conteúdo que realmente dá pra ler.",
   primary_cta_label: "Ler mangás",
   primary_cta_href: "/manga",

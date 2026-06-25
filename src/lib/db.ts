@@ -535,7 +535,7 @@ function createDb() {
         discord_url, telegram_url, maintenance_mode, maintenance_message,
         storefront_enabled, storefront_title, storefront_description, storefront_href
       ) VALUES (
-        'default', 'Tomoverso', 'ler sem frescura.', 'Catálogo BR com leitura real', 'Tomoverso', 'ler sem frescura.',
+        'default', 'Tomoverso', 'onde histórias ganham vida.', 'Catálogo BR com leitura real', 'Tomoverso', 'onde histórias ganham vida.',
         'Catálogo brasileiro com leitor por páginas, busca rápida e conteúdo que realmente dá pra ler.',
         'Ler mangás', '/manga', 'Explorar novels', '/explore', 'Publicar', '/auth/signup',
         'Onde Light Novels brasileiras ganham vida. Pra autores iniciantes e leitores apaixonados.',
