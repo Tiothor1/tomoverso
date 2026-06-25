@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "dark" | "light";
-type ColorTheme = "purple" | "blue" | "sepia";
+type ColorTheme = "purple" | "blue" | "sepia" | "emerald" | "rose" | "amber" | "ocean";
 
 type ThemeProviderProps = {
   children: React.ReactNode;

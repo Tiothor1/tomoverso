@@ -77,12 +77,26 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
   const isBookmarked = user ? !!db.prepare("SELECT 1 FROM bookmarks WHERE user_id = ? AND chapter_id = ?").get(user.id, safeChapter.id) : false;
   const likesCount = (db.prepare("SELECT COUNT(*) as c FROM likes WHERE chapter_id = ?").get(safeChapter.id) as { c: number }).c;
 
-  // Comentários
+  // Assinatura do usuario logado
+  const userSub = user ? db.prepare(`
+    SELECT us.status, sp.badge_label, sp.name AS plan_name
+    FROM user_subscriptions us
+    JOIN subscription_plans sp ON sp.id = us.plan_id
+    WHERE us.user_id = ? AND us.status IN ('active', 'trialing')
+    LIMIT 1
+  `).get(user.id) as { status: string; badge_label: string; plan_name: string } | undefined : null;
+
+  // Comentários com badge
   const comments = db.prepare(`
-    SELECT c.*, u.display_name, u.username, u.avatar_url
-    FROM comments c JOIN users u ON u.id = c.user_id
+    SELECT c.*, u.display_name, u.username, u.avatar_url,
+      sp.badge_label AS comment_badge,
+      CASE WHEN us.status IN ('active', 'trialing') THEN 1 ELSE 0 END AS is_subscriber
+    FROM comments c
+    JOIN users u ON u.id = c.user_id
+    LEFT JOIN user_subscriptions us ON us.user_id = u.id AND us.status IN ('active', 'trialing')
+    LEFT JOIN subscription_plans sp ON sp.id = us.plan_id
     WHERE c.chapter_id = ? AND c.is_hidden = 0
-    ORDER BY c.created_at DESC LIMIT 50
+    ORDER BY is_subscriber DESC, c.created_at DESC LIMIT 50
   `).all(safeChapter.id) as Array<{
     id: string;
     content: string;
@@ -90,6 +104,8 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
     username: string;
     avatar_url: string | null;
     created_at: string;
+    comment_badge: string | null;
+    is_subscriber: number;
   }>;
 
 
@@ -175,10 +191,41 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
               <Button variant="outline" asChild className="h-auto py-3">
                 <Link href={`/novels/${safeNovel.slug}`}>
                   <BookOpen className="h-4 w-4 mr-2" />
-                  Voltar à página
+                  Voltar à p&#225;gina
                 </Link>
               </Button>
             )}
+          </div>
+        </div>
+
+        <div className="border-t border-border/30 bg-card/50">
+          <div className="container mx-auto max-w-3xl px-4 py-4">
+            <div className="flex items-center justify-center gap-4">
+              <ChapterActions
+                chapterId={safeChapter.id}
+                novelSlug={safeNovel.slug}
+                chapterNumber={safeChapter.chapter_number}
+                wordCount={safeChapter.word_count}
+                viewCount={safeChapter.views}
+              />
+              {userSub ? (
+                <a
+                  href={`/api/chapters/${safeChapter.id}/download`}
+                  className="inline-flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-4 py-2 text-sm font-medium text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                  Baixar .txt
+                </a>
+              ) : (
+                <Link
+                  href="/store/plans"
+                  className="inline-flex items-center gap-2 rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-2 text-sm font-medium text-amber-400/70 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                  Assine p/ baixar
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -226,19 +273,28 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
             <p className="text-center text-muted-foreground py-8 text-sm">Nenhum comentário ainda. Seja o primeiro!</p>
           ) : (
             comments.map((c) => (
-              <Card key={c.id}>
+              <Card key={c.id} className={c.is_subscriber ? "border-amber-500/30 bg-amber-500/5" : ""}>
                 <CardContent className="pt-4">
                   <div className="flex gap-3">
                     <Avatar className="h-9 w-9 flex-shrink-0">
-                      <AvatarFallback className="bg-primary/20 text-primary text-sm">
+                      <AvatarFallback className={`${c.is_subscriber ? "bg-amber-500/20 text-amber-400" : "bg-primary/20 text-primary"} text-sm`}>
                         {c.display_name.split(" ").map(n => n[0]).join("").slice(0, 2)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <Link href={`/authors/${c.username}`} className="font-medium text-sm hover:text-primary">
                           {c.display_name}
                         </Link>
+                        {c.comment_badge && (
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                            c.comment_badge === "Autor Verificado"
+                              ? "bg-blue-500/10 text-blue-400"
+                              : "bg-amber-500/10 text-amber-400"
+                          }`}>
+                            {c.comment_badge === "Autor Verificado" ? "✓" : "👑"} {c.comment_badge}
+                          </span>
+                        )}
                         <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleString("pt-BR")}</span>
                       </div>
                       <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">{c.content}</p>
