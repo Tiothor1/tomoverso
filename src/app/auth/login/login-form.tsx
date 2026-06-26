@@ -18,6 +18,10 @@ export function LoginForm() {
     setLoading(true);
     setError(null);
     const result = await loginAction(formData);
+    if (result.redirect) {
+      window.location.href = result.redirect;
+      return;
+    }
     if (!result.ok && result.error) {
       setError(result.error);
       setLoading(false);

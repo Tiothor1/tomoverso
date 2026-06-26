@@ -39,6 +39,10 @@ export function SignupForm() {
                 setLoading(true);
                 setError(null);
                 const result = await signupAction(formData);
+                if (result.redirect) {
+                  window.location.href = result.redirect;
+                  return;
+                }
                 if (!result.ok && result.error) {
                   setError(result.error);
                   setLoading(false);

@@ -45,6 +45,7 @@ const loginSchema = z.object({
 export interface ActionResult {
   ok: boolean;
   error?: string;
+  redirect?: string;
 }
 
 function safeActivityLog(
@@ -132,7 +133,7 @@ export async function signupAction(formData: FormData): Promise<ActionResult> {
   safeActivityLog(db, { userId: id, action: "signup", targetType: "user", targetId: id });
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  return { ok: true, redirect: "/dashboard" };
 }
 
 export async function loginAction(formData: FormData): Promise<ActionResult> {
@@ -181,7 +182,7 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
   safeActivityLog(db, { userId: user.id, action: "login", targetType: "user", targetId: user.id });
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  return { ok: true, redirect: "/dashboard" };
 }
 
 export async function logoutAction() {
