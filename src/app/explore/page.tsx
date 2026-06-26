@@ -71,7 +71,7 @@ interface SearchParams {
 }
 
 function buildQuery(filters: { type?: string; genre?: string; readable?: boolean }): { where: string; params: any[] } {
-  const conditions: string[] = [publicVisibleNovelSql("novels")];
+  const conditions: string[] = [publicVisibleNovelSql("n")];
   const params: any[] = [];
   if (filters.type) {
     conditions.push("type = ?");
@@ -82,7 +82,7 @@ function buildQuery(filters: { type?: string; genre?: string; readable?: boolean
     params.push(`%"${filters.genre}"%`);
   }
   if (filters.readable) {
-    conditions.push(publicReadableNovelSql("novels"));
+    conditions.push(publicReadableNovelSql("n"));
   }
   const where = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
   return { where, params };
@@ -120,13 +120,18 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
   const totalFiltered = countRow.c;
   const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
 
-  // Página atual
+  // Página atual — só colunas necessárias para cards
   const pageRows = db.prepare(`
-    SELECT * FROM novels ${where}
-    ORDER BY created_at DESC
+    SELECT n.id, n.slug, n.title, n.type, n.genres, n.cover_url, n.cover_local_path,
+           n.author_id, n.status, n.views, n.created_at,
+           u.display_name AS author_name,
+           (SELECT COUNT(*) FROM chapters c WHERE c.novel_id = n.id AND COALESCE(word_count, 0) > 30) as chapter_count
+    FROM novels n
+    LEFT JOIN users u ON u.id = n.author_id
+    ${where}
+    ORDER BY n.created_at DESC
     LIMIT ? OFFSET ?
-  `).all(...params, PAGE_SIZE, offset) as NovelRow[];
-  const novels = pageRows.map(parseNovel);
+  `).all(...params, PAGE_SIZE, offset) as any[];
 
   // Contagens por tipo (para badges de filtro) — só uma vez, sem filtro
   const allTypeRows = db.prepare(`SELECT type, COUNT(*) as c FROM novels WHERE ${publicReadableNovelSql("novels")} GROUP BY type`).all() as Array<{ type: string; c: number }>;
@@ -276,14 +281,14 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
         </div>
       )}
 
-      {/* Grid de novels — só 60 por página */}
-      {novels.length === 0 ? (
+      {/* Grid de novels */}
+      {pageRows.length === 0 ? (
         <p className="text-center text-muted-foreground py-12">
           Nenhuma novel encontrada com esses filtros.
         </p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {novels.map((n) => (
+          {pageRows.map((n) => (
             <NovelCard key={n.id} novel={n as any} variant="compact" />
           ))}
         </div>

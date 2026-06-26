@@ -129,7 +129,7 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
     const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
 
     const rows = db.prepare(`
-      SELECT m.id, m.slug, m.title, m.synopsis, m.cover_url, m.cover_local_path,
+      SELECT m.id, m.slug, m.title, m.cover_url, m.cover_local_path,
              m.author, m.created_at, m.updated_at,
              ${CHAPTER_COUNT_SQL} AS chapter_count
       FROM mangas m
