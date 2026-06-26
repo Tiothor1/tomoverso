@@ -44,14 +44,14 @@ export default async function PlansPage() {
       )}
 
       {!sub && (
-        <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
+        <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2 lg:grid-cols-4">
           {plans.map((plan) => {
             const features: string[] = (() => { try { const f = JSON.parse(plan.features as string); return Array.isArray(f) ? f : []; } catch { return []; } })();
             const monthlyPrice = plan.interval === "year"
               ? Math.round(plan.price_cents / 12)
               : plan.price_cents;
             const savings = plan.interval === "year"
-              ? (990 * 12) - plan.price_cents
+              ? (1990 * 12) - plan.price_cents
               : 0;
 
             return (
