@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ReadingProgress } from "@/components/reader/reading-progress";
 import { PremiumReaderControls } from "@/components/reader/premium-controls";
 import { ChapterActions } from "@/components/reader/chapter-actions";
+import { ChapterAd, InterChapterAd } from "@/components/ads/inline-ad";
 import { getDb } from "@/lib/db";
 import { publicReadableNovelSql, readableNovelChapterSql } from "@/lib/public-catalog";
 import { getCurrentUser } from "@/lib/auth";
@@ -154,6 +155,8 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
           </div>
         </header>
 
+        <ChapterAd chapterNumber={safeChapter.chapter_number} />
+
         <div className="prose-ln mx-auto">
           {cleanChapterContent(safeChapter.content).split(/\n\n+/).map((paragraph, i) => {
             const trimmed = paragraph.trim();
@@ -232,6 +235,8 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
           </div>
         </div>
       </div>
+
+      <InterChapterAd chapterNumber={safeChapter.chapter_number} interval={2} />
 
       <div id="comments" className="container mx-auto max-w-3xl px-4 py-12">
         <div className="flex items-center gap-2 mb-6">
