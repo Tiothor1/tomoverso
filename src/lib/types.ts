@@ -26,6 +26,7 @@ export interface Novel {
   cover_local_path?: string | null;
   author_id: string;
   author?: User;
+  author_name?: string;
   source?: string | null;
   source_id?: string | null;
   source_url?: string | null;

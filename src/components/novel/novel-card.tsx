@@ -30,9 +30,9 @@ export function NovelCard({
               <h3 className="font-heading font-semibold line-clamp-1 group-hover:text-primary transition-colors">
                 <NovelTitle novel={novel} />
               </h3>
-              {showAuthor && novel.author && (
+              {showAuthor && (novel.author?.display_name || novel.author_name) && (
                 <p className="text-xs text-muted-foreground">
-                  por {novel.author.display_name}
+                  por {novel.author?.display_name || novel.author_name}
                 </p>
               )}
               <p className="text-sm text-muted-foreground line-clamp-2">
@@ -78,10 +78,10 @@ export function NovelCard({
             <NovelTitle novel={novel} />
           </h3>
 
-          {showAuthor && novel.author && (
+          {showAuthor && (novel.author?.display_name || novel.author_name) && (
             <p className="text-xs text-muted-foreground flex items-center gap-1">
               <Users className="h-3 w-3" />
-              {novel.author.display_name}
+              {novel.author?.display_name || novel.author_name}
             </p>
           )}
 

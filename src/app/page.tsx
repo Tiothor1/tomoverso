@@ -69,7 +69,7 @@ export default function HomePage() {
     `).all() as any[];
 
     novels = (db.prepare(`
-      SELECT n.id, n.slug, n.title, n.title_en, n.title_jp, n.alternative_titles, n.synopsis, n.cover_url, n.cover_local_path,
+      SELECT n.id, n.slug, n.title, n.title_en, n.title_jp, n.alternative_titles, n.cover_url, n.cover_local_path,
              n.type, n.genres, COALESCE(cc.is_featured, n.is_featured, 0) as admin_featured, COALESCE(cc.show_on_home, 0) as show_on_home
       FROM novels n
       LEFT JOIN catalog_controls cc ON cc.item_type='novel' AND cc.item_id = n.id
