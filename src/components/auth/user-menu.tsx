@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { User, LogOut, Settings, BookOpen, BarChart3 } from "lucide-react";
+import { User, LogOut, Settings, BookOpen, BarChart3, Store } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -72,6 +72,12 @@ export function UserMenu({ user }: UserMenuProps) {
           <Link href="/library">
             <BarChart3 className="h-4 w-4 mr-2" />
             Minha estante
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/dashboard/seller">
+            <Store className="h-4 w-4 mr-2" />
+            Vender obras
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

@@ -18,24 +18,31 @@
 /out/
 
 # production
+/build
 
 # database local (SQLite)
-# (Mas o SEED inicial é commitado no repo pra popular /tmp em cold starts do Vercel)
-!/data/tomoverso.seed.db
-/data/tomoverso.seed.db-shm
-/data/tomoverso.seed.db-wal
+# O seed comprimido é commitado para popular /tmp em cold starts do Vercel.
 /data/tomoverso.db
 /data/tomoverso.db-shm
 /data/tomoverso.db-wal
+/data/tomoverso.seed.db
+/data/tomoverso.seed.db-shm
+/data/tomoverso.seed.db-wal
 /data/backups/
 *.db
 *.db-shm
 *.db-wal
-/build
+!/data/tomoverso.seed.db.gz
+
+# Hermes / agent skill caches
+.agents/
+data/skills/
+skills-lock.json
 
 # misc
 .DS_Store
 *.pem
+*.txt
 
 # debug
 npm-debug.log*
@@ -43,8 +50,9 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# env files
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -52,4 +60,3 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-*.txt

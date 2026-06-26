@@ -24,6 +24,7 @@ import {
 import { randomUUID } from "crypto";
 import { cookies } from "next/headers";
 import type { UserRecord } from "@/lib/auth";
+import { getSupabaseAdmin, getSupabaseAuthClient } from "@/lib/supabase/server";
 import type Database from "better-sqlite3";
 
 const signupSchema = z.object({
@@ -88,6 +89,54 @@ async function createPersistentSession(db: Database.Database, user: UserRecord) 
   });
 }
 
+async function upsertSupabaseProfile(user: UserRecord) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return;
+  await supabase.from("profiles").upsert({
+    id: user.id,
+    email: user.email,
+    username: user.username,
+    display_name: user.display_name,
+    avatar_url: user.avatar_url,
+    bio: user.bio || "",
+    role: user.role,
+    email_verified: !!user.email_verified,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: "id" });
+}
+
+async function createSupabaseAuthUser(input: { email: string; password: string; username: string; displayName: string }) {
+  const supabaseAdmin = getSupabaseAdmin();
+  if (supabaseAdmin) {
+    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      email: input.email,
+      password: input.password,
+      email_confirm: true,
+      user_metadata: { username: input.username, display_name: input.displayName },
+    });
+    if (!error && data.user?.id) return data.user.id;
+    // If user already exists in Supabase, keep local signup error handling as source of truth.
+  }
+
+  const supabaseAuth = getSupabaseAuthClient();
+  if (!supabaseAuth) return null;
+  const { data, error } = await supabaseAuth.auth.signUp({
+    email: input.email,
+    password: input.password,
+    options: { data: { username: input.username, display_name: input.displayName } },
+  });
+  if (error || !data.user?.id) return null;
+  return data.user.id;
+}
+
+async function signInWithSupabaseAuth(input: { login: string; password: string }) {
+  const supabaseAuth = getSupabaseAuthClient();
+  if (!supabaseAuth || !input.login.includes("@")) return null;
+  const { data, error } = await supabaseAuth.auth.signInWithPassword({ email: input.login, password: input.password });
+  if (error || !data.user?.id) return null;
+  return data.user;
+}
+
 export async function signupAction(formData: FormData): Promise<ActionResult> {
   const raw = {
     email: formData.get("email") as string,
@@ -112,7 +161,13 @@ export async function signupAction(formData: FormData): Promise<ActionResult> {
     return { ok: false, error: "Email ou username já cadastrado" };
   }
 
-  const id = generateId();
+  const supabaseUserId = await createSupabaseAuthUser({
+    email,
+    password: parsed.data.password,
+    username,
+    displayName: parsed.data.display_name.trim(),
+  });
+  const id = supabaseUserId || generateId();
   const passwordHash = await hashPassword(parsed.data.password);
   const isFirstUser = (db.prepare("SELECT COUNT(*) as c FROM users").get() as { c: number }).c === 0;
 
@@ -129,6 +184,7 @@ export async function signupAction(formData: FormData): Promise<ActionResult> {
   );
 
   const user = db.prepare("SELECT * FROM users WHERE id = ?").get(id) as UserRecord;
+  await upsertSupabaseProfile(user);
 
   // Envia codigo de verificacao (fire-and-forget)
   const { sendVerificationCode } = await import("@/lib/verify-email");
@@ -153,9 +209,30 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
   const usernameLogin = normalizeUsername(parsed.data.login);
   const db = getDb();
 
-  let user = db
-    .prepare("SELECT * FROM users WHERE lower(email) = ? OR lower(username) = ? LIMIT 1")
-    .get(login, usernameLogin) as UserRecord | undefined;
+  const supabaseUser = await signInWithSupabaseAuth({ login, password: parsed.data.password });
+  let user: UserRecord | undefined;
+  if (supabaseUser?.id) {
+    user = db
+      .prepare("SELECT * FROM users WHERE id = ? OR lower(email) = ? LIMIT 1")
+      .get(supabaseUser.id, normalizeEmail(supabaseUser.email || login)) as UserRecord | undefined;
+
+    if (!user && supabaseUser.email) {
+      const passwordHash = await hashPassword(parsed.data.password);
+      const username = normalizeUsername(String(supabaseUser.user_metadata?.username || supabaseUser.email.split("@")[0] || "user"));
+      const displayName = String(supabaseUser.user_metadata?.display_name || username);
+      db.prepare(
+        `INSERT INTO users (id, email, username, password_hash, display_name, role, email_verified)
+         VALUES (?, ?, ?, ?, ?, 'user', 1)`
+      ).run(supabaseUser.id, normalizeEmail(supabaseUser.email), username, passwordHash, displayName);
+      user = db.prepare("SELECT * FROM users WHERE id = ?").get(supabaseUser.id) as UserRecord;
+    }
+  }
+
+  if (!user) {
+    user = db
+      .prepare("SELECT * FROM users WHERE lower(email) = ? OR lower(username) = ? LIMIT 1")
+      .get(login, usernameLogin) as UserRecord | undefined;
+  }
 
   if (!user) {
     const backup = await getAccountBackupFromCookie();
@@ -174,9 +251,14 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
     return { ok: false, error: "Email/username ou senha incorretos" };
   }
 
-  const valid = await verifyPassword(parsed.data.password, user.password_hash);
+  const valid = supabaseUser?.id === user.id || await verifyPassword(parsed.data.password, user.password_hash);
   if (!valid) {
     return { ok: false, error: "Email/username ou senha incorretos" };
+  }
+
+  if (supabaseUser?.id && !user.email_verified) {
+    db.prepare("UPDATE users SET email_verified = 1, updated_at = datetime('now') WHERE id = ?").run(user.id);
+    user = { ...user, email_verified: 1 };
   }
 
   // Verifica se email foi confirmado
@@ -185,6 +267,7 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
   }
 
   db.prepare("UPDATE users SET last_login_at = datetime('now') WHERE id = ?").run(user.id);
+  await upsertSupabaseProfile(user);
   await createPersistentSession(db, user);
   safeActivityLog(db, { userId: user.id, action: "login", targetType: "user", targetId: user.id });
 

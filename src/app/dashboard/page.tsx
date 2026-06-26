@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BookOpen, PenLine, Eye, Users, MessageCircle, Star, TrendingUp, Plus, BarChart3, Sparkles } from "lucide-react";
+import { BookOpen, PenLine, Eye, Users, MessageCircle, Star, TrendingUp, Plus, BarChart3, Sparkles, WalletCards } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -54,12 +54,20 @@ export default async function DashboardPage() {
             Gerencie suas novels, capítulos e métricas
           </p>
         </div>
-        <Button asChild size="lg">
-          <Link href="/dashboard/novels/new">
-            <Plus className="h-4 w-4 mr-2" />
-            Nova novel
-          </Link>
-        </Button>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button asChild size="lg" variant="outline">
+            <Link href="/dashboard/seller">
+              <WalletCards className="h-4 w-4 mr-2" />
+              Vender obras
+            </Link>
+          </Button>
+          <Button asChild size="lg">
+            <Link href="/dashboard/novels/new">
+              <Plus className="h-4 w-4 mr-2" />
+              Nova novel
+            </Link>
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

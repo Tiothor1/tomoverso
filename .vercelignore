@@ -1,0 +1,31 @@
+# Local/dev artifacts
+.env*
+.vercel
+.next
+node_modules
+.git
+
+# Hermes / agent skill caches
+.agents
+data/skills
+skills-lock.json
+
+# Local SQLite runtime files; keep only compressed tracked seed if present
+data/tomoverso.db
+data/tomoverso.db-shm
+data/tomoverso.db-wal
+data/tomoverso.seed.db
+data/tomoverso.seed.db-shm
+data/tomoverso.seed.db-wal
+data/backups
+*.db
+*.db-shm
+*.db-wal
+!data/tomoverso.seed.db.gz
+
+# Logs/temp
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+coverage

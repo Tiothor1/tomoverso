@@ -1,6 +1,38 @@
+import { createHmac, timingSafeEqual } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { checkPaymentStatus } from "@/lib/subscriptions";
+
+function parseMercadoPagoSignature(signature: string | null) {
+  if (!signature) return null;
+  return Object.fromEntries(signature.split(",").map((part) => {
+    const [key, ...rest] = part.trim().split("=");
+    return [key, rest.join("=")];
+  })) as { ts?: string; v1?: string };
+}
+
+function safeEqualHex(a: string, b: string) {
+  try {
+    const ab = Buffer.from(a, "hex");
+    const bb = Buffer.from(b, "hex");
+    return ab.length === bb.length && timingSafeEqual(ab, bb);
+  } catch {
+    return false;
+  }
+}
+
+function validateMercadoPagoWebhookSignature(req: NextRequest, paymentId?: string | null) {
+  const secret = process.env.MP_WEBHOOK_SECRET || process.env.MP_WEBHOOK_SECRET_TEST;
+  if (!secret) return true;
+
+  const signature = parseMercadoPagoSignature(req.headers.get("x-signature"));
+  const requestId = req.headers.get("x-request-id");
+  if (!signature?.ts || !signature.v1 || !requestId || !paymentId) return false;
+
+  const manifest = `id:${paymentId};request-id:${requestId};ts:${signature.ts};`;
+  const expected = createHmac("sha256", secret).update(manifest).digest("hex");
+  return safeEqualHex(expected, signature.v1);
+}
 
 /**
  * Webhook do Mercado Pago.
@@ -20,6 +52,10 @@ export async function POST(req: NextRequest) {
     const paymentId = body.data?.id || body.id || url.searchParams.get("data.id") || url.searchParams.get("id");
     if (!paymentId) {
       return NextResponse.json({ received: true });
+    }
+
+    if (!validateMercadoPagoWebhookSignature(req, String(paymentId))) {
+      return NextResponse.json({ error: "invalid_signature" }, { status: 401 });
     }
 
     const payment = await checkPaymentStatus(String(paymentId));

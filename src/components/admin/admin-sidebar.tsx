@@ -10,6 +10,7 @@ const iconMap = {
   site: Globe,
   catalog: LibraryBig,
   users: Users2,
+  sellers: Users2,
   commerce: Package2,
   integrations: PlugZap,
   imports: Boxes,

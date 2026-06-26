@@ -517,6 +517,260 @@ function createDb() {
     CREATE INDEX IF NOT EXISTS idx_payment_transactions_user ON payment_transactions(user_id);
     CREATE INDEX IF NOT EXISTS idx_payment_transactions_mp ON payment_transactions(mp_payment_id);
 
+    -- Marketplace MVP: seller approval + finance ledger bridge.
+    -- Supabase Postgres is the durable target; these local tables keep dev/build working without secrets.
+    CREATE TABLE IF NOT EXISTS seller_profiles (
+      id TEXT PRIMARY KEY,
+      user_id TEXT UNIQUE NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('draft', 'pending', 'approved', 'rejected', 'suspended')),
+      legal_name TEXT NOT NULL,
+      public_name TEXT NOT NULL,
+      pix_key_type TEXT NOT NULL CHECK (pix_key_type IN ('cpf', 'cnpj', 'email', 'phone', 'random')),
+      pix_key TEXT NOT NULL,
+      payout_notes TEXT DEFAULT '',
+      approved_by TEXT,
+      approved_at TEXT,
+      rejection_reason TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_seller_profiles_status ON seller_profiles(status, created_at);
+
+    CREATE TABLE IF NOT EXISTS seller_applications (
+      id TEXT PRIMARY KEY,
+      seller_id TEXT,
+      user_id TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled')),
+      message TEXT DEFAULT '',
+      reviewed_by TEXT,
+      reviewed_at TEXT,
+      rejection_reason TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (seller_id) REFERENCES seller_profiles(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_seller_applications_user ON seller_applications(user_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_seller_applications_status ON seller_applications(status, created_at);
+
+    CREATE TABLE IF NOT EXISTS platform_fee_rules (
+      id TEXT PRIMARY KEY,
+      label TEXT NOT NULL,
+      fee_basis_points INTEGER NOT NULL DEFAULT 1000,
+      min_withdrawal_cents INTEGER NOT NULL DEFAULT 5000,
+      settlement_delay_days INTEGER NOT NULL DEFAULT 7,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    INSERT OR IGNORE INTO platform_fee_rules (id, label, fee_basis_points, min_withdrawal_cents, settlement_delay_days, is_active)
+    VALUES ('default', 'Tomoverso Marketplace MVP', 1000, 5000, 7, 1);
+
+    CREATE TABLE IF NOT EXISTS paid_works (
+      id TEXT PRIMARY KEY,
+      content_type TEXT NOT NULL CHECK (content_type IN ('novel', 'book', 'manga')),
+      content_id TEXT NOT NULL,
+      seller_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      price_cents INTEGER NOT NULL CHECK (price_cents >= 490),
+      currency TEXT NOT NULL DEFAULT 'BRL',
+      status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'pending_review', 'approved', 'rejected', 'archived')),
+      approval_status TEXT NOT NULL DEFAULT 'pending' CHECK (approval_status IN ('pending', 'approved', 'rejected')),
+      approved_by TEXT,
+      approved_at TEXT,
+      rejection_reason TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (content_type, content_id),
+      FOREIGN KEY (seller_id) REFERENCES seller_profiles(id) ON DELETE CASCADE,
+      FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_paid_works_status ON paid_works(status, approval_status, created_at);
+    CREATE INDEX IF NOT EXISTS idx_paid_works_seller ON paid_works(seller_id, created_at);
+
+    CREATE TABLE IF NOT EXISTS marketplace_orders (
+      id TEXT PRIMARY KEY,
+      order_code TEXT UNIQUE NOT NULL,
+      buyer_id TEXT NOT NULL,
+      checkout_type TEXT NOT NULL DEFAULT 'work_purchase' CHECK (checkout_type IN ('work_purchase', 'subscription')),
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled', 'refunded', 'chargeback')),
+      gross_amount_cents INTEGER NOT NULL DEFAULT 0,
+      currency TEXT NOT NULL DEFAULT 'BRL',
+      provider TEXT NOT NULL DEFAULT 'mercadopago',
+      provider_preference_id TEXT,
+      provider_payment_id TEXT,
+      external_reference TEXT UNIQUE,
+      approved_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_marketplace_orders_buyer ON marketplace_orders(buyer_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_marketplace_orders_status ON marketplace_orders(status, created_at);
+
+    CREATE TABLE IF NOT EXISTS marketplace_order_items (
+      id TEXT PRIMARY KEY,
+      order_id TEXT NOT NULL,
+      paid_work_id TEXT,
+      seller_id TEXT,
+      content_type TEXT NOT NULL CHECK (content_type IN ('novel', 'book', 'manga', 'subscription')),
+      content_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      quantity INTEGER NOT NULL DEFAULT 1,
+      unit_price_cents INTEGER NOT NULL DEFAULT 0,
+      gross_amount_cents INTEGER NOT NULL DEFAULT 0,
+      platform_fee_basis_points INTEGER NOT NULL DEFAULT 1000,
+      platform_fee_amount_cents INTEGER NOT NULL DEFAULT 0,
+      mp_fee_amount_cents INTEGER NOT NULL DEFAULT 0,
+      author_net_amount_cents INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (order_id) REFERENCES marketplace_orders(id) ON DELETE CASCADE,
+      FOREIGN KEY (paid_work_id) REFERENCES paid_works(id) ON DELETE SET NULL,
+      FOREIGN KEY (seller_id) REFERENCES seller_profiles(id) ON DELETE SET NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS purchases (
+      id TEXT PRIMARY KEY,
+      buyer_id TEXT NOT NULL,
+      order_id TEXT,
+      paid_work_id TEXT,
+      content_type TEXT NOT NULL CHECK (content_type IN ('novel', 'book', 'manga')),
+      content_id TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'active', 'refunded', 'revoked')),
+      granted_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (buyer_id, content_type, content_id),
+      FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (order_id) REFERENCES marketplace_orders(id) ON DELETE SET NULL,
+      FOREIGN KEY (paid_work_id) REFERENCES paid_works(id) ON DELETE SET NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_purchases_buyer ON purchases(buyer_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_purchases_content ON purchases(content_type, content_id, status);
+
+    CREATE TABLE IF NOT EXISTS marketplace_payments (
+      id TEXT PRIMARY KEY,
+      order_id TEXT,
+      buyer_id TEXT,
+      provider TEXT NOT NULL DEFAULT 'mercadopago',
+      provider_payment_id TEXT UNIQUE,
+      provider_preference_id TEXT,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected', 'cancelled', 'refunded', 'chargeback')),
+      status_detail TEXT,
+      payment_method TEXT,
+      gross_amount_cents INTEGER NOT NULL DEFAULT 0,
+      mp_fee_amount_cents INTEGER NOT NULL DEFAULT 0,
+      net_received_cents INTEGER,
+      raw_payload TEXT NOT NULL DEFAULT '{}',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (order_id) REFERENCES marketplace_orders(id) ON DELETE SET NULL,
+      FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE SET NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS marketplace_sales (
+      id TEXT PRIMARY KEY,
+      seller_id TEXT NOT NULL,
+      buyer_id TEXT NOT NULL,
+      order_id TEXT NOT NULL,
+      order_item_id TEXT,
+      paid_work_id TEXT,
+      content_type TEXT NOT NULL CHECK (content_type IN ('novel', 'book', 'manga')),
+      content_id TEXT NOT NULL,
+      gross_amount_cents INTEGER NOT NULL,
+      mp_fee_amount_cents INTEGER NOT NULL DEFAULT 0,
+      platform_fee_basis_points INTEGER NOT NULL DEFAULT 1000,
+      platform_fee_amount_cents INTEGER NOT NULL,
+      author_net_amount_cents INTEGER NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'available', 'withdrawn', 'refunded', 'chargeback')),
+      available_at TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (seller_id) REFERENCES seller_profiles(id) ON DELETE CASCADE,
+      FOREIGN KEY (buyer_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (order_id) REFERENCES marketplace_orders(id) ON DELETE CASCADE,
+      FOREIGN KEY (order_item_id) REFERENCES marketplace_order_items(id) ON DELETE SET NULL,
+      FOREIGN KEY (paid_work_id) REFERENCES paid_works(id) ON DELETE SET NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_marketplace_sales_seller ON marketplace_sales(seller_id, status, created_at);
+
+    CREATE TABLE IF NOT EXISTS wallet_balances (
+      seller_id TEXT PRIMARY KEY,
+      pending_cents INTEGER NOT NULL DEFAULT 0,
+      available_cents INTEGER NOT NULL DEFAULT 0,
+      withdrawn_cents INTEGER NOT NULL DEFAULT 0,
+      blocked_cents INTEGER NOT NULL DEFAULT 0,
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (seller_id) REFERENCES seller_profiles(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS wallet_transactions (
+      id TEXT PRIMARY KEY,
+      seller_id TEXT NOT NULL,
+      sale_id TEXT,
+      withdrawal_id TEXT,
+      type TEXT NOT NULL CHECK (type IN ('sale_pending', 'release_available', 'withdrawal_requested', 'withdrawal_paid', 'withdrawal_rejected', 'refund', 'chargeback', 'adjustment')),
+      amount_cents INTEGER NOT NULL,
+      balance_bucket TEXT NOT NULL CHECK (balance_bucket IN ('pending', 'available', 'withdrawn', 'blocked')),
+      description TEXT NOT NULL,
+      metadata TEXT NOT NULL DEFAULT '{}',
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (seller_id) REFERENCES seller_profiles(id) ON DELETE CASCADE,
+      FOREIGN KEY (sale_id) REFERENCES marketplace_sales(id) ON DELETE SET NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_wallet_transactions_seller ON wallet_transactions(seller_id, created_at);
+
+    CREATE TABLE IF NOT EXISTS withdrawal_requests (
+      id TEXT PRIMARY KEY,
+      seller_id TEXT NOT NULL,
+      amount_cents INTEGER NOT NULL CHECK (amount_cents >= 5000),
+      pix_key_type TEXT NOT NULL,
+      pix_key TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'paid', 'rejected', 'cancelled')),
+      requested_at TEXT NOT NULL DEFAULT (datetime('now')),
+      reviewed_by TEXT,
+      reviewed_at TEXT,
+      paid_at TEXT,
+      rejection_reason TEXT,
+      admin_notes TEXT,
+      FOREIGN KEY (seller_id) REFERENCES seller_profiles(id) ON DELETE CASCADE,
+      FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_withdrawal_requests_status ON withdrawal_requests(status, requested_at);
+
+    CREATE TABLE IF NOT EXISTS platform_fees (
+      id TEXT PRIMARY KEY,
+      order_id TEXT,
+      sale_id TEXT,
+      seller_id TEXT,
+      amount_cents INTEGER NOT NULL,
+      fee_basis_points INTEGER NOT NULL DEFAULT 1000,
+      status TEXT NOT NULL DEFAULT 'earned' CHECK (status IN ('pending', 'earned', 'refunded', 'chargeback')),
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (order_id) REFERENCES marketplace_orders(id) ON DELETE SET NULL,
+      FOREIGN KEY (sale_id) REFERENCES marketplace_sales(id) ON DELETE SET NULL,
+      FOREIGN KEY (seller_id) REFERENCES seller_profiles(id) ON DELETE SET NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS content_access_grants (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      content_type TEXT NOT NULL CHECK (content_type IN ('novel', 'book', 'manga')),
+      content_id TEXT NOT NULL,
+      source TEXT NOT NULL CHECK (source IN ('purchase', 'subscription', 'admin', 'author_owner')),
+      purchase_id TEXT,
+      starts_at TEXT NOT NULL DEFAULT (datetime('now')),
+      expires_at TEXT,
+      revoked_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (user_id, content_type, content_id, source),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (purchase_id) REFERENCES purchases(id) ON DELETE SET NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_content_access_user ON content_access_grants(user_id, content_type, content_id);
+
     -- Seed planos padrao
     INSERT OR IGNORE INTO subscription_plans (id, name, description, price_cents, interval, features, role_granted, badge_label, sort_order)
     VALUES
