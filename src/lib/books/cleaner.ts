@@ -4,6 +4,38 @@
 export function cleanBookContent(raw: string): string {
   if (!raw) return "";
 
+  // Detect if content is already clean plain text (e.g. Project Gutenberg)
+  // Clean text: no HTML tags, no CSS, no JS
+  const hasHtmlTags = /<[a-z][\s\S]*?>/i.test(raw);
+  const hasStyleBlocks = /<style[\s\S]*?<\/style>/i.test(raw);
+  const hasScriptBlocks = /<script[\s\S]*?<\/script>/i.test(raw);
+  const isAlreadyClean = !hasHtmlTags && !hasStyleBlocks && !hasScriptBlocks;
+
+  if (isAlreadyClean) {
+    // Content is already clean plain text — just normalize line breaks
+    let text = raw
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n")
+      .replace(/\n{4,}/g, "\n\n\n")
+      .trim();
+
+    // Remove Gutenberg header boilerplate
+    const startMatch = text.match(/\*\*\*\s*START\s+OF\s+(THE\s+)?PROJECT\s+GUTENBERG/i);
+    if (startMatch && startMatch.index !== undefined) {
+      text = text.substring(startMatch.index + startMatch[0].length).trim();
+    }
+    const endMatch = text.match(/\*\*\*\s*END\s+OF\s+(THE\s+)?PROJECT\s+GUTENBERG/i);
+    if (endMatch && endMatch.index !== undefined) {
+      text = text.substring(0, endMatch.index).trim();
+    }
+
+    // Remove trailing "---" chapter separators that are just table of contents
+    text = text.replace(/\n---\s*\n*$/, "");
+    text = text.replace(/^\s*---\s*\n*/, "");
+
+    return text;
+  }
+
   // Remove scripts, style blocks, noscript
   let text = raw
     .replace(/<script[\s\S]*?<\/script>/gi, "")
