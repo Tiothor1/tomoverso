@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { BookOpen, Crown, Library, PenLine, Search, Shield, Store } from "lucide-react";
+import { BookOpen, Crown, Library, PenLine, Shield, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { ColorThemePicker } from "@/components/theme/color-theme-picker";
 import { HeaderSearch } from "@/components/layout/header-search";
+import { MobileMenu } from "@/components/layout/mobile-menu";
 import { UserMenu } from "@/components/auth/user-menu";
 import { LangSelector } from "@/components/layout/novel-lang-selector";
 import { getCurrentUser } from "@/lib/auth";
@@ -84,12 +85,17 @@ export async function Navbar() {
           </nav>
 
           <div className="ml-auto flex items-center gap-1">
+            <MobileMenu
+              isLoggedIn={!!user}
+              isAdmin={user?.role === "admin"}
+              showStore={!!config.storefront_enabled}
+              storeHref={config.storefront_href || "/store"}
+              username={user?.username}
+              publishLabel={config.publish_cta_label}
+              publishHref={config.publish_cta_href}
+              subBadge={sub?.badge_label || null}
+            />
             <LangSelector />
-            <Button variant="ghost" size="icon" asChild className="md:hidden">
-              <Link href="/search" aria-label="Buscar">
-                <Search className="h-4 w-4" />
-              </Link>
-            </Button>
             <ColorThemePicker />
             <ThemeToggle />
             {user ? (
