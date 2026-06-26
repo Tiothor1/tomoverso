@@ -5,7 +5,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { ContinueReadingBanner } from "@/components/reader/continue-reading-banner";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
-import { GoogleAdsense } from "@/components/ads/google-adsense";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
