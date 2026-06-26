@@ -88,6 +88,11 @@ function buildQuery(filters: { type?: string; genre?: string; readable?: boolean
   return { where, params };
 }
 
+function safeJsonArray(val: string | null | undefined): string[] {
+  if (!val) return [];
+  try { const p = JSON.parse(val); return Array.isArray(p) ? p : []; } catch { return []; }
+}
+
 function buildHref(filters: SearchParams, page: number): string {
   const params = new URLSearchParams();
   if (filters.type) params.set("type", filters.type);
@@ -116,7 +121,7 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
     genre: sp.genre,
     readable: readableDefault,
   });
-  const countRow = db.prepare(`SELECT COUNT(*) as c FROM novels ${where}`).get(...params) as { c: number };
+  const countRow = db.prepare(`SELECT COUNT(*) as c FROM novels n ${where}`).get(...params) as { c: number };
   const totalFiltered = countRow.c;
   const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
 
@@ -131,7 +136,15 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
     ${where}
     ORDER BY n.created_at DESC
     LIMIT ? OFFSET ?
-  `).all(...params, PAGE_SIZE, offset) as any[];
+  `).all(...params, PAGE_SIZE, offset).map((n: any) => ({
+    ...n,
+    genres: safeJsonArray(n.genres),
+    title_jp: null,
+    title_en: null,
+    alternative_titles: [],
+    tags: [],
+    is_featured: 0,
+  })) as any[];
 
   // Contagens por tipo (para badges de filtro) — só uma vez, sem filtro
   const allTypeRows = db.prepare(`SELECT type, COUNT(*) as c FROM novels WHERE ${publicReadableNovelSql("novels")} GROUP BY type`).all() as Array<{ type: string; c: number }>;

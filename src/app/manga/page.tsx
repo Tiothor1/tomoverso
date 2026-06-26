@@ -79,7 +79,7 @@ function MangaPoster({ manga, dense = false }: { manga: any; dense?: boolean }) 
             </div>
           )}
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent p-2 pt-10">
-            <p className="text-[10px] font-semibold text-white/90">{manga.chapter_count} caps</p>
+            <p className="text-[10px] font-semibold text-white/90">{manga.chapter_count} {manga.chapter_count === 1 ? "cap" : "caps"}</p>
           </div>
         </div>
         <CardContent className={dense ? "p-2.5" : "space-y-1.5 p-3"}>
