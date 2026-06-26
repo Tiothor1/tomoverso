@@ -148,11 +148,106 @@ export function cleanBookContent(raw: string): string {
     }
   }
 
-  return paragraphs.join("\n\n");
+  const joined = paragraphs.join("\n\n");
+
+  // Fallback for single-paragraph content: try inline extraction
+  if (joined.length < 200 || paragraphs.length <= 2) {
+    const extracted = extractSingleParagraph(raw);
+    if (extracted.length > joined.length) {
+      return extracted;
+    }
+  }
+
+  return joined;
 }
 
 /**
- * Split cleaned text into pages of roughly equal character count.
+ * When content has very few paragraphs (no proper line breaks),
+ * try to extract content by cutting at mid-text markers.
+ */
+function extractSingleParagraph(raw: string): string {
+  if (!raw) return "";
+
+  // Strip HTML (less aggressive) but preserve text content
+  let text = raw
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#8211;/g, "—")
+    .replace(/&#8212;/g, "—")
+    .replace(/&#8220;/g, '"')
+    .replace(/&#8221;/g, '"')
+    .replace(/&#8230;/g, "…")
+    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/\s+/g, " ")
+    .trim();
+
+  // Find "Sobre a obra" or equivalent (mid-text)
+  const markers = [
+    "Sobre a obra", "Sinopse", "Resumo", "Descrição",
+    "Sobre o livro", "Sobre",
+  ];
+  let startPos = -1;
+  for (const marker of markers) {
+    const idx = text.indexOf(marker);
+    if (idx >= 0) {
+      if (startPos < 0 || idx < startPos) startPos = idx;
+    }
+  }
+
+  // Cut at start marker if found
+  if (startPos >= 0) {
+    text = text.substring(startPos);
+  }
+
+  let endPos = text.length;
+
+  // Cut at markers that are never actual book content
+  const earlyEndMarkers = [
+    "Baixar Livro", "Download Seguro",
+    "Reportar Erro", "Denunciar Abuso",
+    "Facebook Twitter", "Facebook Twitter LinkedIn",
+  ];
+  for (const marker of earlyEndMarkers) {
+    const idx = text.indexOf(marker);
+    if (idx >= 0 && idx < endPos) {
+      endPos = idx;
+    }
+  }
+
+  // Also cut at markers found after 25% into text (these could look like content at start)
+  const lateEndMarkers = [
+    "O que os leitores acharam",
+    "Leia também", "Ver mais livros", "Compartilhe", "Compartilhar",
+    "Recomendaria", "Boa qualidade",
+  ];
+  const minCutPos = Math.floor(text.length * 0.25);
+  for (const marker of lateEndMarkers) {
+    const idx = text.indexOf(marker);
+    if (idx >= minCutPos && idx < endPos) {
+      endPos = idx;
+    }
+  }
+
+  text = text.substring(0, endPos).trim();
+
+  // Remove orphaned punctuation, numbers, and file-size suffixes at the end
+  text = text.replace(/[\s,;:.\-–—|]+$/, "");
+  text = text.replace(/\d+\.?\d*\s*(MB|Kb|kb|GB)?\s*$/g, "").trim();
+  text = text.replace(/^(?:[\s,;:.\-–—|]+|MB|Kb|kb)+/, "").trim();
+
+  return text;
+}
+
+/**
+ * Clean scraped book content: strip HTML/CSS/JS, extract meaningful text.
  */
 export function paginateText(
   text: string,
