@@ -43,6 +43,13 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${jakarta.variable} ${lora.variable} ${geistMono.variable}`}
     >
+      <head>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2780687772948357"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="antialiased min-h-screen flex flex-col">
         <ThemeProvider defaultTheme="dark" defaultColor="purple">
           <Navbar />
