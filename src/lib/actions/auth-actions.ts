@@ -117,8 +117,8 @@ export async function signupAction(formData: FormData): Promise<ActionResult> {
   const isFirstUser = (db.prepare("SELECT COUNT(*) as c FROM users").get() as { c: number }).c === 0;
 
   db.prepare(
-    `INSERT INTO users (id, email, username, password_hash, display_name, role)
-     VALUES (?, ?, ?, ?, ?, ?)`
+    `INSERT INTO users (id, email, username, password_hash, display_name, role, email_verified)
+     VALUES (?, ?, ?, ?, ?, ?, 0)`
   ).run(
     id,
     email,
@@ -129,11 +129,13 @@ export async function signupAction(formData: FormData): Promise<ActionResult> {
   );
 
   const user = db.prepare("SELECT * FROM users WHERE id = ?").get(id) as UserRecord;
-  await createPersistentSession(db, user);
-  safeActivityLog(db, { userId: id, action: "signup", targetType: "user", targetId: id });
+
+  // Envia codigo de verificacao (fire-and-forget)
+  const { sendVerificationCode } = await import("@/lib/verify-email");
+  sendVerificationCode(email).catch(() => {});
 
   revalidatePath("/", "layout");
-  return { ok: true, redirect: "/dashboard" };
+  return { ok: true, redirect: `/auth/verify?email=${encodeURIComponent(email)}` };
 }
 
 export async function loginAction(formData: FormData): Promise<ActionResult> {
@@ -175,6 +177,11 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
   const valid = await verifyPassword(parsed.data.password, user.password_hash);
   if (!valid) {
     return { ok: false, error: "Email/username ou senha incorretos" };
+  }
+
+  // Verifica se email foi confirmado
+  if (!user.email_verified) {
+    return { ok: false, redirect: `/auth/verify?email=${encodeURIComponent(user.email)}`, error: "Confirme seu email antes de entrar" };
   }
 
   db.prepare("UPDATE users SET last_login_at = datetime('now') WHERE id = ?").run(user.id);

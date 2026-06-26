@@ -164,8 +164,8 @@ export function restoreUserFromBackup(db: Database.Database, backup: AccountBack
   if (existing) return existing;
 
   db.prepare(
-    `INSERT INTO users (id, email, username, password_hash, display_name, role, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO users (id, email, username, password_hash, display_name, role, created_at, updated_at, email_verified)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)`
   ).run(
     backup.userId,
     backup.email,

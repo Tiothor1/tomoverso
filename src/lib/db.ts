@@ -524,6 +524,19 @@ function createDb() {
       ('pro-monthly', 'Pro', 'A experiencia completa: baixe capitulos, personalize o leitor, cores exclusivas e badge dourado.', 1990, 'month', '[\\\"Zero anuncios no site inteiro\\\",\\\"Badge Pro dourado em comentarios e perfil\\\",\\\"Baixar capitulos em .txt para ler offline\\\",\\\"Modo leitura premium (fonte, espacamento, largura, temas)\\\",\\\"4 cores exclusivas (Esmeralda, Rose Gold, Ambar, Oceano)\\\",\\\"Comentario com destaque dourado\\\",\\\"Suporte prioritario via WhatsApp\\\"]', 'subscriber', 'Pro', 2),
       ('pro-yearly', 'Pro Anual', 'Tudo do Pro com 3 meses gratis. Pague 9 meses e leve 12.', 17900, 'year', '[\\\"Todos os beneficios do Pro\\\",\\\"3 meses gratis (economia de R$ 59,70)\\\",\\\"Menos de R$ 15 por mes\\\"]', 'subscriber', 'Pro', 3),
       ('author-monthly', 'Autor', 'Tudo do Pro + ferramentas profissionais de publicacao. Para autores que levam a serio suas historias.', 2990, 'month', '[\\\"Todos os beneficios do Pro\\\",\\\"Badge Autor Verificado (azul) em perfil e obras\\\",\\\"Publicacao ilimitada de obras (sem fila de aprovacao)\\\",\\\"Dashboard com analytics: views por capitulo, tempo de leitura, abandono\\\",\\\"Destaque no catalogo por 7 dias a cada obra nova\\\",\\\"Exportar obra completa em .txt\\\",\\\"Multiplos autores por obra (co-autoria)\\\",\\\"Prioridade em eventos e divulgacoes\\\"]', 'author', 'Autor Verificado', 4);
+
+    -- Codigos de verificacao de email
+    CREATE TABLE IF NOT EXISTS verification_codes (
+      id TEXT PRIMARY KEY,
+      email TEXT NOT NULL,
+      code TEXT NOT NULL,
+      purpose TEXT NOT NULL DEFAULT 'email_verification' CHECK (purpose IN ('email_verification', 'password_reset')),
+      expires_at TEXT NOT NULL,
+      used_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_verification_codes_email ON verification_codes(email, code);
+    CREATE INDEX IF NOT EXISTS idx_verification_codes_expires ON verification_codes(expires_at);
   `);
 
   const settingsRow = db.prepare("SELECT id FROM site_settings WHERE id = 'default'").get() as { id: string } | undefined;
