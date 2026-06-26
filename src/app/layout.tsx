@@ -31,6 +31,9 @@ export const metadata: Metadata = {
   description:
     "Plataforma brasileira de Light Novels. Leia, escreva e descubra histórias originais em português.",
   keywords: ["light novel", "ln", "web novel", "brasil", "leitura", "escrita"],
+  other: {
+    "google-adsense-account": "ca-pub-2780687772948357",
+  },
 };
 
 export default function RootLayout({
