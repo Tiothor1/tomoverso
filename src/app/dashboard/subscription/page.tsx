@@ -9,6 +9,7 @@ export const dynamic = "force-dynamic";
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   active: { label: "Ativa", color: "text-emerald-500" },
+  pending: { label: "Aguardando pagamento", color: "text-amber-500" },
   trialing: { label: "Teste", color: "text-blue-500" },
   past_due: { label: "Pagamento pendente", color: "text-amber-500" },
   canceled: { label: "Cancelada", color: "text-muted-foreground" },
@@ -20,7 +21,15 @@ export default async function SubscriptionPage() {
   if (!user) notFound();
 
   const db = getDb();
-  const sub = getUserActiveSubscription(db, user.id);
+  const activeSub = getUserActiveSubscription(db, user.id);
+  const pendingSub = activeSub ? null : db.prepare(`
+    SELECT us.*, sp.name AS plan_name, sp.badge_label, sp.role_granted
+    FROM user_subscriptions us
+    JOIN subscription_plans sp ON sp.id = us.plan_id
+    WHERE us.user_id = ? AND us.status = 'pending'
+    ORDER BY us.created_at DESC LIMIT 1
+  `).get(user.id) as any;
+  const sub = activeSub || pendingSub;
   const transactions = getUserTransactions(user.id, 20);
 
   return (
@@ -61,7 +70,7 @@ export default async function SubscriptionPage() {
             </div>
           </div>
 
-          {sub.cancel_at_period_end === 0 && (
+          {sub.status !== "pending" && sub.cancel_at_period_end === 0 && (
             <form action="/api/payments/cancel" method="POST" className="mt-6">
               <button
                 type="submit"
@@ -74,6 +83,15 @@ export default async function SubscriptionPage() {
                 O acesso continua até o fim do período atual.
               </p>
             </form>
+          )}
+
+          {sub.status === "pending" && (
+            <div className="mt-6 rounded-xl bg-amber-500/10 p-4 text-sm">
+              <p className="font-medium text-amber-400">Pagamento iniciado</p>
+              <p className="mt-1 text-muted-foreground">
+                Assim que o Mercado Pago confirmar PIX, cartão ou boleto, o plano será ativado automaticamente.
+              </p>
+            </div>
           )}
 
           {sub.cancel_at_period_end === 1 && (

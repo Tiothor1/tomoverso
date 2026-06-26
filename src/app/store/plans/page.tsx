@@ -6,11 +6,13 @@ import { Check, Crown, Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-export default async function PlansPage() {
+export default async function PlansPage({ searchParams }: { searchParams?: Promise<{ error?: string; mp_failure?: string }> }) {
   const db = getDb();
   const user = await getCurrentUser();
   const plans = getActivePlans();
   const sub = user ? getUserActiveSubscription(db, user.id) : null;
+  const params = searchParams ? await searchParams : {};
+  const paymentError = params.error || (params.mp_failure ? "mp_failure" : "");
 
   return (
     <main className="container mx-auto max-w-7xl px-4 py-10">
@@ -23,6 +25,17 @@ export default async function PlansPage() {
             : "Escolha um plano e ajude a manter a plataforma. Sem anúncios, conteúdo exclusivo e badge de apoiador."}
         </p>
       </section>
+
+      {paymentError && (
+        <section className="mx-auto mb-8 max-w-2xl rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-100">
+          <p className="font-bold">Não foi possível iniciar o pagamento.</p>
+          <p className="mt-1 text-red-100/80">
+            {paymentError === "mp_missing_token"
+              ? "O Mercado Pago ainda não está configurado no servidor. Adicione MP_ACCESS_TOKEN no Vercel ou MP_CLIENT_ID + MP_CLIENT_SECRET."
+              : "Tente novamente em instantes. Se continuar, revise as credenciais do Mercado Pago."}
+          </p>
+        </section>
+      )}
 
       {sub && (
         <section className="mx-auto mb-10 max-w-md rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6 text-center">

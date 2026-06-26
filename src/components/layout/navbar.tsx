@@ -6,6 +6,7 @@ import { ColorThemePicker } from "@/components/theme/color-theme-picker";
 import { HeaderSearch } from "@/components/layout/header-search";
 import { MobileMenu } from "@/components/layout/mobile-menu";
 import { UserMenu } from "@/components/auth/user-menu";
+import { SubscriberCookieSync } from "@/components/auth/subscriber-cookie-sync";
 import { LangSelector } from "@/components/layout/novel-lang-selector";
 import { getCurrentUser } from "@/lib/auth";
 import { getSiteConfig } from "@/lib/site-config";
@@ -20,6 +21,7 @@ export async function Navbar() {
 
   return (
     <>
+      <SubscriberCookieSync active={!!sub} />
       {config.maintenance_mode ? (
         <div className="border-b border-amber-500/20 bg-amber-500/10 px-4 py-2 text-center text-xs text-amber-100">
           {config.maintenance_message}

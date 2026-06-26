@@ -485,7 +485,7 @@ function createDb() {
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
       plan_id TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'canceled', 'expired', 'past_due', 'trialing')),
+      status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('pending', 'active', 'canceled', 'expired', 'past_due', 'trialing')),
       current_period_start TEXT NOT NULL,
       current_period_end TEXT NOT NULL,
       cancel_at_period_end INTEGER NOT NULL DEFAULT 0,
@@ -562,6 +562,8 @@ function createDb() {
     CREATE INDEX IF NOT EXISTS idx_books_source ON books(source);
   `);
 
+  migrateUserSubscriptionsPendingStatus(db);
+
   const settingsRow = db.prepare("SELECT id FROM site_settings WHERE id = 'default'").get() as { id: string } | undefined;
   if (!settingsRow) {
     db.prepare(`
@@ -600,6 +602,44 @@ function createDb() {
   }
 
   return db;
+}
+
+function migrateUserSubscriptionsPendingStatus(db: Database.Database) {
+  const row = db.prepare("SELECT sql FROM sqlite_master WHERE type='table' AND name='user_subscriptions'").get() as { sql?: string } | undefined;
+  if (!row?.sql || row.sql.includes("'pending'")) return;
+
+  console.log("[db] Migrating user_subscriptions status CHECK to include pending");
+  db.exec(`
+    PRAGMA foreign_keys=OFF;
+    CREATE TABLE IF NOT EXISTS user_subscriptions_new (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      plan_id TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('pending', 'active', 'canceled', 'expired', 'past_due', 'trialing')),
+      current_period_start TEXT NOT NULL,
+      current_period_end TEXT NOT NULL,
+      cancel_at_period_end INTEGER NOT NULL DEFAULT 0,
+      mp_preference_id TEXT,
+      mp_payment_id TEXT,
+      mp_payer_email TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (plan_id) REFERENCES subscription_plans(id)
+    );
+    INSERT INTO user_subscriptions_new (
+      id, user_id, plan_id, status, current_period_start, current_period_end,
+      cancel_at_period_end, mp_preference_id, mp_payment_id, mp_payer_email, created_at, updated_at
+    )
+    SELECT id, user_id, plan_id, status, current_period_start, current_period_end,
+      cancel_at_period_end, mp_preference_id, mp_payment_id, mp_payer_email, created_at, updated_at
+    FROM user_subscriptions;
+    DROP TABLE user_subscriptions;
+    ALTER TABLE user_subscriptions_new RENAME TO user_subscriptions;
+    CREATE INDEX IF NOT EXISTS idx_user_subscriptions_user ON user_subscriptions(user_id);
+    CREATE INDEX IF NOT EXISTS idx_user_subscriptions_status ON user_subscriptions(status);
+    PRAGMA foreign_keys=ON;
+  `);
 }
 
 function seedDatabase(db: Database.Database) {
