@@ -5,8 +5,6 @@ import Script from "next/script";
  * Colocado no root layout. O AdSense só é carregado se NEXT_PUBLIC_ADSENSE_ENABLED=true.
  */
 export function GoogleAdsense() {
-  if (process.env.NEXT_PUBLIC_ADSENSE_ENABLED !== "true") return null;
-
   return (
     <Script
       async
