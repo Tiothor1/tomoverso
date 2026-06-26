@@ -545,6 +545,7 @@ function createDb() {
       title TEXT NOT NULL,
       author TEXT NOT NULL DEFAULT '',
       synopsis TEXT NOT NULL DEFAULT '',
+      content TEXT NOT NULL DEFAULT '',
       cover_url TEXT NOT NULL DEFAULT '',
       cover_local_path TEXT,
       genres TEXT NOT NULL DEFAULT '[]',

@@ -62,9 +62,9 @@ export default async function LerLivroPage({ params }: { params: Promise<{ slug:
           </header>
 
           {/* Texto do livro */}
-          {book.synopsis ? (
+          {(book.content || book.synopsis) ? (
             <div className="prose prose-lg max-w-none dark:prose-invert mx-auto text-justify leading-relaxed">
-              {book.synopsis.split(/\n\n+/).map((paragraph: string, i: number) => {
+              {(book.content || book.synopsis).split(/\n\n+/).map((paragraph: string, i: number) => {
                 const trimmed = paragraph.trim();
                 if (!trimmed) return null;
                 return <p key={i}>{trimmed}</p>;
