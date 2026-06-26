@@ -6,7 +6,7 @@ import { readableTitle } from "@/lib/display-title";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type Filter = "all" | "light-novel" | "web-novel" | "manga" | "chapters" | "authors" | "genres" | "pages";
+type Filter = "all" | "light-novel" | "web-novel" | "manga" | "books" | "chapters" | "authors" | "genres" | "pages";
 
 type SearchItem = {
   id: string;
@@ -54,7 +54,7 @@ function cleanQuery(value: string | null): string {
 }
 
 function validFilter(value: string | null): Filter {
-  const filters: Filter[] = ["all", "light-novel", "web-novel", "manga", "chapters", "authors", "genres", "pages"];
+  const filters: Filter[] = ["all", "light-novel", "web-novel", "manga", "books", "chapters", "authors", "genres", "pages"];
   return filters.includes(value as Filter) ? (value as Filter) : "all";
 }
 
@@ -166,6 +166,29 @@ export async function GET(req: NextRequest) {
       }))));
     }
 
+    // Livros recentes
+    if (tableExists(db, "books")) {
+      const topBooks = db.prepare(`
+        SELECT id, slug, title, author, synopsis, cover_url, cover_local_path, pages
+        FROM books WHERE is_hidden = 0
+        ORDER BY created_at DESC
+        LIMIT ?
+      `).all(limit) as any[];
+      if (topBooks.length > 0) {
+        response.groups.push(group("books", "Livros recentes", topBooks.map((b) => ({
+          id: b.id,
+          type: "page",
+          title: b.title,
+          subtitle: b.author ? `Livro · ${b.author}` : "Livro",
+          description: excerpt(b.synopsis, b.title, 180),
+          href: `/livros/${b.slug}`,
+          cover: b.cover_local_path || b.cover_url,
+          meta: [`${b.pages} páginas`],
+          score: 1,
+        }))));
+      }
+    }
+
     response.groups.push(group("pages", "Páginas", pages.slice(0, 4)));
     response.total = response.groups.reduce((sum, g) => sum + g.items.length, 0);
     return NextResponse.json(response);
@@ -259,6 +282,39 @@ export async function GET(req: NextRequest) {
       meta: [`${m.chapter_count || 0} caps`],
       score: m.score,
     }))));
+  }
+
+  // Busca de livros
+  if ((filter === "all" || filter === "books") && tableExists(db, "books")) {
+    const books = db.prepare(`
+      SELECT id, slug, title, author, synopsis, cover_url, cover_local_path, pages, genres,
+        CASE
+          WHEN lower(title) = ? THEN 110
+          WHEN lower(title) LIKE ? THEN 85
+          WHEN lower(title) LIKE ? THEN 60
+          WHEN lower(author) LIKE ? THEN 50
+          WHEN lower(synopsis) LIKE ? THEN 20
+          ELSE 1
+        END AS score
+      FROM books WHERE is_hidden = 0 AND (
+        lower(title) LIKE ? OR lower(author) LIKE ? OR lower(synopsis) LIKE ? OR lower(genres) LIKE ?
+      )
+      ORDER BY score DESC, created_at DESC
+      LIMIT ?
+    `).all(exact, starts, like, like, like, like, like, like, like, limit) as any[];
+    if (books.length > 0) {
+      response.groups.push(group("books", "Livros", books.map((b) => ({
+        id: b.id,
+        type: "page",
+        title: b.title,
+        subtitle: b.author ? `Livro · ${b.author}` : "Livro",
+        description: excerpt(b.synopsis, query),
+        href: `/livros/${b.slug}`,
+        cover: b.cover_local_path || b.cover_url,
+        meta: [`${b.pages} páginas`],
+        score: b.score,
+      }))));
+    }
   }
 
   if (filter === "all" || filter === "chapters") {

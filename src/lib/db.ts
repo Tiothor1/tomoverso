@@ -537,6 +537,28 @@ function createDb() {
     );
     CREATE INDEX IF NOT EXISTS idx_verification_codes_email ON verification_codes(email, code);
     CREATE INDEX IF NOT EXISTS idx_verification_codes_expires ON verification_codes(expires_at);
+
+    -- Livros
+    CREATE TABLE IF NOT EXISTS books (
+      id TEXT PRIMARY KEY,
+      slug TEXT UNIQUE NOT NULL,
+      title TEXT NOT NULL,
+      author TEXT NOT NULL DEFAULT '',
+      synopsis TEXT NOT NULL DEFAULT '',
+      cover_url TEXT NOT NULL DEFAULT '',
+      cover_local_path TEXT,
+      genres TEXT NOT NULL DEFAULT '[]',
+      pages INTEGER NOT NULL DEFAULT 1,
+      source TEXT NOT NULL DEFAULT '',
+      source_url TEXT NOT NULL DEFAULT '',
+      language TEXT NOT NULL DEFAULT 'pt-BR',
+      is_featured INTEGER NOT NULL DEFAULT 0,
+      is_hidden INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_books_slug ON books(slug);
+    CREATE INDEX IF NOT EXISTS idx_books_source ON books(source);
   `);
 
   const settingsRow = db.prepare("SELECT id FROM site_settings WHERE id = 'default'").get() as { id: string } | undefined;

@@ -44,6 +44,7 @@ export async function Navbar() {
           <nav className="hidden lg:flex items-center gap-1">
             <Button variant="ghost" asChild><Link href="/explore">Light Novels</Link></Button>
             <Button variant="ghost" asChild><Link href="/manga">Mangás</Link></Button>
+            <Button variant="ghost" asChild><Link href="/livros">Livros</Link></Button>
             {config.storefront_enabled ? (
               <Button variant="ghost" asChild>
                 <Link href={config.storefront_href}>
