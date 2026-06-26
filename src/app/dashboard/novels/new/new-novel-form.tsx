@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Save, ImageIcon, Tag, Plus, X, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, ImageIcon, Tag, Plus, X, Loader2, Crown, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,15 @@ export function NewNovelForm() {
   const [selectedGenres, setSelectedGenres] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [workCount, setWorkCount] = useState(0);
+  const [isAuthor, setIsAuthor] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/user/works-count")
+      .then(r => r.json())
+      .then(d => { setWorkCount(d.count); setIsAuthor(d.isAuthor); })
+      .catch(() => {});
+  }, []);
 
   function toggleGenre(g: string) {
     setSelectedGenres((prev) => {
@@ -56,6 +65,29 @@ export function NewNovelForm() {
       </div>
 
       <form action={handleSubmit} className="space-y-6">
+        {!isAuthor && workCount >= 3 && (
+          <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4 flex items-start gap-3">
+            <AlertTriangle className="h-5 w-5 text-amber-400 mt-0.5 shrink-0" />
+            <div className="flex-1">
+              <p className="font-medium text-sm">Limite de obras gratuito atingido</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Você já publicou {workCount} obras. O plano gratuito permite até 3.
+                Assine o plano Autor para publicar sem limites.
+              </p>
+              <Button asChild size="sm" className="mt-2">
+                <Link href="/store/plans"><Crown className="h-3 w-3 mr-1" />Ver planos</Link>
+              </Button>
+            </div>
+          </div>
+        )}
+        {!isAuthor && workCount < 3 && (
+          <div className="rounded-lg border border-border/60 bg-muted/30 p-3 flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">
+              Obras publicadas: <strong>{workCount}/3</strong> no plano gratuito
+            </p>
+            <Link href="/store/plans" className="text-xs text-primary hover:underline">Autor ilimitado →</Link>
+          </div>
+        )}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
