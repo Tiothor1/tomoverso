@@ -161,6 +161,16 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
           {cleanChapterContent(safeChapter.content).split(/\n\n+/).map((paragraph, i) => {
             const trimmed = paragraph.trim();
             if (!trimmed) return null;
+            const imageMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+            if (imageMatch) {
+              const [, alt, src] = imageMatch;
+              return (
+                <figure key={i} className="not-prose my-10 overflow-hidden rounded-3xl border border-border/40 bg-card shadow-2xl shadow-black/20">
+                  <img src={src} alt={alt || safeChapter.title} className="w-full object-cover" loading="lazy" />
+                  {alt ? <figcaption className="px-4 py-3 text-center text-xs text-muted-foreground">{alt}</figcaption> : null}
+                </figure>
+              );
+            }
             return <p key={i}>{trimmed}</p>;
           })}
         </div>
