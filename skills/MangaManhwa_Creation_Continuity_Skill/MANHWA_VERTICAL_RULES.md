@@ -1,68 +1,46 @@
-# MANHWA_VERTICAL_RULES
+# Manhwa/Webtoon Vertical — Regras de Produção
 
-Regras para manhwa/webtoon vertical colorido. A unidade principal é o scroll, não a página isolada.
+## Princípio
 
-## 1. Estrutura de scroll
+O scroll é a página. Ritmo, pausa, impacto e cliffhanger dependem do espaço vertical.
 
-Um bloco vertical profissional alterna:
+## Blocos
 
-1. Estabelecimento visual.
-2. Fala ou reação.
-3. Espaço de respiro.
-4. Preparação.
-5. Impacto.
-6. Consequência.
-7. Gancho.
+- Bloco de orientação: cenário/personagens.
+- Bloco de diálogo: balões topo→baixo com espaço entre reações.
+- Bloco de tensão: close + silêncio + respiro.
+- Bloco de impacto: imagem grande após vazio.
+- Bloco de consequência: dano/reação/estado.
+- Bloco de gancho: imagem forte + fala curta.
 
-Nem todo bloco precisa de todos os itens, mas toda cena precisa de ritmo.
+## Espaçamento
 
-## 2. Espaçamento
+Use respiro antes de revelações, golpes e frases finais. Espaço vazio não é desperdício; é timing. Evite 4-5 balões colados em sequência sem reação.
 
-- Espaço branco/preto = tempo.
-- Espaço antes de revelação aumenta tensão.
-- Espaço depois de impacto deixa o leitor sentir consequência.
-- Não colar todos os quadros.
-- Não usar espaço vazio sem intenção.
+## Cor e luz
 
-## 3. Composição vertical
+Paleta por cena; glow e gradiente guiam olhar. Poderes têm cores consistentes. Escuridão não pode apagar identidade visual.
 
-- Direcionar diagonais para baixo.
-- Usar corpo inteiro em entradas/revelações.
-- Usar close grande para emoção.
-- Usar painéis horizontais dentro do scroll para pausa.
-- Usar fundo contínuo quando a ação percorre o mesmo espaço.
-- Usar gradiente/abstrato para transição emocional.
+## Luta vertical
 
-## 4. Cor e iluminação
+Ação pode descer: queda, salto, explosão, perseguição. Marcar posição inicial, trajetória e consequência. Se o personagem cai, o próximo bloco mostra impacto/levantada.
 
-- Fixar paleta por cena.
-- Auras e poderes têm cor consistente.
-- Luz ambiente continua entre blocos.
-- Mudança brusca de cor precisa ter motivo emocional/narrativo.
-- Sombras e glow ajudam separar personagem do fundo.
+## Balões
 
-## 5. Balões verticais
+Topo→baixo; usar espaços brancos; rabicho claro; narração separada; grito pode quebrar moldura. Nunca obrigar leitor a subir para entender ordem.
 
-- Ordem sempre topo→baixo.
-- Posicionar balões em espaços vazios ou áreas de baixa informação.
-- Não cobrir rosto em close.
-- Dividir falas longas em balões menores espaçados.
-- Revelação forte deve vir após silêncio vertical.
+## Cliffhanger
 
-## 6. Continuidade em blocos longos
+No fim do scroll: imagem forte, pouco texto, estado de continuidade claro. Exemplo estrutural: mão no sino → espaço preto → voz do antagonista → close do protagonista ferido.
 
-- Repetir Character Lock no prompt mesmo após muitos pixels de scroll.
-- Atualizar ferimentos e roupas a cada impacto.
-- Preservar direção de movimento.
-- Mostrar onde personagens pousam/caem após ataques.
-- Usar cenário-âncora para o leitor não se perder.
+## Mobile
 
-## 7. Checklist
+Texto grande o suficiente; painéis não dependerem de detalhe minúsculo; corpo inteiro em blocos altos; close em blocos curtos.
 
-- [ ] Scroll tem começo, meio e gancho.
-- [ ] Espaços de respiro têm função.
-- [ ] Balões seguem topo→baixo.
-- [ ] Impactos têm consequência.
-- [ ] Cor/luz são consistentes.
-- [ ] Character Lock foi repetido.
-- [ ] Cenário não reiniciou.
+## Checklist
+- [ ] Blocos de scroll nomeados.
+- [ ] Respiro antes de impacto.
+- [ ] Topo→baixo claro.
+- [ ] Continuidade entre blocos.
+- [ ] Cores/poderes consistentes.
+- [ ] Cliffhanger no final.

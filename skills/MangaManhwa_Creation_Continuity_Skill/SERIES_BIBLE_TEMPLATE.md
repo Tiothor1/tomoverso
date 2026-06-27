@@ -1,48 +1,58 @@
-# Page Script Template
+# Series Bible Template
 
-## Campos obrigatórios
-
-- Obra:
-- Capítulo:
-- Página/bloco:
+## Obra
+- Título:
+- Autor/criador:
 - Formato:
-- Direção de leitura:
-- Função narrativa:
-- Emoção dominante:
-- Ritmo: lento/médio/rápido/impacto:
-- Continuidade herdada:
-- Personagens presentes:
-- Cenário:
-- Quantidade de painéis/blocos:
-- Composição geral:
-- Falas principais:
-- Balões planejados:
-- Onomatopeias:
-- Espaços de respiro:
-- Transição para próxima página:
-- Continuidade deixada:
-- QA esperado:
+- Gênero/subgênero:
+- Tom:
+- Público-alvo:
+- Tema central:
+- Promessa narrativa:
+- Logline:
 
-## Instruções
+## Mundo
+- Local principal:
+- Regras do mundo:
+- Cronologia:
+- Cultura/facções:
+- Tecnologia/magia:
+- Sistema de poder:
+- Hierarquia de poder:
+- Custos/limites:
+- Mistérios centrais:
 
-1. Defina a função da página antes de qualquer painel.
-2. A página precisa avançar história, emoção, relação ou informação.
-3. Em manhwa, pensar em blocos de scroll; em mangá, pensar em virada/grade.
-4. Escrever a saída de continuidade para a próxima página.
+## Estética
+- Estilo visual:
+- Paleta:
+- Linha/sombra:
+- Regras de cenário:
+- Regras de poder:
+- Elementos proibidos:
+- Referências técnicas permitidas:
 
-## Exemplo preenchido — Lua de Ferro p.2 tradicional
-Função: revelar que a forja foi sabotada. Emoção: suspeita virando urgência. 5 painéis, leitura direita→esquerda. Continuidade herdada: Ícaro com corte no antebraço esquerdo, Nara atrás dele, sino lunar tocando. Painel dominante no meio: bigorna rachada emitindo luz azul. Balões no topo dos painéis, sem cobrir o corte nem a rachadura. Página termina com Caio surgindo na saída sul.
+## Personagens
+- Protagonista:
+- Aliados:
+- Rivais:
+- Antagonistas:
+- Secundários:
+
+## Cronologia e produção
+- Arcos planejados:
+- Volumes:
+- Estado atual:
+- Continuidade global:
+
+## Exemplo Lua de Ferro
+Fantasia sombria industrial, formato híbrido mangá/manhwa. Uma cidade-forja sobrevive sob uma lua metálica que grava memórias no ferro. Poder: ferro lunar responde a sangue e promessa, mas cobra lembranças. Tema: o peso de herdar ferramentas quebradas.
 
 ## Checklist
-- [ ] Página tem objetivo claro.
-- [ ] Herda estado anterior.
-- [ ] Deixa estado para próxima.
-- [ ] Ordem de leitura explícita.
-- [ ] Balões planejados antes do prompt.
-- [ ] Painel principal identificado.
-
-## Erros comuns
-Página bonita mas sem função; muitos painéis iguais; sem saída de continuidade; fala demais; painel principal sem destaque.
+- [ ] Premissa visualizável.
+- [ ] Sistema de poder com custo.
+- [ ] Estética e formato definidos.
+- [ ] Elementos proibidos claros.
+- [ ] Pode gerar arco sem adivinhar.
 
 ---
 

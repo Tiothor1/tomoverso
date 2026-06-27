@@ -1,78 +1,89 @@
-# SCENE_MAP_TEMPLATE
+# Scene Map Template
 
-Use principalmente para cenas com múltiplos personagens, luta, perseguição, escola/sala/castelo/rua ou qualquer situação onde a posição espacial importe.
+## Objetivo
 
-## 1. Identificação
+Mapear espaço físico, câmera e continuidade espacial. Obrigatório para luta, perseguição, diálogo com 3+ personagens e cena com objetos importantes.
 
-- Obra:
-- Capítulo:
-- Cena:
-- Páginas/blocos cobertos:
-- Objetivo dramático:
-- Conflito:
-- Resultado esperado:
-
-## 2. Ambiente
-
-- Local macro:
-- Local exato:
+## Planta textual
+- Local:
 - Formato do espaço:
-- Pontos de entrada:
-- Pontos de saída:
+- Norte/sul/esquerda/direita da página:
+- Entradas:
+- Saídas:
 - Obstáculos:
-- Objetos interativos:
-- Pistas visuais recorrentes:
-- Elementos que podem quebrar/mover:
+- Objetos importantes:
+- Fonte de luz:
+- Áreas perigosas:
 
-## 3. Mapa textual
+## Posições iniciais
+| Personagem/objeto | Posição | Direção do olhar/movimento | Distância | Observações |
+|---|---|---|---|---|
 
-```text
-NORTE / FUNDO:
+## Rotas e bloqueios
+- Rota A:
+- Rota B:
+- Bloqueio:
+- Objeto que pode mudar:
 
-ESQUERDA:                         DIREITA:
+## Eixo de câmera
+- Eixo principal:
+- Regra 180º:
+- Quando quebrar eixo:
+- Plano de orientação:
+- Close permitido:
 
-CENTRO:
+## Dano antes/depois
+- Antes da cena:
+- Após painel 1:
+- Após painel 2:
+- Após página:
 
-SUL / CÂMERA:
-```
+## Exemplo — Lua de Ferro
+Corredor da forja lunar, longo e estreito. Norte: porta do sino. Sul: saída bloqueada por Caio. Esquerda: janelas altas com luz azul. Direita: fornos apagando. Ícaro centro-norte, olhando sul; Nara atrás dele à esquerda; Caio sul, lança horizontal; brasas entre Ícaro e Caio; bigorna rachada à direita. Câmera principal olha norte→sul para manter Caio como barreira. Quando Ícaro avança, manter movimento descendente/diagonal direita para reforçar perigo.
 
-## 4. Personagens e posições
+## Checklist
+- [ ] Leitor sabe onde todos estão.
+- [ ] Próximo painel não inverte lados sem motivo.
+- [ ] Objetos importantes não somem.
+- [ ] Dano no cenário tem antes/depois.
+- [ ] Câmera e eixo estão definidos.
 
-| Personagem | Posição inicial | Direção do olhar | Distância | Objetivo físico | Pode mover para |
-|---|---|---|---|---|---|
-| | | | | | |
+## Erros comuns
+Luta sem distância; porta muda de lado; inimigo aparece atrás sem transição; arma troca de mão; cenário reinicia limpo.
 
-## 5. Eixo de câmera
+---
 
-- Eixo estabelecido:
-- Personagem A fica visualmente em:
-- Personagem B fica visualmente em:
-- Quando mudar eixo, mostrar:
-- Enquadramentos permitidos:
-- Enquadramentos que confundiriam:
+## Campos opcionais profissionais
+- Referência visual autorizada própria:
+- Restrições de plataforma/formato:
+- Variante para mangá PB:
+- Variante para manhwa vertical:
+- Notas de revisão editorial:
+- Risco de inconsistência conhecido:
+- Critério de aprovação específico:
 
-## 6. Linha de ação
+## Instruções de preenchimento
+1. Preencha os campos obrigatórios antes de qualquer roteiro, prompt ou arte.
+2. Use campos opcionais quando a cena tiver risco de drift visual, texto denso, luta, troca de cenário ou múltiplos personagens.
+3. Se algum campo obrigatório for desconhecido, declare premissa temporária e marque para revisão.
+4. Ao concluir, atualize a Continuity Bible com qualquer mudança gerada por este template.
+5. Nunca use o template como texto final ao leitor; ele é documento de produção.
 
-1. Posição inicial:
-2. Movimento 1:
-3. Impacto/virada:
-4. Consequência:
-5. Nova posição:
+## Exemplo preenchido mínimo
+Obra: Lua de Ferro. Estado: Ícaro Vale entra na forja lunar à noite, com casaco azul remendado, luva direita, lâmina quebrada acorrentada ao antebraço direito e corte no antebraço esquerdo. Nara está atrás com mapa rasgado. Caio bloqueia a saída sul. A página/painel deve manter esses elementos e deixar espaço limpo para balões no topo.
 
-## 7. Continuidade de cenário
+## Checklist de validação do template
+- [ ] Todos os campos obrigatórios preenchidos.
+- [ ] Campos opcionais relevantes avaliados.
+- [ ] Exemplo/estado específico substituiu placeholders.
+- [ ] Continuidade herdada e deixada claras.
+- [ ] Riscos de inconsistência registrados.
+- [ ] QA pode ser aplicado sem informação externa.
 
-- Luz:
-- Clima:
-- Danos existentes:
-- Danos novos:
-- Objetos caídos:
-- Sangue/poeira/fogo/água:
-- Elementos que devem reaparecer:
-
-## 8. Critério de aprovação
-
-- [ ] O leitor entende onde todos estão.
-- [ ] A câmera não inverte sem explicação.
-- [ ] Distâncias são coerentes.
-- [ ] Destruição/objetos persistem.
-- [ ] A próxima página pode herdar o mapa.
+## Erros comuns do template
+- Deixar campo obrigatório em branco.
+- Escrever descrição bonita mas sem continuidade.
+- Não registrar roupa, ferimento, arma ou posição.
+- Não indicar direção de leitura.
+- Não reservar área de balão.
+- Não exportar estado para próxima página/cena.

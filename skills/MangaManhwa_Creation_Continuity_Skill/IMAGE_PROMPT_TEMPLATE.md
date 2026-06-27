@@ -1,80 +1,110 @@
-# IMAGE_PROMPT_TEMPLATE
+# Image Prompt Template Profissional
 
-Prompts de mangá/manhwa precisam carregar continuidade, não apenas estética. Use este template por página ou painel.
+## Estrutura obrigatória
 
-## 1. Prompt mestre
+### 1. Header de produção
+- Obra:
+- Formato:
+- Capítulo/Página/Painel:
+- Direção de leitura:
+- Objetivo narrativo:
 
-```text
-Original [manga/manhwa/webtoon] artwork for [TITLE], chapter [CHAPTER], page/block [PAGE], panel [PANEL].
-Format: [traditional black-and-white manga page / full-color vertical Korean manhwa scroll / webtoon block].
-Reading order: [right-to-left / left-to-right / top-to-bottom].
+### 2. Character Lock Block
+Para cada personagem no painel:
+- Nome + descrição fixa completa.
+- Roupa atual.
+- Ferimentos atuais.
+- Objetos/armas.
+- Expressão.
+- Pose.
+- Linguagem corporal.
+- Proibições de alteração.
 
-CONTINUITY LOCK — mandatory:
-Direct continuation from previous panel/page: [LAST ACTION]. Preserve the same location, time of day, lighting, weather, character positions, clothing state, wounds, dirt, blood, weapons, emotional state, and camera logic unless explicitly changed. Do not reset the scene.
+### 3. Scene Continuity Block
+- Continuação direta de:
+- Local:
+- Hora/clima/iluminação:
+- Dano no cenário:
+- Posição dos personagens:
+- Ação imediatamente anterior:
+- Próxima ação sugerida:
 
-CHARACTER LOCKS:
-[Character A]: [age apparent], [height/body], [skin], [face shape], [eyes color+shape], [hair color+cut+length], [current outfit], [accessories], [weapon/object], [wounds/dirt], [posture], [personality expression]. Must look like the exact same person as previous pages.
-[Character B]: ...
+### 4. Composition Block
+- Enquadramento:
+- Ângulo:
+- Lente:
+- Hierarquia visual:
+- Direção do movimento:
+- Área reservada para balões:
+- Área proibida para texto:
 
-SCENE MAP:
-Location: [specific place].
-Background anchors: [doors/windows/ruins/classroom/street/castle/etc.].
-Positions: [A left/right/front/back, B ...].
-Movement direction: [direction].
-Lighting: [source, color, contrast].
-Atmosphere: [rain, dust, smoke, silence, crowd noise].
+### 5. Style Block
+- Mangá PB/manhwa colorido/etc:
+- Linha:
+- Sombra:
+- Paleta:
+- Efeitos:
+- Qualidade:
 
-VISUAL ACTION:
-[Describe what happens in this panel/page.]
-Emotion: [dominant emotion].
-Camera: [close-up / medium / wide / low angle / high angle / over-the-shoulder].
-Composition: [main focal point, eye path, secondary focal point].
-Effects/SFX: [if any; no random text].
+### 6. Negative Prompt
+- Sem mudar rosto/cabelo/idade/roupa/proporção.
+- Sem personagem aleatório.
+- Sem texto embutido, exceto onomatopeia planejada.
+- Sem cobrir rosto/arma/mão/impacto.
+- Sem trocar cenário/hora/clima.
 
-BUBBLE SAFE AREAS:
-Leave clean readable empty space for planned speech bubbles at [positions]. Do not put faces, hands, weapons, impact, magic, important props, or mystery clues in those areas.
+## Prompt de página tradicional
+“Original black-and-white manga page, [page objective], [panel layout], right-to-left reading, strong panel hierarchy, screentone and hatching, clear gutters, planned empty bubble zones, no embedded dialogue text, consistent character locks...”
 
-STYLE LOCK:
-[black-and-white manga: ink, screentone, hatching, high contrast] OR [full-color manhwa: cinematic lighting, gradients, glow, polished rendering]. Keep style consistent with previous page.
+## Prompt de manhwa vertical
+“Original vertical webtoon/manhwa scroll block, top-to-bottom reading, [block rhythm], cinematic color, atmospheric gradient, large breathing space before impact, clean bubble-safe negative space, consistent character locks...”
 
-NEGATIVE CONSISTENCY RULES:
-No changed face, no changed hairstyle, no changed hair color, no changed eye color, no changed outfit, no random accessories, no random extra characters, no age change, no body proportion change, no weapon hand swap, no healed wounds, no clean clothes if previously damaged, no unrelated background, no text baked into dialogue balloons, no watermark, no logo, no confusing panel order.
-```
+## Exemplo — Lua de Ferro painel
+Obra Lua de Ferro, cap.1 p.4 painel 3. Ícaro Vale: 17, slim resilient build, olive skin, oval face, gray-rust almond eyes, diagonal scar through left eyebrow, short messy black hair with one white lock on right fringe, dark blue patched coat, red waist sash, single right leather glove, broken lunar-iron blade chained to right forearm, fresh bandaged cut on left forearm. Continuação direta do painel anterior: Ícaro avançou a partir do centro da forja; Caio bloqueia a saída sul com lança quente. Plano médio baixo, diagonal dinâmica, brasas no chão, luz azul-prata da lua, área limpa no alto direito para balão curto. Não inserir texto. Não alterar cabelo, cicatriz, roupa, luva, arma ou ferimento.
 
-## 2. Compact prompt for repeated panels
+## Checklist
+- [ ] Inclui todos os personagens presentes.
+- [ ] Inclui continuidade herdada.
+- [ ] Inclui área de balão.
+- [ ] Inclui negativos específicos.
+- [ ] Não depende de “same character” sozinho.
 
-```text
-Continue same scene and same Character Locks. [Character] remains [visual lock]. Current state: [wounds/clothes/object/emotion]. Panel: [camera/action/background/light]. Reserve [area] for bubbles. Negative: no design changes, no random characters, no text in art.
-```
+## Erros comuns
+Prompt só estético; esquecer página/painel; não reservar balão; negativo genérico; não registrar ferimento/objeto.
 
-## 3. Prompt for full traditional manga page
+---
 
-Add:
+## Campos opcionais profissionais
+- Referência visual autorizada própria:
+- Restrições de plataforma/formato:
+- Variante para mangá PB:
+- Variante para manhwa vertical:
+- Notas de revisão editorial:
+- Risco de inconsistência conhecido:
+- Critério de aprovação específico:
 
-- exact number of panels;
-- panel hierarchy;
-- gutters;
-- page direction;
-- each panel’s short action;
-- zones reserved for dialogue;
-- black/white treatment.
+## Instruções de preenchimento
+1. Preencha os campos obrigatórios antes de qualquer roteiro, prompt ou arte.
+2. Use campos opcionais quando a cena tiver risco de drift visual, texto denso, luta, troca de cenário ou múltiplos personagens.
+3. Se algum campo obrigatório for desconhecido, declare premissa temporária e marque para revisão.
+4. Ao concluir, atualize a Continuity Bible com qualquer mudança gerada por este template.
+5. Nunca use o template como texto final ao leitor; ele é documento de produção.
 
-## 4. Prompt for vertical manhwa block
+## Exemplo preenchido mínimo
+Obra: Lua de Ferro. Estado: Ícaro Vale entra na forja lunar à noite, com casaco azul remendado, luva direita, lâmina quebrada acorrentada ao antebraço direito e corte no antebraço esquerdo. Nara está atrás com mapa rasgado. Caio bloqueia a saída sul. A página/painel deve manter esses elementos e deixar espaço limpo para balões no topo.
 
-Add:
+## Checklist de validação do template
+- [ ] Todos os campos obrigatórios preenchidos.
+- [ ] Campos opcionais relevantes avaliados.
+- [ ] Exemplo/estado específico substituiu placeholders.
+- [ ] Continuidade herdada e deixada claras.
+- [ ] Riscos de inconsistência registrados.
+- [ ] QA pode ser aplicado sem informação externa.
 
-- vertical scroll composition;
-- top-to-bottom rhythm;
-- breathing space before/after impact;
-- continuous background or transition background;
-- color palette and lighting;
-- balloon spaces between blocks.
-
-## 5. Prompt QA
-
-- [ ] Character Lock repeated in full?
-- [ ] Continuity state included?
-- [ ] Scene map included?
-- [ ] Bubble safe areas included?
-- [ ] Negatives block design drift?
-- [ ] Prompt forbids random text/watermark?
+## Erros comuns do template
+- Deixar campo obrigatório em branco.
+- Escrever descrição bonita mas sem continuidade.
+- Não registrar roupa, ferimento, arma ou posição.
+- Não indicar direção de leitura.
+- Não reservar área de balão.
+- Não exportar estado para próxima página/cena.

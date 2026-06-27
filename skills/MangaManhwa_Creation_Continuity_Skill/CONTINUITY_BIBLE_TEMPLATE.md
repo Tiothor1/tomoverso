@@ -1,104 +1,122 @@
-# CONTINUITY_BIBLE_TEMPLATE
+# Continuity Bible Template
 
-Use este arquivo como memória viva do capítulo. Atualize depois de cada cena, página ou evento permanente.
+## Objetivo
 
-## 1. Escopo
+Controlar o estado vivo de capítulo, cena, página e painel. A próxima página herda tudo daqui.
 
-- Obra:
+## Estado da obra
+- Título:
+- Arco:
+- Volume/temporada:
 - Capítulo:
-- Cena atual:
-- Página/bloco atual:
-- Última página aprovada:
-- Última atualização:
+- Página atual:
+- Formato:
 
-## 2. Estado global
+## Estado do capítulo
+- Objetivo narrativo:
+- Emoção dominante:
+- Conflito ativo:
+- Mistérios em aberto:
+- Promessas narrativas:
+- Gancho planejado:
 
-- Tempo narrativo/data:
+## Estado da cena
+- Local:
 - Hora do dia:
 - Clima:
-- Local macro:
-- Evento imediatamente anterior:
-- Consequências permanentes ativas:
-- Regras de mundo relevantes:
-
-## 3. Estado da cena
-
-- Local exato:
-- Subárea/sala/rua:
 - Iluminação:
-- Paleta da cena:
-- Sons:
-- Atmosfera emocional:
-- Entradas e saídas:
+- Ambiente sonoro:
+- Personagens presentes:
+- Personagens ausentes relevantes:
+- Objetivo da cena:
+- Ação anterior:
+- Próxima ação lógica:
+
+## Estado por personagem
+Para cada personagem:
+- Localização no espaço:
+- Direção do olhar:
+- Roupa atual:
+- Ferimentos:
+- Objetos carregados:
+- Arma equipada:
+- Estado físico:
+- Estado emocional:
+- Relação momentânea com outros:
+- Última fala:
+- Última ação:
+
+## Estado do cenário
 - Objetos importantes:
-- Objetos movidos:
-- Objetos quebrados:
-- Destruição/sangue/poeira/fogo/água:
+- Portas/janelas:
+- Obstáculos:
+- Danos/destruição:
+- Sangue/sujeira/fumaça/fogo/água:
+- Itens movidos:
+- Saídas possíveis:
 
-## 4. Personagens presentes
+## Mudanças permanentes nesta página
+- Mudança física:
+- Mudança emocional:
+- Informação revelada:
+- Relação alterada:
+- Objeto perdido/ganho:
+- Dano irreversível:
 
-| Personagem | Posição | Olhando para | Roupa | Ferimentos | Objeto/arma | Emoção | Última ação |
-|---|---|---|---|---|---|---|---|
-| | | | | | | | |
+## Resumo para próximo capítulo
+- Onde termina:
+- Quem está presente:
+- Quem está ferido:
+- O que ficou sem resposta:
+- Próxima ameaça:
+- Estado visual que deve continuar:
 
-## 5. Personagens fora de cena
+## Exemplo — Lua de Ferro, cap. teste p.3
+Ícaro está no corredor da forja lunar, noite, poeira de metal no ar, iluminação azul-prata da lua quebrada. Ícaro segura a lâmina quebrada com corrente na mão direita; corte do antebraço esquerdo sangrou através do curativo. Nara está 3 passos atrás à esquerda com mapa rasgado; Caio bloqueia a saída sul com lança quente. Uma bigorna rachada e brasas espalhadas permanecem no chão desde a p.2. Vespera ainda não apareceu fisicamente; sua voz veio do sino.
 
-| Personagem | Local atual | Motivo da ausência | Pode entrar quando? | Estado conhecido |
-|---|---|---|---|---|
-| | | | | |
+## Checklist
+- [ ] Página seguinte consegue continuar sem adivinhar.
+- [ ] Ferimentos e objetos estão registrados.
+- [ ] Cenário danificado continua registrado.
+- [ ] Emoção e objetivo estão claros.
+- [ ] Ganchos e mistérios estão listados.
 
-## 6. Continuidade espacial
+## Erros comuns
+Esquecer objeto na mão, curar ferimento sem cena, trocar noite por dia, remover personagem presente, mudar distância espacial sem transição.
 
-- Eixo da cena:
-- Quem está à esquerda:
-- Quem está à direita:
-- Quem está mais perto da câmera:
-- Distância entre personagens:
-- Direção de movimento principal:
-- Direção dos olhares:
-- Último enquadramento usado:
-- Próximo enquadramento lógico:
-- Inversão de eixo permitida? Como mostrar?
+---
 
-## 7. Continuidade física
+## Campos opcionais profissionais
+- Referência visual autorizada própria:
+- Restrições de plataforma/formato:
+- Variante para mangá PB:
+- Variante para manhwa vertical:
+- Notas de revisão editorial:
+- Risco de inconsistência conhecido:
+- Critério de aprovação específico:
 
-- Ferimentos que precisam aparecer:
-- Roupas rasgadas/sujas/molhadas:
-- Armas quebradas/perdidas:
-- Munição/energia restante:
-- Cansaço:
-- Personagem caído/sentado/preso:
-- Obstáculo no caminho:
+## Instruções de preenchimento
+1. Preencha os campos obrigatórios antes de qualquer roteiro, prompt ou arte.
+2. Use campos opcionais quando a cena tiver risco de drift visual, texto denso, luta, troca de cenário ou múltiplos personagens.
+3. Se algum campo obrigatório for desconhecido, declare premissa temporária e marque para revisão.
+4. Ao concluir, atualize a Continuity Bible com qualquer mudança gerada por este template.
+5. Nunca use o template como texto final ao leitor; ele é documento de produção.
 
-## 8. Continuidade emocional
+## Exemplo preenchido mínimo
+Obra: Lua de Ferro. Estado: Ícaro Vale entra na forja lunar à noite, com casaco azul remendado, luva direita, lâmina quebrada acorrentada ao antebraço direito e corte no antebraço esquerdo. Nara está atrás com mapa rasgado. Caio bloqueia a saída sul. A página/painel deve manter esses elementos e deixar espaço limpo para balões no topo.
 
-- Emoção anterior:
-- Emoção atual:
-- Mudança permitida:
-- Gatilho visível da mudança:
-- Emoção proibida sem transição:
-- Subtexto:
+## Checklist de validação do template
+- [ ] Todos os campos obrigatórios preenchidos.
+- [ ] Campos opcionais relevantes avaliados.
+- [ ] Exemplo/estado específico substituiu placeholders.
+- [ ] Continuidade herdada e deixada claras.
+- [ ] Riscos de inconsistência registrados.
+- [ ] QA pode ser aplicado sem informação externa.
 
-## 9. Eventos permanentes do capítulo
-
-| Página | Evento | Consequência visual | Consequência narrativa | Deve reaparecer? |
-|---|---|---|---|---|
-| | | | | |
-
-## 10. Herança obrigatória para próxima página
-
-Copiar para o próximo Page Script:
-
-```text
-Continue directly from: [última ação]. Keep [personagens] in [posições]. Preserve [roupas/ferimentos/objetos]. Scene remains [local/hora/clima/iluminação]. Emotional state: [estado]. Do not reset damage or move characters without transition.
-```
-
-## 11. Checklist
-
-- [ ] Ninguém mudou de roupa sem cena de troca.
-- [ ] Ferimentos continuam.
-- [ ] Objetos não trocaram de mão sozinhos.
-- [ ] Cenário não reiniciou limpo.
-- [ ] Posição espacial ainda faz sentido.
-- [ ] Emoção atual veio de gatilho visível.
-- [ ] Próxima página tem herança explícita.
+## Erros comuns do template
+- Deixar campo obrigatório em branco.
+- Escrever descrição bonita mas sem continuidade.
+- Não registrar roupa, ferimento, arma ou posição.
+- Não indicar direção de leitura.
+- Não reservar área de balão.
+- Não exportar estado para próxima página/cena.

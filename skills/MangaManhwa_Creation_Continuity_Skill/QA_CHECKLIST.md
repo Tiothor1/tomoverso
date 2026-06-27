@@ -1,72 +1,83 @@
-# QA_CHECKLIST
+# QA Checklist com Pontuação
 
-Use antes de aprovar roteiro, prompt, página gerada ou letramento. Se um item crítico falhar, corrija e revise de novo.
+## Sistema de nota
 
-## 1. Continuidade visual
+Cada categoria recebe 0-3:
 
-- [ ] Protagonista parece a mesma pessoa da página anterior.
-- [ ] Rosto, idade aparente, cabelo, olhos e corpo estão iguais.
-- [ ] Roupa atual está igual ou mudança foi mostrada.
-- [ ] Acessórios importantes continuam.
-- [ ] Arma/ferramenta está correta e na mão correta.
-- [ ] Ferimentos, sangue, sujeira, suor e roupa rasgada persistem.
-- [ ] Personagens secundários continuam reconhecíveis.
-- [ ] Nenhum personagem presente sumiu sem saída.
-- [ ] Nenhum personagem novo apareceu sem entrada.
+- 0 = falhou / contraditório / inutilizável.
+- 1 = aceitável com problemas graves.
+- 2 = bom, utilizável.
+- 3 = profissional, consistente e claro.
 
-## 2. Continuidade espacial
+A página só passa se:
 
-- [ ] Local é o mesmo quando a cena continua.
-- [ ] Hora do dia/clima/luz são coerentes.
-- [ ] Destruição e objetos movidos persistem.
-- [ ] Distância entre personagens faz sentido.
-- [ ] Eixo de câmera não confundiu esquerda/direita.
-- [ ] Movimento continua a ação anterior.
-- [ ] Luta mostra posição, impacto e consequência.
+- nenhuma categoria tiver 0;
+- média geral >= 2.4;
+- personagem >= 2;
+- continuidade >= 2;
+- balões >= 2.
 
-## 3. Composição
+Produção completa/readiness só passa se média dos testes >= 2.6.
 
-- [ ] Página tem foco visual claro.
-- [ ] Painel/bloco mais importante tem destaque.
-- [ ] O olho do leitor sabe para onde ir.
-- [ ] Silhuetas são reconhecíveis.
-- [ ] Há respiro visual suficiente.
-- [ ] Fundo detalhado quando precisa localizar.
-- [ ] Fundo simplificado quando precisa emoção/velocidade.
-- [ ] A página funciona mesmo sem texto.
+## Categorias
 
-## 4. Balões/letramento
+### Personagem
+0 mudou completamente; 1 parcialmente reconhecível; 2 consistente; 3 profissionalmente consistente em ângulos/emoções.
 
-- [ ] Ordem de leitura correta para o formato.
-- [ ] Falante claro em todos os balões.
-- [ ] Rabicho aponta para o personagem certo.
-- [ ] Balões não cobrem rosto, olhos, mãos, arma, magia ou impacto.
-- [ ] Texto tem margem interna e tamanho legível.
-- [ ] Falas longas foram divididas.
-- [ ] Narração está separada de fala.
-- [ ] Onomatopeia tem intenção e não polui.
+### Continuidade
+0 contradiz anterior; 1 graves inconsistências; 2 coerente; 3 excelente herança e consequência.
 
-## 5. Narrativa
+### Balões
+0 ilegível; 1 confuso; 2 bom; 3 profissional com ordem, rabicho e espaço.
 
-- [ ] Página avança história ou aprofunda emoção.
-- [ ] Objetivo da cena está claro.
-- [ ] Existe causa e consequência.
-- [ ] Reação emocional vem depois de gatilho.
-- [ ] Final puxa a próxima página.
-- [ ] Nenhum painel parece ilustração solta.
+### Composição
+0 confusa; 1 básica; 2 boa; 3 cinematográfica.
 
-## 6. Prompt/arte de IA
+### Narrativa
+0 não avança; 1 fraca; 2 funcional; 3 forte e envolvente.
 
-- [ ] Prompt repetiu Character Lock.
-- [ ] Prompt repetiu Continuity Lock.
-- [ ] Prompt indicou espaço para balões.
-- [ ] Prompt proibiu alterações de design.
-- [ ] Resultado gerado foi comparado contra a bíblia.
-- [ ] Inconsistências foram corrigidas antes de finalizar.
+### Prompt
+0 vago; 1 genérico; 2 detalhado; 3 pronto para produção.
 
-## 7. Decisão
+## QA por escopo
 
-- Aprovado? Sim/Não:
-- Falhas encontradas:
-- Correções necessárias:
-- Próxima revisão:
+### Página
+- [ ] Objetivo claro.
+- [ ] Painel principal destacado.
+- [ ] Ritmo compatível com emoção.
+- [ ] Continuidade herdada e deixada.
+
+### Painel
+- [ ] Câmera, pose, ação e expressão claros.
+- [ ] Elemento visual principal legível.
+- [ ] Nada importante coberto.
+
+### Capítulo
+- [ ] Começo, meio, clímax e gancho.
+- [ ] Estado final exportado.
+- [ ] Promessas narrativas acompanhadas.
+
+### Volume/arco
+- [ ] Evolução do protagonista.
+- [ ] Conflito cresce.
+- [ ] Consequências permanentes.
+
+### Manhwa vertical
+- [ ] Scroll respira.
+- [ ] Impacto após pausa.
+- [ ] Balões topo→baixo.
+
+### Mangá tradicional
+- [ ] Ordem de leitura clara.
+- [ ] Gutters e hierarquia.
+- [ ] PB/retícula/contraste com função.
+
+## Tabela de QA
+| Item | Personagem | Continuidade | Balões | Composição | Narrativa | Prompt | Média | Passa? |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+
+## Exemplo Lua de Ferro p.4
+Personagem 3; Continuidade 3; Balões 2.5; Composição 2.8; Narrativa 2.8; Prompt 3; Média 2.85; Passa.
+
+## Correção
+Se qualquer categoria <2, reescrever roteiro/prompt antes de prosseguir. Não maquiar pontuação.

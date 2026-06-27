@@ -1,179 +1,97 @@
 ---
 name: mangamanhwa-creation-continuity-skill
-description: Use when creating, adapting, storyboarding, prompting, lettering, or QA-reviewing manga/manhwa/webtoon pages. Enforces visual continuity, character lock, scene maps, panel scripts, bubble placement, image prompts, and professional page review before final output.
-version: 1.0.0
+description: Use when creating, adapting, planning, prompting, lettering, QA-reviewing, or producing complete manga/manhwa/webtoon works. Professional Full Production Mode enforces series bible, arc/volume/chapter planning, character lock, continuity bible, scene maps, page/panel scripts, bubble placement, prompt chaining, scoring QA, and production readiness before claiming readiness.
+version: 2.0.0
 author: Hermes Agent
 license: MIT
 metadata:
   hermes:
-    tags: [manga, manhwa, webtoon, comics, continuity, storyboard, image-prompts, lettering]
-    related_skills: [image-generation-fallback, novel-site-brasil]
+    tags: [manga, manhwa, webtoon, comics, continuity, full-production, storyboard, image-prompts, lettering, qa]
+    related_skills: [image-generation-fallback, novel-site-brasil, manga-cover-generation]
 ---
+# MangaManhwa_Creation_Continuity_Skill — Professional Full Production Mode
 
-# MangaManhwa_Creation_Continuity_Skill
+## Overview
 
-## Objetivo
+Esta skill transforma o Hermes em um estúdio interno de produção de mangá, manhwa, webtoon e HQ original. Ela não é apenas uma lista de dicas: é um processo obrigatório de produção completa com bíblia de obra, planejamento de arcos/volumes/capítulos, travamento visual de personagens, continuidade viva, mapas de cena, roteiro visual, painéis, balões, prompts encadeados e QA com pontuação.
 
-Criar mangás, manhwas, webtoons e histórias em quadrinhos originais com continuidade profissional. Esta skill impede o erro clássico de IA — o protagonista mudar de rosto, cabelo, roupa, corpo, idade ou personalidade a cada página — exigindo bíblia visual, mapa de cena, roteiro de página, roteiro de painel, posicionamento de balões e revisão antes de qualquer geração de imagem.
+Use referências reais apenas como estudo técnico temporário. Nunca copie personagens, nomes, poses específicas, falas, páginas, layouts protegidos ou artes. A saída deve ser original.
 
-A skill foi construída a partir de estudo técnico do corpus de mangás/manhwas disponíveis no Tomoverso: 172 obras mapeadas, 103 com páginas visíveis, 15.076 capítulos, 262.242 páginas, com amostragem visual de 154 páginas reais de 18 obras representativas. O estudo identificou dois macroformatos dominantes: mangá tradicional em páginas PB com grade de painéis e manhwa/webtoon vertical colorido com blocos de rolagem, pausas e impactos espaçados.
-
-## Quando usar
+## When to Use
 
 Use quando o usuário pedir:
 
-- criar mangá, manhwa, webtoon ou HQ;
-- transformar novel/roteiro/capítulo em quadrinhos;
-- criar storyboard, roteiro visual, página ou painel;
-- gerar prompts de imagem para páginas/painéis sequenciais;
-- corrigir continuidade visual;
-- posicionar balões, onomatopeias ou caixas de narração;
-- revisar páginas de quadrinho geradas por IA.
+- criar mangá, manhwa, webtoon, HQ, capítulo ou volume;
+- transformar novel/roteiro/cena em quadrinhos;
+- criar série inteira, arco, capítulo, página, storyboard ou prompts;
+- corrigir personagem que mudou de aparência;
+- planejar balões, onomatopeias, leitura ou letreiramento;
+- revisar continuidade entre painéis, páginas, capítulos ou arcos;
+- validar se uma produção está pronta.
 
-Não use para copiar páginas, personagens, poses, falas ou designs protegidos. Use referências apenas para aprender estrutura, ritmo, continuidade, composição e letramento.
+Não use para copiar obra existente, reproduzir arte protegida, fazer apenas capas estáticas, ou quando o usuário só quer resumo textual sem narrativa visual.
 
-## Entradas necessárias
+## Operating Modes
 
-Se o usuário não fornecer tudo, inferir o mínimo e declarar premissas. Para produção profissional, reunir:
+1. **Full Production Mode** — obra inteira: Series Bible → arcos → volumes → capítulos → páginas → painéis → prompts → QA.
+2. **Chapter Mode** — um capítulo completo com continuidade herdada e estado final.
+3. **Page Mode** — uma página isolada, mas ainda exige Character Bible e Continuity Bible.
+4. **Prompt Mode** — prompts de imagem consistentes por painel/página; nunca usar prompt vago.
+5. **Lettering Mode** — balões, narração, onomatopeia e ordem de leitura.
+6. **Continuity Repair Mode** — detectar drift visual/narrativo e corrigir ficha, roteiro ou prompt.
+7. **Review Mode** — pontuar página/capítulo com QA 0-3.
 
-1. Título, gênero, tom e público-alvo.
-2. Formato: mangá tradicional, manhwa vertical, webtoon, HQ horizontal ou híbrido.
-3. Idioma e direção de leitura: direita→esquerda, esquerda→direita ou vertical topo→baixo.
-4. Sinopse, objetivo do capítulo, resumo anterior e estado atual da continuidade.
-5. Character Bible dos personagens principais e secundários.
-6. Continuity Bible da cena atual.
-7. Quantidade de páginas ou blocos de rolagem.
-8. Estilo visual desejado, paleta, nível de cor/PB e acabamento.
-9. Restrições: violência, romance, humor, censura, idade, plataforma.
+## Mandatory Workflow
 
-## Processo obrigatório
+1. **Load or create Series Bible.** Done when título, formato, gênero, tema, mundo, regras, estética, público e limites estão definidos.
+2. **Load or create Character Bible.** Done when every recurring character has visual lock, narrative lock, clothes, props, wounds and negative prompt.
+3. **Load or create Continuity Bible.** Done when current chapter/page/scene state is explicit: location, time, weather, lighting, positions, injuries, objects, emotions and promises.
+4. **Plan arc/volume/chapter if scope requires it.** Done when every chapter has objective, conflict, turn, climax and hook.
+5. **Create Scene Map.** Done when spatial relationships, entrances, exits, obstacles and camera axis are clear.
+6. **Write Page Script.** Done when every page has purpose, emotion, panel count, composition, reading order, inherited continuity and outgoing continuity.
+7. **Write Panel Script.** Done when every panel has camera, action, pose, expression, background, bubble plan and prompt.
+8. **Plan Bubble Placement before final image.** Done when no text covers faces, hands, weapons, impact, magic, expression or key clue.
+9. **Generate/prepare Image Prompts.** Done when prompts include Character Lock, Continuity Lock, Scene Lock, style, bubble-safe zones and negatives.
+10. **Run QA scoring.** Done only when every category passes minimum thresholds.
+11. **Export state for next page/chapter.** Done when the next generation can continue without guessing.
 
-1. **Entender a obra.** Definir gênero, tom, formato, direção de leitura e promessa emocional. Concluído quando a página/capítulo tem objetivo dramático claro.
-2. **Criar ou carregar Character Bible.** Nenhum personagem importante pode entrar sem ficha visual fixa. Concluído quando cada personagem tem aparência, roupa, silhueta, acessórios, fala e estado emocional.
-3. **Criar ou carregar Continuity Bible.** Registrar local, hora, clima, ferimentos, objetos, posições e última ação. Concluído quando a próxima página pode continuar a anterior sem reiniciar a cena.
-4. **Criar Scene Map.** Mapear espaço físico e eixo de câmera. Concluído quando se sabe onde cada personagem está e para onde se move.
-5. **Dividir capítulo em páginas/blocos.** Cada página deve avançar a história. Concluído quando cada página tem objetivo, emoção e gancho.
-6. **Dividir páginas em painéis.** Definir enquadramento, câmera, ação, emoção, fundo e transição. Concluído quando a página pode ser desenhada sem adivinhar.
-7. **Planejar balões.** Definir texto, ordem, formato, rabicho, posição e área livre. Concluído quando nenhum balão cobre rosto, mão, arma, impacto ou expressão-chave.
-8. **Criar prompts de imagem.** Usar fichas travadas, continuidade herdada e negativos de consistência. Concluído quando cada prompt força “mesmo personagem, mesma roupa, mesmo cenário, continuação direta”.
-9. **Revisar coerência.** Aplicar QA checklist. Concluído apenas quando continuidade, composição, balões e narrativa passam.
-10. **Corrigir antes de entregar.** Se falhar, reescrever roteiro/prompt/balão antes da arte final.
+## Absolute Rules
 
-## Sistemas obrigatórios
+- Never generate art before visual script.
+- Never introduce recurring characters without Character Bible.
+- Never continue a scene without Continuity Bible.
+- Next page inherits previous page state unless an explicit transition exists.
+- Next chapter inherits unresolved state unless recap/time skip explains change.
+- Never change face, hair, age, body, eyes, outfit, weapon, scar, injury or personality without a written reason.
+- Never let bubbles cover important faces, hands, weapons, impacts, magic, clues or emotional expressions.
+- Never add random characters or remove present characters without blocking/staging.
+- Never use vague prompts such as “same character, manga style”. Use full lock blocks.
+- Never claim production readiness until `PRODUCTION_READINESS_GATE.md` passes.
 
-### Character Lock System
+## Output Contracts
 
-Todo personagem recorrente precisa ter uma ficha visual e narrativa travada. Em cada página, compare o desenho/prompt com a ficha:
+For full work: Series Bible, Character Bible, Continuity Bible, arc plan, volume plan, chapter plan, page scripts, panel scripts, bubble scripts, prompts, QA tables, final state.
 
-- mesmo rosto, idade aparente, cabelo, olhos, corpo, pele e silhueta;
-- mesma roupa atual, acessórios, arma e marcas;
-- ferimentos permanecem até cura explícita;
-- pose e expressão combinam com personalidade e estado emocional;
-- fala combina com forma de falar do personagem;
-- personagem parece a mesma pessoa em close, meio corpo e corpo inteiro.
+For page: inherited state, objective, layout, panels, bubbles, prompt(s), QA, outgoing state.
 
-### Continuity Bible
+For review: failures, severity, correction, revised prompt/script, score before/after.
 
-Registro vivo que acompanha capítulo, cena, página e painel. Deve guardar:
+## Key Files
 
-- personagens vivos/presentes/ausentes;
-- roupa atual, ferimentos, objetos carregados e perdas;
-- local, hora, clima, iluminação e destruição;
-- posição espacial dos personagens;
-- direção de movimento e eixo de câmera;
-- última ação, última fala, última emoção e próxima ação lógica;
-- consequências permanentes.
+- `MangaManhwa_Creation_Continuity_Skill.md` — manual principal.
+- `FULL_PRODUCTION_PIPELINE.md` — pipeline completa.
+- `PRODUCTION_READINESS_GATE.md` — critérios para dizer que está pronto.
+- `SERIES_BIBLE_TEMPLATE.md`, `ARC_PLANNING_TEMPLATE.md`, `VOLUME_PLANNING_TEMPLATE.md`, `CHAPTER_PLANNING_TEMPLATE.md` — planejamento macro.
+- `CHARACTER_BIBLE_TEMPLATE.md`, `VISUAL_CONTINUITY_LOCK.md` — identidade visual/narrativa.
+- `CONTINUITY_BIBLE_TEMPLATE.md`, `SCENE_MAP_TEMPLATE.md` — continuidade viva.
+- `PAGE_SCRIPT_TEMPLATE.md`, `PANEL_SCRIPT_TEMPLATE.md`, `STORYBOARD_WORKFLOW.md` — storyboard.
+- `BUBBLE_PLACEMENT_RULES.md` — letramento.
+- `IMAGE_PROMPT_TEMPLATE.md`, `PROMPT_CHAINING_WORKFLOW.md` — prompts.
+- `QA_CHECKLIST.md`, `ANTI_ERRORS.md` — revisão.
+- `MANGA_FORMAT_RULES.md`, `MANHWA_VERTICAL_RULES.md` — formatos.
+- `ADAPT_NOVEL_TO_MANGA_WORKFLOW.md` — adaptação.
+- `*_TEST.md` — testes originais “Lua de Ferro”.
 
-### Scene Continuity Map
+## Readiness Rule
 
-Mapa espacial da cena. Use especialmente em lutas, perseguições e diálogos com vários personagens. Deve responder:
-
-- onde cada personagem está no ambiente;
-- quem olha para quem;
-- quem está perto/longe;
-- que objetos estão entre eles;
-- qual parede/porta/rua/janela foi mostrada;
-- o que quebrou, caiu, queimou, molhou ou mudou;
-- de onde a câmera está olhando.
-
-### Bubble Placement System
-
-Balões são parte da direção de cena, não decoração. Para cada balão, definir:
-
-- falante;
-- tipo: fala normal, grito, pensamento, sussurro, narração, interrupção, medo, rádio/telefone;
-- texto e quebras de linha;
-- posição no painel;
-- rabicho apontando para a boca/rosto correto;
-- ordem de leitura;
-- zona proibida: rosto, olhos, mão importante, arma, impacto, magia, expressão, pista visual.
-
-## Regras finais absolutas
-
-1. Nunca gerar página sem roteiro visual antes.
-2. Nunca gerar personagem sem ficha visual fixa.
-3. Nunca continuar cena sem consultar continuidade.
-4. Nunca mudar aparência, roupa, idade, cabelo, olhos ou proporções sem motivo narrativo.
-5. Nunca apagar ferimento, sujeira, sangue, arma quebrada ou cenário destruído sem transição.
-6. Nunca trocar cenário, hora do dia ou clima sem passagem de tempo.
-7. Nunca colocar balão cobrindo rosto, expressão, golpe, arma ou mão importante.
-8. Nunca quebrar a ordem de leitura.
-9. Nunca adicionar personagem aleatório.
-10. Nunca ignorar personagem presente na cena anterior.
-11. Nunca gerar imagem que pareça de outra obra.
-12. Nunca finalizar sem QA de continuidade, balões, composição e narrativa.
-
-## Fluxo futuro de resposta
-
-Quando solicitado a criar manga/manhwa, responder primeiro com:
-
-A. Bíblia da obra — premissa, tom, mundo, regras visuais.  
-B. Bíblia dos personagens — protagonistas, aliados, rivais, vilões.  
-C. Planejamento do capítulo — cenas, clímax, gancho.  
-D. Roteiro visual — páginas, painéis, falas, balões, enquadramentos.  
-E. Prompts de imagem — um por página ou painel, com continuidade explícita.  
-F. Revisão final — checklist e correções.
-
-## Arquivos de apoio
-
-- `RELATORIO_ESTUDO_MANGAS_MANHWAS.md` — estudo técnico do corpus Tomoverso.
-- `STYLE_GUIDE.md` — regras visuais e narrativas extraídas do estudo.
-- `CHARACTER_BIBLE_TEMPLATE.md` — ficha visual/narrativa fixa.
-- `CONTINUITY_BIBLE_TEMPLATE.md` — continuidade de capítulo/cena/página.
-- `SCENE_MAP_TEMPLATE.md` — mapa espacial e emocional da cena.
-- `PAGE_SCRIPT_TEMPLATE.md` — roteiro de página/bloco vertical.
-- `PANEL_SCRIPT_TEMPLATE.md` — roteiro de painel.
-- `BUBBLE_PLACEMENT_RULES.md` — regras de balões e letramento.
-- `IMAGE_PROMPT_TEMPLATE.md` — template de prompts com Character Lock.
-- `QA_CHECKLIST.md` — aprovação obrigatória.
-- `ANTI_ERRORS.md` — erros proibidos.
-- `MANGA_FORMAT_RULES.md` — mangá tradicional.
-- `MANHWA_VERTICAL_RULES.md` — manhwa/webtoon vertical.
-- `EXAMPLES.md` — exemplos práticos.
-
-
-## Common Pitfalls
-
-1. **Gerar arte antes do roteiro.** Isso produz imagens bonitas mas desconectadas. Corrija criando Page Script e Panel Script antes do prompt.
-2. **Confiar em “same character”.** Modelos de imagem não preservam identidade só com essa frase. Corrija repetindo Character Lock completo em todo prompt.
-3. **Ignorar estado físico.** Feridas, suor, roupa rasgada e objetos são continuidade. Corrija atualizando Continuity Bible após cada ação.
-4. **Balões depois da arte sem área reservada.** Isso causa rostos cobertos. Corrija planejando Bubble Script antes do prompt.
-5. **Luta sem mapa.** Vira colagem de golpes. Corrija com Scene Map e sequência intenção→movimento→impacto→consequência.
-6. **Manhwa sem respiro.** Scroll colado perde impacto. Corrija marcando espaços verticais antes/depois de revelações.
-7. **Mangá PB sem hierarquia.** Todos os painéis iguais achatam ritmo. Corrija definindo painel dominante e gutters.
-8. **Copiar referência.** Referência é estudo técnico, não molde literal. Corrija criando personagens, cenas e composições originais.
-
-## Verification Checklist
-
-Antes de dizer que uma página/capítulo/skill está pronto:
-
-- [ ] Character Bible existe para todos os recorrentes.
-- [ ] Continuity Bible está atualizada com roupa, ferimentos, objetos e local.
-- [ ] Scene Map existe quando há luta, movimento ou múltiplos personagens.
-- [ ] Page Script define objetivo, emoção, painéis e gancho.
-- [ ] Panel Script define câmera, ação, composição e continuidade.
-- [ ] Bubble Script define posição, ordem, rabicho e área proibida.
-- [ ] Image Prompt inclui Character Lock, Continuity Lock, Scene Map e negativos.
-- [ ] QA_CHECKLIST foi aplicado.
-- [ ] Erros de ANTI_ERRORS não aparecem.
-- [ ] Resultado é original e não copia página/personagem protegido.
+Só declare prontidão se a skill carrega no Hermes, todos os arquivos existem, testes originais passam média >=2.6, não há temporários/imagens/segredos, e o commit local foi feito.

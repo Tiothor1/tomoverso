@@ -1,48 +1,31 @@
-# Page Script Template
+# Arc Planning Template
 
 ## Campos obrigatórios
+- Nome do arco:
+- Premissa do arco:
+- Objetivo:
+- Conflito central:
+- Antagonista/obstáculo:
+- Evolução do protagonista:
+- Evolução dos secundários:
+- Revelações:
+- Lutas/eventos importantes:
+- Virada emocional:
+- Consequência final:
+- Gancho para próximo arco:
+- Mudanças visuais permanentes:
 
-- Obra:
-- Capítulo:
-- Página/bloco:
-- Formato:
-- Direção de leitura:
-- Função narrativa:
-- Emoção dominante:
-- Ritmo: lento/médio/rápido/impacto:
-- Continuidade herdada:
-- Personagens presentes:
-- Cenário:
-- Quantidade de painéis/blocos:
-- Composição geral:
-- Falas principais:
-- Balões planejados:
-- Onomatopeias:
-- Espaços de respiro:
-- Transição para próxima página:
-- Continuidade deixada:
-- QA esperado:
-
-## Instruções
-
-1. Defina a função da página antes de qualquer painel.
-2. A página precisa avançar história, emoção, relação ou informação.
-3. Em manhwa, pensar em blocos de scroll; em mangá, pensar em virada/grade.
-4. Escrever a saída de continuidade para a próxima página.
-
-## Exemplo preenchido — Lua de Ferro p.2 tradicional
-Função: revelar que a forja foi sabotada. Emoção: suspeita virando urgência. 5 painéis, leitura direita→esquerda. Continuidade herdada: Ícaro com corte no antebraço esquerdo, Nara atrás dele, sino lunar tocando. Painel dominante no meio: bigorna rachada emitindo luz azul. Balões no topo dos painéis, sem cobrir o corte nem a rachadura. Página termina com Caio surgindo na saída sul.
+## Exemplo Lua de Ferro — Arco do Sino Rachado
+Ícaro aprende que o ferro lunar registra memórias de sangue. Conflito: Vespera quer acordar o sino. Evolução: Ícaro deixa de esconder a lâmina quebrada e aceita comandá-la. Consequência: a forja é marcada por rachadura azul permanente.
 
 ## Checklist
-- [ ] Página tem objetivo claro.
-- [ ] Herda estado anterior.
-- [ ] Deixa estado para próxima.
-- [ ] Ordem de leitura explícita.
-- [ ] Balões planejados antes do prompt.
-- [ ] Painel principal identificado.
+- [ ] Arco muda protagonista.
+- [ ] Conflito escala.
+- [ ] Revelações têm preparação.
+- [ ] Consequências afetam capítulos seguintes.
 
 ## Erros comuns
-Página bonita mas sem função; muitos painéis iguais; sem saída de continuidade; fala demais; painel principal sem destaque.
+Arco só sequência de lutas; antagonista sem objetivo; evolução visual sem registro.
 
 ---
 

@@ -1,100 +1,51 @@
-# EXAMPLES
+# Exemplos Profissionais
 
-Exemplos de uso da skill. São modelos originais; não copiar cenas/páginas existentes.
+## Exemplo 1 — Página de diálogo
 
-## 1. Página de diálogo — mangá tradicional
+Contexto: Ícaro, Nara e Caio na forja. Continuidade herdada: corte no antebraço de Ícaro, bigorna rachada, noite azul.
 
-**Formato:** PB, direita→esquerda, 5 painéis.  
-**Objetivo:** protagonista decide enfrentar o rival.  
-**Continuidade herdada:** corredor destruído, protagonista com manga rasgada e corte no rosto, rival à direita.
+Página: 5 painéis. P1 plano geral orienta três posições. P2 close Nara sussurrando “O mapa não mentiu.” P3 Ícaro olha para a bigorna, balão pequeno: “Então alguém abriu por dentro.” P4 Caio interrompe em grito, balão irregular no alto esquerdo: “Chega!” P5 silêncio: mão de Vespera toca o sino fora de quadro.
 
-### Page Script
+Prompt: incluir todos os locks, forja azul, áreas limpas no topo dos painéis, sem texto embutido. QA: personagem 3, continuidade 3, balões 2.7, composição 2.7, narrativa 2.8, prompt 3.
 
-1. **Painel 1 — plano geral:** corredor com lâmpadas quebradas. Protagonista à esquerda, rival à direita. Balão do rival no topo direito: “Ainda vai fugir?”
-2. **Painel 2 — close no protagonista:** olho tremendo, sangue no rosto. Sem fala.
-3. **Painel 3 — detalhe:** mão do protagonista apertando espada rachada.
-4. **Painel 4 — meio-corpo do rival:** sorriso confiante. Balão: “Você sempre escolhe tarde demais.”
-5. **Painel 5 — painel largo:** protagonista ergue a espada. Balão pequeno: “Hoje não.”
+Continuidade deixada: Vespera está prestes a entrar; Caio bloqueia a saída.
 
-### QA esperado
+## Exemplo 2 — Página de luta
 
-- Corte no rosto aparece em todos os closes.
-- Espada continua rachada.
-- Rival permanece à direita até mudança de câmera.
-- Balões não cobrem olhos nem espada.
+Continuidade herdada: Caio bloqueia sul; Ícaro centro; brasas no chão. 6 painéis. Sequência: postura → avanço → defesa → contra-ataque → dano → consequência. Balões mínimos. Onomatopeia diagonal acompanha lâmina. Não cobrir arma, mãos ou ferimento.
 
-## 2. Página de luta — mangá tradicional
+## Exemplo 3 — Página dramática
 
-**Formato:** PB, 4 painéis, ação rápida.
+3 painéis. P1 close do curativo sangrando. P2 rosto de Ícaro quase sem fundo. P3 painel grande com lua refletida na lâmina quebrada. Falas curtas: “Eu ouvi.” “Ela ainda vive.” Espaço vazio alto para peso.
 
-1. Plano médio estabelece distância.
-2. Pé do atacante avança; linhas de velocidade.
-3. Painel diagonal grande: golpe cruza a página com SFX.
-4. Consequência: defensor recua, parede racha, sangue no ombro.
+## Exemplo 4 — Página de comédia
 
-**Regra aplicada:** intenção → movimento → impacto → consequência.
+4 painéis. Nara tenta explicar mecanismo; Ícaro entende errado; Caio reage em mini-deformação cômica permitida; retorno ao modelo normal no painel final. Regra: chibi/deformação só por um painel e registrada como variação temporária.
 
-## 3. Página dramática
+## Exemplo 5 — Página de romance/sutileza
 
-1. Chuva no chão, sem personagem.
-2. Close na mão segurando carta molhada.
-3. Rosto da personagem; olhos vermelhos, boca fechada.
-4. Balão pequeno: “Eu esperei.”
-5. Painel silencioso da carta rasgando.
+2 personagens, distância física pequena, mãos quase tocando mapa, blush leve, fala contida. Não transformar em exagero se o tom for aventura sombria. Balões pequenos e silêncio visual.
 
-**Regra aplicada:** objeto + silêncio + frase curta = drama.
+## Exemplo 6 — Revelação
 
-## 4. Página de comédia
+Fim de página: sombra de Vespera; página seguinte: máscara rachada em close. Regra: preparar com som/objeto antes de mostrar rosto.
 
-1. Personagem declara: “Meu plano é perfeito.”
-2. Painel pequeno mostra o plano escrito de cabeça para baixo.
-3. Reação deformada do grupo.
-4. Grito pontiagudo: “VOCÊ NEM LEU?!”
-5. Retorno ao modelo normal com vergonha.
+## Exemplo 7 — Manhwa vertical
 
-**Regra aplicada:** deformação temporária não altera Character Lock permanente.
+Bloco 1: corredor longo. Respiro branco. Bloco 2: olho de Ícaro. Balão: “Acordou?” Bloco 3: sino lunar gigante. Respiro preto. Bloco 4: Vespera: “Parabéns.” Cliffhanger.
 
-## 5. Página de revelação
+## Exemplo 8 — Mangá tradicional
 
-1. Plano de sala aparentemente normal.
-2. Close em relógio parado.
-3. Personagem nota poeira formando símbolo.
-4. Espaço silencioso.
-5. Painel grande: sombra atrás dele. Balão: “Você voltou.”
+Página PB R→L com 5 painéis: orientação, diálogo, close, ação pequena, gancho. Hachura no corredor; retícula na lua; preto sólido atrás de Vespera.
 
-**Regra aplicada:** preparar pista antes da revelação.
+## Exemplo 9 — Capítulo curto completo
 
-## 6. Bloco vertical manhwa — ação
+6 páginas: p1 chegada à forja; p2 sabotagem; p3 confronto; p4 luta curta; p5 revelação de Vespera; p6 gancho do sino vivo. Cada página exporta estado para a próxima.
 
-**Formato:** colorido, topo→baixo.
+## Exemplo 10 — Continuidade entre duas páginas
 
-1. Bloco de localização: telhado à noite, chuva, neon azul.
-2. Respiro escuro.
-3. Protagonista pousa no telhado, capa rasgada do capítulo anterior.
-4. Balão no espaço vazio: “Cheguei tarde?”
-5. Close do vilão, aura vermelha consistente.
-6. Longo respiro vertical.
-7. Ataque desce em diagonal com SFX integrado.
-8. Consequência: chão rachado, protagonista protegendo braço ferido.
+P3 termina com Ícaro segurando lâmina na mão direita e curativo sangrando. P4 começa com close da mesma mão direita + curativo esquerdo visível no canto. Proibido trocar mão ou curar ferida.
 
-### Prompt resumido
+## Exemplo 11 — Continuidade entre capítulos
 
-```text
-Full-color vertical manhwa scroll block. Continue from previous scene on rainy rooftop at night. Protagonist same face, black short hair, torn dark cape, cut on left cheek, injured right forearm, holding cracked sword in right hand. Villain same red aura, white coat, golden eyes. Preserve rain, neon blue lighting, rooftop tiles. Leave empty space above protagonist for bubble. No changed outfit, no healed wounds, no random characters, no text baked into bubbles.
-```
-
-## 7. Bubble Script exemplo
-
-| Ordem | Painel | Falante | Texto | Tipo | Posição | Não cobrir |
-|---|---|---|---|---|---|---|
-| 1 | 1 | Rival | Ainda vai fugir? | normal | topo direito | rosto do rival |
-| 2 | 4 | Rival | Você sempre escolhe tarde demais. | normal | superior | sorriso |
-| 3 | 5 | Protagonista | Hoje não. | baixo esquerdo | espada e olhos |
-
-## 8. Mini QA aplicado
-
-- [x] Personagem mantém roupa/ferimento.
-- [x] Cenário continua.
-- [x] Balões seguem leitura.
-- [x] Cada painel tem função.
-- [x] Último painel puxa próxima ação.
+Cap.1 termina com Vespera tocando sino. Cap.2 abre com mesmo corredor, mesma noite, personagens nas mesmas posições, mas 3 segundos depois. Se abrir em outro local, precisa de caixa: “Três horas antes” ou transição clara.

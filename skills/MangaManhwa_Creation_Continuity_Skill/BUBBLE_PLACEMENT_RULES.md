@@ -1,84 +1,66 @@
-# BUBBLE_PLACEMENT_RULES
+# Bubble Placement System — Regras Avançadas
 
-Balão é coreografia de leitura. Ele define tempo, voz e direção do olhar. Planeje balões antes da arte final.
+## Princípio
 
-## 1. Ordem de leitura
+Balões são coreografia de leitura. Eles devem guiar o olhar, revelar ritmo e preservar arte importante.
 
-### Mangá tradicional JP — direita→esquerda
+## Ordem de leitura
 
-- Primeiro balão tende a ficar no topo direito do primeiro painel.
-- Balões à direita são lidos antes dos à esquerda quando estão na mesma faixa vertical.
-- Evite rabichos cruzando a página contra o fluxo.
-- Se adaptar para PT-BR mantendo arte JP, respeitar fluxo original ou redesenhar layout.
+- Mangá direita→esquerda: balão superior direito antes do superior esquerdo; seguir zigue-zague coerente.
+- HQ/mangá ocidental esquerda→direita: superior esquerdo antes do direito.
+- Manhwa/webtoon: topo→baixo; nunca obrigar o leitor a voltar para cima.
 
-### HQ/mangá ocidental — esquerda→direita
+## Hierarquia
 
-- Primeiro balão no topo esquerdo.
-- Balões seguem ziguezague natural sem cruzar focos importantes.
-- O último balão pode conduzir para o próximo painel.
+1. Narração/contexto.
+2. Fala que inicia ação.
+3. Resposta/reação.
+4. Pensamento interno.
+5. Onomatopeia/efeito.
 
-### Manhwa/Webtoon — topo→baixo
+Quebre a hierarquia quando o objetivo for surpresa, mas deixe visualmente claro.
 
-- Cada balão deve aparecer depois do elemento visual que o contextualiza.
-- Balões podem ocupar espaços brancos/pretos entre blocos.
-- Revelações funcionam melhor após pausa vertical.
-- Falas muito longas devem ser quebradas em blocos separados.
+## Tipos
 
-## 2. Tipos de balão
+- Normal: oval limpo, rabicho claro.
+- Grito: borda irregular, fonte maior, menos palavras.
+- Pensamento: nuvem ou balão sem rabicho direto; diferenciar da fala.
+- Sussurro: menor, borda pontilhada/suave, próximo ao personagem.
+- Narração: caixa retangular; não competir com diálogo.
+- Interrupção: balão cortado ou traço interrompido.
+- Medo/fraqueza: borda tremida, texto curto.
+- Onomatopeia: integrada à direção da ação, não jogada aleatoriamente.
 
-| Tipo | Uso | Forma | Cuidado |
-|---|---|---|---|
-| Normal | fala comum | oval/arredondado | manter rabicho claro |
-| Grito | raiva, choque, dor | borda pontiaguda | não usar para toda fala intensa |
-| Pensamento | monólogo interno | nuvem/pontilhado | diferenciar de fala real |
-| Sussurro | fala baixa | menor/suave | aproximar do falante |
-| Medo/tremor | pânico | borda irregular | não prejudicar legibilidade |
-| Narração | contexto | caixa retangular | sem rabicho |
-| Off-panel | falante fora do quadro | balão na borda | identificar direção |
-| SFX | som/impacto | letras integradas | não cobrir impacto principal |
+## Áreas proibidas
 
-## 3. Zonas proibidas
+Nunca cobrir: olhos, boca em fala emocional, mão segurando objeto, arma, golpe, explosão, ferimento, pista visual, expressão-chave, silhueta de revelação, rosto do protagonista em momento decisivo.
 
-Nunca cobrir:
+## Divisão de fala
 
-1. Olhos em close.
-2. Rosto em emoção importante.
-3. Boca quando a fala/expressão importa.
-4. Mãos em ação.
-5. Arma, magia, golpe ou objeto-chave.
-6. Ponto de impacto.
-7. Pista visual de mistério.
-8. Silhueta que identifica personagem.
-9. Direção de movimento.
-10. Elemento de cenário que localiza a cena.
+- Até 12 palavras: um balão.
+- 13-24: dividir em 2 balões se houver pausa natural.
+- 25+: transformar parte em narração, reação ou outro painel.
+- Evite monólogos longos em painel de ação.
 
-## 4. Quebra de texto
+## Layouts de exemplo
 
-- Ação rápida: 1–8 palavras por balão.
-- Diálogo normal: 6–18 palavras.
-- Drama: poucas palavras, muito respiro.
-- Explicação longa: dividir em balões + reação visual.
-- Nunca resolver página inteira em blocos de texto.
+### Diálogo 2 personagens
+Painel médio com A à direita e B à esquerda. Em mangá R→L: fala de A no alto direito, resposta de B no alto esquerdo, reação/pausa no rodapé. Rabichos não cruzam rostos.
 
-## 5. Rabicho
+### Três personagens
+Use triângulo visual: personagem dominante recebe balão superior; secundários falam em sequência acompanhando posição espacial. Se a ordem de fala não bate com posição, reposicionar personagens no roteiro.
 
-- Aponta para boca/cabeça do falante.
-- Não atravessa outro balão.
-- Não aponta para personagem errado.
-- Se dois personagens estão próximos, aproximar balão do falante correto.
-- Se falante está fora do painel, usar balão off-panel com direção clara.
+### Manhwa vertical
+Balão 1 no topo em espaço branco; imagem/reação; balão 2 abaixo da reação; respiro; impacto. Nunca amontoar 4 balões no mesmo bloco se o scroll pede pausa.
 
-## 6. Bubble Script
+## Checklist
+- [ ] Ordem de leitura inequívoca.
+- [ ] Rabicho aponta para falante correto.
+- [ ] Balão não cobre área proibida.
+- [ ] Texto cabe com margem interna.
+- [ ] Falas longas divididas.
+- [ ] Formato do balão combina com tom.
+- [ ] Silêncio visual preservado quando necessário.
 
-| Ordem | Painel | Falante | Texto | Tipo | Posição | Rabicho | Justificativa | Não cobrir |
-|---|---|---|---|---|---|---|---|---|
-| 1 | | | | | | | | |
-
-## 7. QA de letramento
-
-- [ ] Dá para ler sem voltar atrás?
-- [ ] O falante é inequívoco?
-- [ ] Texto cabe com margem interna?
-- [ ] A fala soa natural no idioma?
-- [ ] Há respiro suficiente?
-- [ ] Nenhum balão cobre informação crítica?
+## Erros comuns
+Balões em cima do rosto, texto longo demais, rabicho cruzando painel, fala fora de ordem, pensamento parecendo fala, onomatopeia cobrindo ação.

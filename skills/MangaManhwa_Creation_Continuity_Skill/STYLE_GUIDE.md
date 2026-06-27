@@ -1,54 +1,48 @@
-# STYLE_GUIDE
+# Style Guide Profissional
 
-## Princípio central
+## Estilos suportados
 
-A página precisa ser lida antes de ser admirada. Beleza sem sequência é ilustração solta; mangá/manhwa profissional é continuidade visual + ritmo + clareza.
+### Mangá PB tradicional
+Traço expressivo, contraste preto/branco, hachuras, retículas, speed lines, onomatopeias integradas, páginas com grade variável e leitura definida. Use para ação, esporte, drama psicológico, comédia e horror.
 
-## Estilo por formato
+### Manhwa/webtoon colorido
+Cor digital, gradientes, glow, fundos atmosféricos, scroll vertical, pausas grandes e impacto escalonado. Use para fantasia, ação, romance, dungeon, murim, sobrenatural e drama mobile.
 
-### Mangá tradicional
+### Anime/light novel híbrido
+Personagens limpos, foco em expressão, cor suave, fundos simplificados. Use para capítulos ilustrados e adaptação de novel.
 
-- Normalmente PB, alto contraste e retícula/hachura.
-- Página vertical com grade de painéis.
-- Usar variação de painel: abertura, reação, detalhe, ação, impacto, consequência.
-- Manter gutters claros para guiar leitura.
-- Em ação, diagonais e quadros inclinados aceleram o ritmo.
-- Em drama, painéis estreitos e close-ups seguram a leitura.
+## Regras de paleta
 
-### Manhwa/webtoon vertical
+- Definir paleta fixa da obra e paleta secundária por arco.
+- Personagem recorrente tem cores de assinatura que não mudam sem evento narrativo.
+- Cena noturna reduz saturação, mas mantém cor de cabelo/roupa reconhecível.
+- Magia/poder usa cor consistente por personagem/facção.
 
-- Colorido, leitura por scroll.
-- Organizar em blocos verticais: localização → diálogo/reação → impacto → respiro.
-- Usar espaço vazio como tempo narrativo.
-- Revelações devem aparecer depois de respiro vertical.
-- Ação pode ocupar segmentos altos com diagonais e efeitos.
-- Não comprimir tudo: scroll precisa respirar.
+## Regras de linha e acabamento
 
-## Guia de personagens
+- Linha grossa para silhueta/foco; linha fina para detalhe interno.
+- Em mangá PB, use preto sólido para peso dramático e retícula para tom médio.
+- Em manhwa, use sombra colorida e glow controlado; não poluir todo painel com efeitos.
 
-- Defina silhueta antes dos detalhes.
-- Cada personagem precisa de 3 âncoras visuais mínimas: cabelo/rosto, roupa/acessório, postura/paleta.
-- Protagonista deve ser reconhecível em close, meio-corpo, corpo inteiro e sombra.
-- Secundários não podem ter designs intercambiáveis; cada um precisa de contraste de rosto, cabelo, proporção ou roupa.
+## Gêneros
 
-## Guia de cenário
+- **Ação:** mapa espacial, poses legíveis, consequência física.
+- **Fantasia/isekai:** cenário estabelece regras do mundo antes do combate.
+- **Romance:** microexpressões, mãos, distância física, silêncio.
+- **Drama:** close, vazio, contraste, fala curta.
+- **Comédia:** timing, reação, deformação pontual; retornar ao modelo normal depois.
+- **Terror/suspense:** ocultação parcial, sombras, ritmo lento, revelação tardia.
+- **Escolar:** cenários reconhecíveis, uniformes consistentes, grupos posicionados.
+- **Sobrenatural:** efeitos visuais com regras fixas; não trocar cor/aura do poder.
 
-- Toda cena nova precisa de pista espacial.
-- Detalhe cenário no começo; simplifique em emoção forte.
-- Em lutas, mostrar posição antes de golpes complexos.
-- Destruição continua destruída.
-- Luz/clima/hora do dia são continuidade, não decoração.
+## Consistência visual
 
-## Guia de ritmo
+A estética de uma obra deve parecer feita por uma equipe única. Evite misturar render 3D, pintura realista, chibi e mangá dramático no mesmo capítulo sem intenção. Se usar deformação cômica, marque como variação temporária permitida na Character Bible.
 
-- Diálogo: alternar fala, reação e silêncio.
-- Luta: intenção → movimento → impacto → consequência.
-- Drama: distância → close → silêncio → frase curta.
-- Comédia: setup → quebra → reação.
-- Romance: distância física, mãos, hesitação, silêncio e microexpressão.
+## Cenário
 
-## Acabamento
+Cenário detalhado aparece no início de cena, mudança de local e momento de orientação. Cenário abstrato aparece em emoção forte, velocidade, humor ou suspensão dramática. Após dano no cenário, registrar no Scene Map.
 
-- Mangá PB: contraste, linhas de movimento, retícula, onomatopeia integrada.
-- Manhwa: cor, glow, partículas, gradiente, profundidade, foco seletivo.
-- Sempre preservar legibilidade de olhos, boca, mãos, armas e direção de ação.
+## Emoção
+
+Toda página precisa de emoção dominante. Expressões devem evoluir: neutro → dúvida → medo → decisão; não saltar para raiva extrema sem beat intermediário, salvo choque intencional.

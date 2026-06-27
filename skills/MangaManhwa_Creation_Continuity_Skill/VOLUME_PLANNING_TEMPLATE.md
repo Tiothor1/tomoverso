@@ -1,48 +1,32 @@
-# Page Script Template
+# Volume Planning Template
 
 ## Campos obrigatórios
+- Volume/temporada:
+- Capítulos incluídos:
+- Tema visual:
+- Início:
+- Desenvolvimento:
+- Midpoint:
+- Pré-clímax:
+- Clímax:
+- Resolução parcial:
+- Cliffhanger:
+- Evolução visual dos personagens:
+- Evolução de poder:
+- Mudanças de cenário:
+- Eventos permanentes:
 
-- Obra:
-- Capítulo:
-- Página/bloco:
-- Formato:
-- Direção de leitura:
-- Função narrativa:
-- Emoção dominante:
-- Ritmo: lento/médio/rápido/impacto:
-- Continuidade herdada:
-- Personagens presentes:
-- Cenário:
-- Quantidade de painéis/blocos:
-- Composição geral:
-- Falas principais:
-- Balões planejados:
-- Onomatopeias:
-- Espaços de respiro:
-- Transição para próxima página:
-- Continuidade deixada:
-- QA esperado:
-
-## Instruções
-
-1. Defina a função da página antes de qualquer painel.
-2. A página precisa avançar história, emoção, relação ou informação.
-3. Em manhwa, pensar em blocos de scroll; em mangá, pensar em virada/grade.
-4. Escrever a saída de continuidade para a próxima página.
-
-## Exemplo preenchido — Lua de Ferro p.2 tradicional
-Função: revelar que a forja foi sabotada. Emoção: suspeita virando urgência. 5 painéis, leitura direita→esquerda. Continuidade herdada: Ícaro com corte no antebraço esquerdo, Nara atrás dele, sino lunar tocando. Painel dominante no meio: bigorna rachada emitindo luz azul. Balões no topo dos painéis, sem cobrir o corte nem a rachadura. Página termina com Caio surgindo na saída sul.
+## Exemplo Lua de Ferro vol.1
+Capítulos 1-8. Início: forja sabotada. Midpoint: Caio era guarda contra Vespera, não traidor. Clímax: sino acorda sob a cidade. Cliffhanger: lua de ferro aparece rachada no céu.
 
 ## Checklist
-- [ ] Página tem objetivo claro.
-- [ ] Herda estado anterior.
-- [ ] Deixa estado para próxima.
-- [ ] Ordem de leitura explícita.
-- [ ] Balões planejados antes do prompt.
-- [ ] Painel principal identificado.
+- [ ] Volume tem curva de tensão.
+- [ ] Capítulos não repetem função.
+- [ ] Clímax responde tema.
+- [ ] Visual evolui com história.
 
 ## Erros comuns
-Página bonita mas sem função; muitos painéis iguais; sem saída de continuidade; fala demais; painel principal sem destaque.
+Volume sem midpoint; todo capítulo com mesmo ritmo; cliffhanger aleatório.
 
 ---
 

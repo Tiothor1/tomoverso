@@ -1,48 +1,42 @@
-# Page Script Template
+# Chapter Planning Template
 
 ## Campos obrigatórios
-
 - Obra:
+- Arco/volume:
 - Capítulo:
-- Página/bloco:
-- Formato:
-- Direção de leitura:
-- Função narrativa:
+- Título do capítulo:
+- Objetivo narrativo:
 - Emoção dominante:
-- Ritmo: lento/médio/rápido/impacto:
 - Continuidade herdada:
 - Personagens presentes:
-- Cenário:
-- Quantidade de painéis/blocos:
-- Composição geral:
-- Falas principais:
-- Balões planejados:
-- Onomatopeias:
-- Espaços de respiro:
-- Transição para próxima página:
-- Continuidade deixada:
-- QA esperado:
+- Local principal:
+- Conflito:
+- Virada:
+- Clímax:
+- Gancho final:
+- Número de páginas/blocos:
+- Estado final para próximo capítulo:
 
-## Instruções
+## Estrutura
+1. Abertura: orientar local/personagem/estado.
+2. Desenvolvimento: conflito cresce.
+3. Virada: informação/ação muda direção.
+4. Clímax: decisão/impacto.
+5. Consequência: dano, emoção, nova informação.
+6. Gancho: pergunta visual.
 
-1. Defina a função da página antes de qualquer painel.
-2. A página precisa avançar história, emoção, relação ou informação.
-3. Em manhwa, pensar em blocos de scroll; em mangá, pensar em virada/grade.
-4. Escrever a saída de continuidade para a próxima página.
-
-## Exemplo preenchido — Lua de Ferro p.2 tradicional
-Função: revelar que a forja foi sabotada. Emoção: suspeita virando urgência. 5 painéis, leitura direita→esquerda. Continuidade herdada: Ícaro com corte no antebraço esquerdo, Nara atrás dele, sino lunar tocando. Painel dominante no meio: bigorna rachada emitindo luz azul. Balões no topo dos painéis, sem cobrir o corte nem a rachadura. Página termina com Caio surgindo na saída sul.
+## Exemplo Lua de Ferro cap.1
+Objetivo: Ícaro descobre que a forja lunar foi sabotada por alguém que conhece seu sangue. 6 páginas. Começo: sino toca sozinho. Meio: Nara revela mapa rasgado; Caio bloqueia a saída. Clímax: Ícaro e Caio lutam e a lâmina quebrada responde ao sangue. Gancho: Vespera fala pelo sino.
 
 ## Checklist
-- [ ] Página tem objetivo claro.
-- [ ] Herda estado anterior.
-- [ ] Deixa estado para próxima.
-- [ ] Ordem de leitura explícita.
-- [ ] Balões planejados antes do prompt.
-- [ ] Painel principal identificado.
+- [ ] Capítulo herda estado anterior.
+- [ ] Todas as cenas têm função.
+- [ ] Cada página avança algo.
+- [ ] Gancho deixa continuidade clara.
+- [ ] Estado final exportado.
 
 ## Erros comuns
-Página bonita mas sem função; muitos painéis iguais; sem saída de continuidade; fala demais; painel principal sem destaque.
+Capítulo episódico sem arco; clímax sem preparação; gancho sem estado; personagens somem.
 
 ---
 

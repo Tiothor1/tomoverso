@@ -1,82 +1,47 @@
-# MANGA_FORMAT_RULES
+# Manga Tradicional — Regras de Produção
 
-Regras para mangá tradicional em páginas. Use para PB, leitura direita→esquerda ou esquerda→direita, grade de painéis e composição de página.
+## Direção de leitura
 
-## 1. Antes da página
+Defina explicitamente: direita→esquerda ou esquerda→direita. Todos os balões, movimentos e viradas devem seguir a direção escolhida.
 
-- Definir direção de leitura.
-- Definir tamanho da página e margem segura.
-- Definir quantidade de painéis.
-- Definir painel dominante.
-- Definir onde ficam balões antes da arte.
-- Definir PB/retícula/hachura/contraste.
+## Estrutura de página
 
-## 2. Tipos de página
+- 3-7 painéis para página narrativa comum.
+- 1-2 painéis para impacto, revelação ou silêncio.
+- 6-9 painéis para diálogo rápido/comédia/ação fragmentada.
+- Usar gutters claros; quebrar borda apenas com intenção.
 
-### Página de diálogo
+## PB, hachura e retícula
 
-- 4–6 painéis.
-- Abrir com plano médio ou localização.
-- Alternar falante e reação.
-- Usar detalhe de mão/objeto para subtexto.
-- Terminar em frase curta, reação ou mudança de decisão.
+- Preto sólido para medo, peso, noite, ameaça.
+- Retícula para tom médio, pele, céu, sombra suave.
+- Hachura para tensão, velocidade, volume e drama.
+- Fundo branco para pausa, choque ou humor seco.
 
-### Página de luta
+## Ação
 
-- 3–5 painéis.
-- Mostrar posição inicial.
-- Mostrar intenção do ataque.
-- Mostrar movimento em diagonal.
-- Usar painel maior para impacto.
-- Mostrar consequência no último painel.
+Sequência mínima: posição inicial → intenção → movimento → impacto → consequência. Onomatopeia acompanha direção do golpe. Nunca esconder mão/arma em golpe decisivo.
 
-### Página dramática
+## Drama
 
-- 2–5 painéis.
-- Close nos olhos, boca ou mãos.
-- Fundo simples/abstrato.
-- Pausa visual antes da fala-chave.
-- Pouco texto.
+Use close nos olhos, boca, mãos e objetos. Diminuir texto. Painéis silenciosos antes de frase importante.
 
-### Página de comédia
+## Página dupla/impacto
 
-- Setup visual.
-- Quebra de expectativa.
-- Reação exagerada.
-- Retorno ao modelo normal.
+Reservar para virada emocional, revelação de cenário, monstro, golpe ou transformação. Mesmo sem página dupla real, simular com painel dominante.
 
-## 3. Composição
+## Virada de página
 
-- Painel maior = batida mais importante.
-- Painel estreito = pausa, tensão ou detalhe.
-- Diagonal = velocidade/conflito.
-- Plano geral = localização.
-- Close = emoção.
-- Gutter largo = pausa.
-- Gutter apertado = ritmo rápido.
+Final de página deve ter pergunta visual: porta abrindo, mão revelada, reação incompleta, sombra entrando, fala interrompida. Página seguinte responde ou complica.
 
-## 4. PB e contraste
+## Capítulo
 
-- Usar preto sólido para peso dramático.
-- Usar branco para choque/silêncio.
-- Retícula diferencia pele, roupa, fundo e clima.
-- Hachura mostra sombra, velocidade e pressão.
-- Silhueta precisa ser reconhecível sem cor.
+Abertura orienta leitor; meio complica; clímax concentra painel grande; final deixa estado claro e gancho.
 
-## 5. Balões
-
-- Respeitar direção de leitura.
-- Balão não atravessa gutter sem intenção.
-- Rabicho nunca cruza rosto importante.
-- Texto longo vira sequência de balões.
-- Onomatopeia pode quebrar quadro em impacto, mas precisa guiar olhar.
-
-## 6. Checklist
-
-- [ ] Direção de leitura clara.
-- [ ] Hierarquia de painéis clara.
-- [ ] Painel principal destacado.
-- [ ] Gutter ajuda ritmo.
-- [ ] PB legível.
-- [ ] Balões não competem com arte.
-- [ ] Continuidade herdada aplicada.
+## Checklist
+- [ ] Direção de leitura definida.
+- [ ] Hierarquia visual clara.
+- [ ] PB/retícula têm função.
+- [ ] Onomatopeia integrada.
+- [ ] Virada planejada.
+- [ ] Estado final exportado.
