@@ -30,3 +30,6 @@ P4 painel 4 continua P4 painel 3: Ícaro avançou com lâmina na mão direita; C
 - [ ] Mudança única clara.
 - [ ] Negativos específicos.
 - [ ] Área de balão.
+## Cicatrizário do Abismo — prompt chaining aprendido em produção
+
+Não encadear prompts com `same character` apenas. Cada prompt de painel deve repetir o character lock completo do protagonista e o negative prompt completo. Para Ren: rosto fino, cabelo preto médio bagunçado, olhos castanho-escuros cansados, cicatriz no lábio inferior, corpo magro, túnica cinza simples em Arvhal e F-0 visível. A cadeia deve carregar também proibições: joias, colares, armadura, roupa nobre, idade diferente e corpo musculoso.

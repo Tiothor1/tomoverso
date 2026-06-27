@@ -62,3 +62,13 @@ Causa: confiar em “manga style”. Detectar ausência de personagem/cenário/c
 
 ## 20. Capítulo sem estado final
 Causa: não exportar continuidade. Detectar próximo capítulo precisa adivinhar. Corrigir resumo final. Prevenir Chapter Planning Template.
+## Erro real — aceitar piloto painterly com drift
+
+Não confundir impacto visual com prontidão. O piloto V1 de Cicatrizário parecia forte, mas Ren mudava de rosto e roupa. Isso deve reprovar final comercial.
+
+Correção obrigatória:
+1. Auditar bloco por bloco.
+2. Criar reference sheet/style bible/visual lock.
+3. Regenerar com referência fixa quando possível.
+4. Se sem FAL_KEY, declarar preview/piloto técnico, não final comercial.
+5. Não esconder reprovação com frases como “consistente o suficiente”.

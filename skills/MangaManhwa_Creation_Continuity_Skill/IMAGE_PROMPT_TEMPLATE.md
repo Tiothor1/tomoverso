@@ -108,3 +108,16 @@ Obra: Lua de Ferro. Estado: Ícaro Vale entra na forja lunar à noite, com casac
 - Não indicar direção de leitura.
 - Não reservar área de balão.
 - Não exportar estado para próxima página/cena.
+## Adendo — personagem recorrente em manhwa com IA
+
+Para personagem recorrente, o template deve incluir uma seção `FIXED CHARACTER PROMPT` e uma seção `NEGATIVE CONTINUITY PROMPT` em todos os blocos. Se o modelo não suporta referência fixa, prompts sozinhos não são suficientes para final comercial; use pós-produção local apenas para preview técnico e reporte a limitação.
+
+Campos obrigatórios adicionais:
+- face lock;
+- hair lock;
+- age lock;
+- body lock;
+- outfit lock por fase;
+- visible continuity markers, como F-0;
+- forbidden drift list;
+- bubble-safe zones.

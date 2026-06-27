@@ -95,3 +95,6 @@ For review: failures, severity, correction, revised prompt/script, score before/
 ## Readiness Rule
 
 Só declare prontidão se a skill carrega no Hermes, todos os arquivos existem, testes originais passam média >=2.6, não há temporários/imagens/segredos, e o commit local foi feito.
+## Real project lesson: Cicatrizário do Abismo
+
+The project `Cicatrizário do Abismo` exposed a critical production rule: painterly AI panels are not production-ready if the recurring protagonist drifts. Before approving a chapter, create a contact sheet, score drift, and require reference sheet + style bible + visual continuity lock + immutable character prompt. Without a backend that supports fixed character reference, report the result as preview/pilot rather than final commercial art. See `REAL_PROJECT_LESSONS_CICATRIZARIO_ABISMO.md`.

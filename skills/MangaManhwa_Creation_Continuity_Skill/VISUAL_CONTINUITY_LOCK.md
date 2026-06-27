@@ -30,3 +30,6 @@ Adicionar: “same fixed character design as Character Bible: ...” + descriç�
 
 ## Exemplo Lua de Ferro
 Ícaro pode ficar molhado, sujo, iluminado por vermelho ou azul; não pode perder a mecha branca, cicatriz, casaco azul, luva direita, lâmina acorrentada ou corte esquerdo antes de cura.
+## Cicatrizário do Abismo — regra real adicionada
+
+Após o piloto V1, drift visual deve ser tratado como bloqueador, não como ressalva. Painel painterly bonito deve ser reprovado se o protagonista muda rosto, idade, roupa ou status visual. Em cenas de Arvhal, Ren exige: túnica cinza simples, F-0 no peito, sem joias, sem armadura, sem aura dourada. Se backend sem referência fixa for usado, gerar contact sheet e classificar como piloto até passar em personagem e qualidade comercial.

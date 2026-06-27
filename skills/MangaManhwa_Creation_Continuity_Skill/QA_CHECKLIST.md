@@ -81,3 +81,13 @@ Personagem 3; Continuidade 3; Balões 2.5; Composição 2.8; Narrativa 2.8; Prom
 
 ## Correção
 Se qualquer categoria <2, reescrever roteiro/prompt antes de prosseguir. Não maquiar pontuação.
+## Adendo QA — drift visual profissional
+
+Antes de aprovar capítulo de manhwa com IA, criar contact sheet de todos os painéis e responder:
+- o protagonista parece literalmente a mesma pessoa?
+- roupa mudou sem cena de troca?
+- idade aparente mudou?
+- status/insígnias continuam visíveis?
+- a correção de drift reduziu a arte a nível animatic/cartoon?
+
+Se a resposta for sim para drift ou queda comercial severa, reprovar mesmo que a narrativa esteja clara.
