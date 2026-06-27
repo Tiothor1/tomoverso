@@ -165,9 +165,15 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
             if (imageMatch) {
               const [, alt, src] = imageMatch;
               return (
-                <figure key={i} className="not-prose my-10 overflow-hidden rounded-3xl border border-border/40 bg-card shadow-2xl shadow-black/20">
-                  <img src={src} alt={alt || safeChapter.title} className="w-full object-cover" loading="lazy" />
-                  {alt ? <figcaption className="px-4 py-3 text-center text-xs text-muted-foreground">{alt}</figcaption> : null}
+                <figure key={i} className="not-prose mx-auto my-12 w-fit max-w-full overflow-hidden rounded-3xl border border-border/40 bg-card shadow-2xl shadow-black/20">
+                  <img
+                    src={src}
+                    alt={alt || safeChapter.title}
+                    className="mx-auto block h-auto max-h-[calc(100vh-7rem)] max-w-full object-contain"
+                    loading="eager"
+                    decoding="async"
+                  />
+                  {alt ? <figcaption className="max-w-[min(100%,42rem)] px-4 py-3 text-center text-xs text-muted-foreground">{alt}</figcaption> : null}
                 </figure>
               );
             }
