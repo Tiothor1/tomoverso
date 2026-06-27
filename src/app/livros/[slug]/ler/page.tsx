@@ -33,13 +33,14 @@ export default async function LerLivroPage({ params, searchParams }: Props) {
     }
   })();
 
-  // Clean and paginate content
-  const rawContent = book.content || book.synopsis || "";
+  // Clean and paginate only full book content. Synopsis alone is catalog material, not reader content.
+  const rawContent = book.content || "";
   const cleanText = cleanBookContent(rawContent);
   const { pages, pageCount } = paginateText(cleanText);
   const currentPageContent = pages[pageNum - 1] || "";
   const hasContent = currentPageContent.length > 0;
   const isLastPage = pageNum >= pageCount;
+  const coverSrc = book.cover_local_path || book.cover_url;
 
   return (
     <div className="min-h-screen">
@@ -85,8 +86,8 @@ export default async function LerLivroPage({ params, searchParams }: Props) {
           {/* Header */}
           <header className="mb-8 md:mb-10 text-center">
             <div className="mx-auto w-16 h-24 rounded-lg overflow-hidden shadow-md mb-4">
-              {book.cover_url ? (
-                <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
+              {coverSrc ? (
+                <img src={coverSrc} alt={book.title} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-muted">
                   <BookOpen className="h-5 w-5 text-muted-foreground/40" />

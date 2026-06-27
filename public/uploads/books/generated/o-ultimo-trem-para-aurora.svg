@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 450" width="600" height="900" role="img" aria-labelledby="title desc">
+  <title id="title">O Último Trem para Aurora</title>
+  <desc id="desc">Trem noturno atravessando cidade vazia com aurora no céu e casal em plataformas opostas.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#172554"/>
+      <stop offset="58%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#f9a8d4"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.42"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000000" stop-opacity="0.05"/>
+      <stop offset="55%" stop-color="#000000" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.88"/>
+    </linearGradient>
+    <filter id="grain" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="table" tableValues="0 0.12"/></feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="300" height="450" fill="url(#bg)"/>
+  <rect width="300" height="450" fill="url(#glow)"/>
+  <circle cx="289" cy="223" r="2.8" fill="#fff" opacity="0.62"/>
+<circle cx="72" cy="0" r="0.8" fill="#fff" opacity="0.51"/>
+<circle cx="155" cy="47" r="1.8" fill="#fff" opacity="0.40"/>
+<circle cx="238" cy="94" r="2.8" fill="#fff" opacity="0.29"/>
+<circle cx="21" cy="141" r="0.8" fill="#fff" opacity="0.18"/>
+<circle cx="104" cy="188" r="1.8" fill="#fff" opacity="0.57"/>
+<circle cx="187" cy="235" r="2.8" fill="#fff" opacity="0.46"/>
+<circle cx="270" cy="12" r="0.8" fill="#fff" opacity="0.35"/>
+<circle cx="53" cy="59" r="1.8" fill="#fff" opacity="0.24"/>
+<circle cx="136" cy="106" r="2.8" fill="#fff" opacity="0.62"/>
+<circle cx="219" cy="153" r="0.8" fill="#fff" opacity="0.51"/>
+<circle cx="2" cy="200" r="1.8" fill="#fff" opacity="0.40"/>
+<circle cx="85" cy="247" r="2.8" fill="#fff" opacity="0.29"/>
+<circle cx="168" cy="24" r="0.8" fill="#fff" opacity="0.18"/>
+<circle cx="251" cy="71" r="1.8" fill="#fff" opacity="0.57"/>
+<circle cx="34" cy="118" r="2.8" fill="#fff" opacity="0.46"/>
+<circle cx="117" cy="165" r="0.8" fill="#fff" opacity="0.35"/>
+<circle cx="200" cy="212" r="1.8" fill="#fff" opacity="0.24"/>
+<circle cx="283" cy="259" r="2.8" fill="#fff" opacity="0.62"/>
+<circle cx="66" cy="36" r="0.8" fill="#fff" opacity="0.51"/>
+<circle cx="149" cy="83" r="1.8" fill="#fff" opacity="0.40"/>
+<circle cx="232" cy="130" r="2.8" fill="#fff" opacity="0.29"/>
+<circle cx="15" cy="177" r="0.8" fill="#fff" opacity="0.18"/>
+<circle cx="98" cy="224" r="1.8" fill="#fff" opacity="0.57"/>
+<circle cx="181" cy="1" r="2.8" fill="#fff" opacity="0.46"/>
+<circle cx="264" cy="48" r="0.8" fill="#fff" opacity="0.35"/>
+<circle cx="47" cy="95" r="1.8" fill="#fff" opacity="0.24"/>
+<circle cx="130" cy="142" r="2.8" fill="#fff" opacity="0.62"/>
+<circle cx="213" cy="189" r="0.8" fill="#fff" opacity="0.51"/>
+<circle cx="296" cy="236" r="1.8" fill="#fff" opacity="0.40"/>
+<circle cx="79" cy="13" r="2.8" fill="#fff" opacity="0.29"/>
+<circle cx="162" cy="60" r="0.8" fill="#fff" opacity="0.18"/>
+<circle cx="245" cy="107" r="1.8" fill="#fff" opacity="0.57"/>
+<circle cx="28" cy="154" r="2.8" fill="#fff" opacity="0.46"/>
+  <g transform="translate(0 6)" opacity="0.95">
+    <path d="M150 55 C198 55 232 86 232 130 C232 205 170 205 170 255 L130 255 C130 180 190 185 190 130 C190 105 174 90 150 90 C126 90 110 105 110 130 L70 130 C70 86 102 55 150 55 Z M128 295 L172 295 L172 340 L128 340 Z" fill="#ffffff" opacity="0.12"/>
+    <path d="M150 55 C198 55 232 86 232 130 C232 205 170 205 170 255 L130 255 C130 180 190 185 190 130 C190 105 174 90 150 90 C126 90 110 105 110 130 L70 130 C70 86 102 55 150 55 Z M128 295 L172 295 L172 340 L128 340 Z" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.42"/>
+  </g>
+  <circle cx="240" cy="78" r="42" fill="#fff" opacity="0.12"/>
+  <path d="M-20 356 C65 320 110 372 182 338 C230 315 260 300 330 335 L330 450 L-20 450 Z" fill="#000" opacity="0.28"/>
+  <rect width="300" height="450" fill="url(#shade)"/>
+  <rect width="300" height="450" filter="url(#grain)" opacity="0.45"/>
+  <text x="150" y="278" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="2.5" fill="#ffffff" opacity="0.75">TOMOVERSO ORIGINAL</text>
+  <text x="150" y="305" text-anchor="middle" font-family="Georgia, serif" font-size="24" font-weight="800" fill="#ffffff">O Último Trem para</text>
+<text x="150" y="331" text-anchor="middle" font-family="Georgia, serif" font-size="24" font-weight="800" fill="#ffffff">Aurora</text>
+  <text x="150" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="700" letter-spacing="1.8" fill="#ffffff" opacity="0.72">MISTÉRIO</text>
+</svg>

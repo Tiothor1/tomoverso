@@ -13,6 +13,7 @@ interface BookRow {
   title: string;
   author: string;
   synopsis: string;
+  content: string;
   cover_url: string;
   cover_local_path: string | null;
   genres: string;
@@ -40,6 +41,9 @@ export default async function LivroPage({ params }: { params: Promise<{ slug: st
       .all(book.slug, ...genres.map(g => `%"${g.toLowerCase()}"%`)) as any[]
     : [];
 
+  const coverSrc = book.cover_local_path || book.cover_url;
+  const hasReadableContent = Boolean(book.content?.trim());
+
   return (
     <div className="min-h-screen">
       <div className="border-b border-border/40 bg-muted/20">
@@ -55,8 +59,8 @@ export default async function LivroPage({ params }: { params: Promise<{ slug: st
           {/* Cover */}
           <div className="mx-auto w-full max-w-[260px]">
             <div className="aspect-[3/4] rounded-2xl overflow-hidden shadow-lg shadow-black/10">
-              {book.cover_url ? (
-                <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
+              {coverSrc ? (
+                <img src={coverSrc} alt={book.title} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-muted">
                   <BookOpen className="h-12 w-12 text-muted-foreground/40" />
@@ -84,14 +88,20 @@ export default async function LivroPage({ params }: { params: Promise<{ slug: st
             )}
 
             <div className="flex gap-4 text-sm text-muted-foreground">
-              <span className="flex items-center gap-1.5"><BookText className="h-4 w-4" />{book.pages} páginas</span>
+              <span className="flex items-center gap-1.5"><BookText className="h-4 w-4" />{hasReadableContent ? `${book.pages} páginas` : "Conceito de catálogo"}</span>
               <span className="flex items-center gap-1.5"><Calendar className="h-4 w-4" />{new Date(book.created_at).toLocaleDateString("pt-BR")}</span>
               {book.language && <span>{book.language === "pt-BR" ? "Português" : book.language}</span>}
             </div>
 
-            <Button asChild size="lg" className="w-full sm:w-auto">
-              <Link href={`/livros/${book.slug}/ler`}><BookOpen className="h-4 w-4 mr-2" />Começar a ler</Link>
-            </Button>
+            {hasReadableContent ? (
+              <Button asChild size="lg" className="w-full sm:w-auto">
+                <Link href={`/livros/${book.slug}/ler`}><BookOpen className="h-4 w-4 mr-2" />Começar a ler</Link>
+              </Button>
+            ) : (
+              <div className="inline-flex w-full sm:w-auto items-center justify-center rounded-xl border border-dashed border-primary/35 bg-primary/5 px-5 py-3 text-sm font-medium text-primary">
+                Conceito de catálogo — história em breve
+              </div>
+            )}
 
             {book.synopsis && (
               <div className="space-y-2">
@@ -111,15 +121,18 @@ export default async function LivroPage({ params }: { params: Promise<{ slug: st
           <div className="mt-16 pt-10 border-t border-border/40">
             <h2 className="font-heading text-xl font-bold mb-6">Livros relacionados</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {related.map(r => (
+              {related.map(r => {
+                const relatedCover = r.cover_local_path || r.cover_url;
+                return (
                 <Link key={r.slug} href={`/livros/${r.slug}`} className="group">
                   <div className="aspect-[3/4] rounded-xl overflow-hidden bg-muted mb-2 shadow-sm">
-                    {r.cover_url ? <img src={r.cover_url} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-muted"><BookOpen className="h-6 w-6 text-muted-foreground/40" /></div>}
+                    {relatedCover ? <img src={relatedCover} alt={r.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" /> : <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-muted"><BookOpen className="h-6 w-6 text-muted-foreground/40" /></div>}
                   </div>
                   <h3 className="font-medium text-sm leading-tight line-clamp-2 group-hover:text-primary">{r.title}</h3>
                   <p className="text-xs text-muted-foreground truncate">{r.author}</p>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

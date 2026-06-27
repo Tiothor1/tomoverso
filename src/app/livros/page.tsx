@@ -92,11 +92,13 @@ export default async function LivrosPage({ searchParams }: { searchParams: Promi
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-5">
-            {books.map(book => (
+            {books.map(book => {
+              const coverSrc = book.cover_local_path || book.cover_url;
+              return (
               <Link key={book.id} href={`/livros/${book.slug}`} className="group">
                 <div className="aspect-[3/4] rounded-xl overflow-hidden bg-muted mb-2.5 shadow-sm">
-                  {book.cover_url ? (
-                    <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                  {coverSrc ? (
+                    <img src={coverSrc} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-muted">
                       <BookOpen className="h-8 w-8 text-muted-foreground/40" />
@@ -106,7 +108,8 @@ export default async function LivrosPage({ searchParams }: { searchParams: Promi
                 <h3 className="font-medium text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors">{book.title}</h3>
                 <p className="text-xs text-muted-foreground truncate mt-0.5">{book.author || "Autor desconhecido"}</p>
               </Link>
-            ))}
+              );
+            })}
           </div>
         )}
 
