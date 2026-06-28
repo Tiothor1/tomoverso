@@ -204,8 +204,21 @@ E o reino de Vael, pela primeira vez em quatorze anos, parou de queimar.`,
   },
 ];
 
-export async function POST() {
+export async function POST(req: Request) {
   const db = getDb();
+
+  // Segurança: só funciona com SEED_SECRET correto ou se o banco estiver vazio
+  const seedSecret = process.env.SEED_SECRET;
+  const reqSeed = new URL(req.url).searchParams.get("secret");
+  const userCount = (db.prepare("SELECT COUNT(*) as c FROM users").get() as { c: number }).c;
+
+  if (userCount > 0 && (!seedSecret || reqSeed !== seedSecret)) {
+    return NextResponse.json(
+      { ok: false, error: "Banco já populado. Use ?secret=SEED_SECRET se souber." },
+      { status: 403 }
+    );
+  }
+
   const now = new Date().toISOString();
 
   // Cria usuário Fábio (admin)
@@ -280,6 +293,6 @@ export async function POST() {
   });
 }
 
-export async function GET() {
-  return POST();
+export async function GET(req: Request) {
+  return POST(req);
 }

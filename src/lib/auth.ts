@@ -6,9 +6,14 @@ import type { User } from "./types";
 import { createHash, randomUUID } from "crypto";
 import type Database from "better-sqlite3";
 
-const AUTH_SECRET = process.env.AUTH_SECRET || "tomoverso-dev-secret-change-in-production-min-32-chars";
-const JWT_SECRET = new TextEncoder().encode(AUTH_SECRET);
-const JWE_SECRET = createHash("sha256").update(AUTH_SECRET).digest();
+const AUTH_SECRET = process.env.AUTH_SECRET;
+// Only throw at runtime on Vercel, not during build
+if (!AUTH_SECRET && process.env.VERCEL && process.env.NEXT_PHASE !== "phase-production-build") {
+  throw new Error("AUTH_SECRET não configurado no ambiente de produção! Defina no Vercel Dashboard > Settings > Environment Variables.");
+}
+const SECRET = AUTH_SECRET || "tomoverso-dev-secret-change-in-production-min-32-chars";
+const JWT_SECRET = new TextEncoder().encode(SECRET);
+const JWE_SECRET = createHash("sha256").update(SECRET).digest();
 const SESSION_DURATION_DAYS = 30;
 const ACCOUNT_BACKUP_DAYS = 365;
 export const COOKIE_NAME = "tomoverso-session";
