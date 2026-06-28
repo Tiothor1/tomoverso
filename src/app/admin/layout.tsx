@@ -4,7 +4,7 @@ import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { getCurrentUser } from "@/lib/auth";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  const user = await getCurrentUser();
+  const user = await getCurrentUser().catch(() => null);
   if (!user) redirect("/auth/login");
   if (user.role !== "admin") redirect("/");
 

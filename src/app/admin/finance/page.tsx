@@ -12,7 +12,7 @@ import { adminConfirmWithdrawalAction } from "@/lib/actions/marketplace-actions"
 export const dynamic = "force-dynamic";
 
 export default async function AdminFinancePage() {
-  const user = await getCurrentUser();
+  const user = await getCurrentUser().catch(() => null);
   if (!user || user.role !== "admin") redirect("/");
 
   const db = getDb();
