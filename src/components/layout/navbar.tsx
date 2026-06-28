@@ -76,14 +76,6 @@ export async function Navbar() {
                 </Link>
               </Button>
             )}
-            {user?.role === "admin" && (
-              <Button variant="ghost" asChild>
-                <Link href="/admin" className="text-red-400">
-                  <Shield className="h-4 w-4 mr-1.5" />
-                  Admin
-                </Link>
-              </Button>
-            )}
           </nav>
 
           <div className="ml-auto flex items-center gap-1">

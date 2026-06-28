@@ -179,22 +179,7 @@ export default async function AdminSecretoPage() {
               <Link href={`/${SECRET}/setup`}><KeyRound className="h-3.5 w-3.5 mr-2" /> Segurança</Link>
             </Button>
             <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
-              <Link href="/admin/site"><Globe className="h-3.5 w-3.5 mr-2" /> Site</Link>
-            </Button>
-            <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
-              <Link href="/admin/users"><Users className="h-3.5 w-3.5 mr-2" /> Usuários</Link>
-            </Button>
-            <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
-              <Link href="/admin/catalog"><BookOpen className="h-3.5 w-3.5 mr-2" /> Catálogo</Link>
-            </Button>
-            <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
-              <Link href="/admin/stats"><BarChart3 className="h-3.5 w-3.5 mr-2" /> Estatísticas</Link>
-            </Button>
-            <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
-              <Link href="/admin/sellers"><Store className="h-3.5 w-3.5 mr-2" /> Vendedores</Link>
-            </Button>
-            <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
-              <Link href="/admin/commerce"><ShoppingCart className="h-3.5 w-3.5 mr-2" /> Commerce</Link>
+              <Link href={`/${SECRET}`}><Activity className="h-3.5 w-3.5 mr-2" /> Dashboard</Link>
             </Button>
           </CardContent>
         </Card>
