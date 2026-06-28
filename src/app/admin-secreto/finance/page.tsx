@@ -26,7 +26,7 @@ export default async function AdminSecretoFinancePage() {
   const db = getDb();
   const secretPath = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
 
-  const totalSales = (db.prepare("SELECT COALESCE(SUM(amount_cents),0) FROM marketplace_payments WHERE status = 'approved'").get() as any)["COALESCE(SUM(amount_cents),0)"];
+  const totalSales = (db.prepare("SELECT COALESCE(SUM(gross_amount_cents),0) FROM marketplace_payments WHERE status = 'approved'").get() as any)["COALESCE(SUM(gross_amount_cents),0)"];
   const totalAuthorPayouts = (db.prepare("SELECT COALESCE(SUM(amount_cents),0) FROM withdrawal_requests WHERE status = 'paid'").get() as any)["COALESCE(SUM(amount_cents),0)"];
   const pendingTotal = (db.prepare("SELECT COALESCE(SUM(amount_cents),0) FROM withdrawal_requests WHERE status = 'pending'").get() as any)["COALESCE(SUM(amount_cents),0)"];
 

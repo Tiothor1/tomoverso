@@ -176,10 +176,19 @@ export default async function AdminSecretoPage() {
               <Link href={`/${SECRET}/finance`}><DollarSign className="h-3.5 w-3.5 mr-2" /> Financeiro</Link>
             </Button>
             <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
-              <Link href={`/${SECRET}/setup`}><KeyRound className="h-3.5 w-3.5 mr-2" /> Segurança</Link>
+              <Link href={`/${SECRET}/usuarios`}><Users className="h-3.5 w-3.5 mr-2" /> Usuários</Link>
             </Button>
             <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
-              <Link href={`/${SECRET}`}><Activity className="h-3.5 w-3.5 mr-2" /> Dashboard</Link>
+              <Link href={`/${SECRET}/novels`}><BookOpen className="h-3.5 w-3.5 mr-2" /> Novels</Link>
+            </Button>
+            <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
+              <Link href={`/${SECRET}/mangas`}><Activity className="h-3.5 w-3.5 mr-2" /> Mangás</Link>
+            </Button>
+            <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
+              <Link href={`/${SECRET}/comentarios`}><MessageCircle className="h-3.5 w-3.5 mr-2" /> Comentários</Link>
+            </Button>
+            <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
+              <Link href={`/${SECRET}/setup`}><Shield className="h-3.5 w-3.5 mr-2" /> Segurança</Link>
             </Button>
           </CardContent>
         </Card>
