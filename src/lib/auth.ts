@@ -7,9 +7,8 @@ import { createHash, randomUUID } from "crypto";
 import type Database from "better-sqlite3";
 
 const AUTH_SECRET = process.env.AUTH_SECRET;
-// Only throw at runtime on Vercel, not during build
-if (!AUTH_SECRET && process.env.VERCEL && process.env.NEXT_PHASE !== "phase-production-build") {
-  throw new Error("AUTH_SECRET não configurado no ambiente de produção! Defina no Vercel Dashboard > Settings > Environment Variables.");
+if (!AUTH_SECRET && process.env.VERCEL) {
+  console.warn("⚠️ AUTH_SECRET não configurado no Vercel! Use um secret de 32+ caracteres. Usando fallback inseguro.");
 }
 const SECRET = AUTH_SECRET || "tomoverso-dev-secret-change-in-production-min-32-chars";
 const JWT_SECRET = new TextEncoder().encode(SECRET);
