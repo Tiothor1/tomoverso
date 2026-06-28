@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { BookOpen, PenLine, Eye, Users, MessageCircle, Star, TrendingUp, Plus, BarChart3, Sparkles, WalletCards } from "lucide-react";
+import { BookOpen, PenLine, Eye, Users, MessageCircle, Star, TrendingUp, Plus, BarChart3, Sparkles, WalletCards, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -150,6 +150,12 @@ export default async function DashboardPage() {
                           </Button>
                           <Button size="sm" variant="outline" asChild>
                             <Link href={`/dashboard/novels/${n.id}/edit`}>Editar</Link>
+                          </Button>
+                          <Button size="sm" variant="outline" asChild>
+                            <Link href={`/dashboard/novels/${n.id}/pricing`}>
+                              <DollarSign className="h-3 w-3 mr-1" />
+                              Precificar
+                            </Link>
                           </Button>
                         </div>
                       </div>

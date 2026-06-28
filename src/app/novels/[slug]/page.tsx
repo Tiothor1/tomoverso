@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft, BookOpen, Eye, Star, Calendar, User, Heart, Share2, Bookmark, MessageCircle, ListOrdered, Clock,
+  ArrowLeft, BookOpen, Eye, Star, Calendar, User, Heart, Share2, Bookmark, MessageCircle, ListOrdered, Clock, DollarSign, Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -107,6 +107,11 @@ export default async function NovelPage({ params }: { params: Promise<{ slug: st
   const user = await getCurrentUser();
   const isFavorite = user ? !!db.prepare("SELECT 1 FROM favorites WHERE user_id = ? AND novel_id = ?").get(user.id, novelRow.id) : false;
   const isFollowing = user && author ? !!db.prepare("SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?").get(user.id, novelRow.author_id) : false;
+  const isOwnNovel = user && novelRow.author_id === user.id;
+
+  // Verifica se obra está à venda
+  const paidWork = db.prepare("SELECT * FROM paid_works WHERE content_type = 'novel' AND content_id = ? AND price_cents > 0").get(novelRow.id) as any;
+  const hasPurchased = user && paidWork ? !!db.prepare("SELECT 1 FROM purchases WHERE buyer_id = ? AND content_type = 'novel' AND content_id = ?").get(user.id, novelRow.id) : false;
 
   return (
     <div>
@@ -137,6 +142,19 @@ export default async function NovelPage({ params }: { params: Promise<{ slug: st
                     Começar a ler
                   </Link>
                 </Button>
+              )}
+              {paidWork && !isOwnNovel && !hasPurchased && (
+                <Button asChild className="w-full" size="lg" variant="default">
+                  <Link href={`/novels/${novelRow.slug}/comprar`}>
+                    <DollarSign className="h-4 w-4 mr-2" />
+                    Comprar por R$ {(paidWork.price_cents / 100).toFixed(2)}
+                  </Link>
+                </Button>
+              )}
+              {hasPurchased && (
+                <Badge variant="default" className="w-full justify-center py-2 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-sm">
+                  <Check className="h-4 w-4 mr-1" /> Adquirida
+                </Badge>
               )}
               {user && (
                 <form action={async () => {

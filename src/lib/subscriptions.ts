@@ -108,27 +108,30 @@ export async function createCheckoutPreference(params: {
   userId: string;
   userEmail: string;
   userName?: string;
+  isOneTime?: boolean;
 }): Promise<{ preferenceId: string; checkoutUrl: string } | null> {
   const token = await getMercadoPagoAccessToken();
   if (!token) return null;
 
-  const label = params.interval === "year" ? "anual" : "mensal";
-  const title = `Tomoverso ${params.planName} — ${label}`;
+  const isOneTime = params.isOneTime === true;
+  const label = isOneTime ? "compra única" : (params.interval === "year" ? "anual" : "mensal");
+  const title = isOneTime ? params.planName : `Tomoverso ${params.planName} — ${label}`;
+  const backUrl = isOneTime ? "success" : "dashboard/subscription";
 
   const body = {
     auto_return: "approved",
     back_urls: {
-      success: `${SITE_URL}/dashboard/subscription?mp_success=1`,
-      failure: `${SITE_URL}/store/plans?mp_failure=1`,
-      pending: `${SITE_URL}/dashboard/subscription?mp_pending=1`,
+      success: `${SITE_URL}/${isOneTime ? "library?purchase=success" : "dashboard/subscription?mp_success=1"}`,
+      failure: `${SITE_URL}/${isOneTime ? "library?purchase=failure" : "store/plans?mp_failure=1"}`,
+      pending: `${SITE_URL}/${isOneTime ? "library?purchase=pending" : "dashboard/subscription?mp_pending=1"}`,
     },
     statement_descriptor: "TOMOVERSO",
     binary_mode: false,
-    external_reference: `${params.userId}:${params.planId}`,
+    external_reference: isOneTime ? `work:${params.planId}:${params.userId}` : `${params.userId}:${params.planId}`,
     items: [{
-      id: params.planId,
+      id: isOneTime ? params.planId : params.planId,
       title,
-      description: `Assinatura ${label} do Tomoverso`,
+      description: isOneTime ? `Compra única: ${params.planName}` : `Assinatura ${label} do Tomoverso`,
       quantity: 1,
       unit_price: params.priceCents / 100,
       currency_id: "BRL",
