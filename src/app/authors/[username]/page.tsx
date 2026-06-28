@@ -40,7 +40,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
   const totalViews = authorNovels.reduce((acc, n) => acc + n.views, 0);
   const followers = (db.prepare("SELECT COUNT(*) as c FROM follows WHERE following_id = ?").get(author.id) as { c: number }).c;
 
-  const currentUser = await getCurrentUser();
+  const currentUser = await getCurrentUser().catch(() => null);
   const isFollowing = currentUser ? !!db.prepare("SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?").get(currentUser.id, safeAuthor.id) : false;
   const isOwnProfile = currentUser?.id === safeAuthor.id;
 
