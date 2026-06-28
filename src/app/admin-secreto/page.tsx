@@ -5,7 +5,7 @@ import {
   Shield, Activity, DollarSign, Users, BookOpen, 
   Settings, AlertTriangle, KeyRound, Store, MessageCircle, 
   TrendingUp, BarChart3, Globe, Boxes, ShoppingCart,
-  WalletCards, Eye, PenLine
+  WalletCards, Eye, PenLine, Upload, FileText
 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
@@ -186,6 +186,12 @@ export default async function AdminSecretoPage() {
             </Button>
             <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
               <Link href={`/${SECRET}/comentarios`}><MessageCircle className="h-3.5 w-3.5 mr-2" /> Comentários</Link>
+            </Button>
+            <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
+              <Link href={`/${SECRET}/upload`}><Upload className="h-3.5 w-3.5 mr-2" /> Importar</Link>
+            </Button>
+            <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
+              <Link href={`/${SECRET}/analise`}><FileText className="h-3.5 w-3.5 mr-2" /> Análise</Link>
             </Button>
             <Button asChild variant="outline" className="border-red-800/20 text-red-300 hover:bg-red-950/40 justify-start h-10 text-xs">
               <Link href={`/${SECRET}/setup`}><Shield className="h-3.5 w-3.5 mr-2" /> Segurança</Link>
