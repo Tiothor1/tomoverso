@@ -75,7 +75,7 @@ export function ParagraphComments({
   }
 
   return (
-    <span className="inline-block align-middle ml-1.5 relative">
+    <span className="inline-block align-middle ml-1.5 relative" style={{ opacity: 'var(--paragraph-comment-opacity, 1)', pointerEvents: 'var(--paragraph-comment-pointer, auto)' as any }}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] transition-colors hover:bg-primary/20 hover:text-primary text-muted-foreground/50"

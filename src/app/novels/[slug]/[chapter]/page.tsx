@@ -10,6 +10,7 @@ import { ReadingProgress } from "@/components/reader/reading-progress";
 import { PremiumReaderControls } from "@/components/reader/premium-controls";
 import { ChapterActions } from "@/components/reader/chapter-actions";
 import { ParagraphComments } from "@/components/reader/paragraph-comments";
+import { ParagraphToggle } from "@/components/reader/paragraph-toggle";
 import { ChapterAd, InterChapterAd } from "@/components/ads/inline-ad";
 import { getDb } from "@/lib/db";
 import { publicReadableNovelSql, readableNovelChapterSql } from "@/lib/public-catalog";
@@ -173,6 +174,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
             <Badge variant="outline" className="font-mono">
               Cap {idx + 1} / {allChapters.length}
             </Badge>
+            <ParagraphToggle />
           </div>
         </div>
       </div>
