@@ -4,6 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { getCurrentUser } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Como criar uma Light Novel — Tomoverso",
@@ -79,7 +82,9 @@ const steps = [
   },
 ];
 
-export default function HowToPage() {
+export default async function HowToPage() {
+  const user = await getCurrentUser().catch(() => null);
+
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12 space-y-12">
       {/* Hero */}
@@ -154,13 +159,21 @@ export default function HowToPage() {
             Bora publicar?
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Você tem o tutorial. Agora falta só começar. Cria sua conta, posta o
-            capítulo 1, e deixa o mundo ler.
+            {user
+              ? "Sua conta já tá criada. Agora é só cadastrar sua novel e postar o capítulo 1."
+              : "Você tem o tutorial. Agora falta só começar. Cria sua conta, posta o capítulo 1, e deixa o mundo ler."}
           </p>
           <Button size="lg" asChild>
-            <Link href="/auth/signup">
-              Criar conta grátis <ArrowRight className="h-4 w-4 ml-2" />
-            </Link>
+            {user ? (
+              <Link href="/dashboard/novels/new">
+                <PenLine className="h-4 w-4 mr-2" />
+                Criar nova novel <ArrowRight className="h-4 w-4 ml-2" />
+              </Link>
+            ) : (
+              <Link href="/auth/signup">
+                Criar conta grátis <ArrowRight className="h-4 w-4 ml-2" />
+              </Link>
+            )}
           </Button>
         </CardContent>
       </Card>
