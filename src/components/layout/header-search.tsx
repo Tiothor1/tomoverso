@@ -28,7 +28,7 @@ export function HeaderSearch({ className }: HeaderSearchProps) {
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Pesquisar..."
-        className="h-10 rounded-full bg-muted/50 pl-9 pr-20 text-sm focus-visible:bg-background"
+        className="h-10 rounded-full bg-muted/50 pl-9 pr-14 md:pr-20 text-sm focus-visible:bg-background"
       />
       {query && (
         <button

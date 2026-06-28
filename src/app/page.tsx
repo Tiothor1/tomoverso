@@ -109,7 +109,7 @@ export default function HomePage() {
             <input
               name="q"
               placeholder="Pesquisar mangá, novel, capítulo..."
-              className="h-14 w-full rounded-2xl border border-border/60 bg-card/90 pl-12 pr-36 text-base shadow-lg outline-none transition focus:border-primary/50 focus:ring-4 focus:ring-primary/10"
+              className="h-14 w-full rounded-2xl border border-border/60 bg-card/90 pl-12 pr-28 md:pr-36 text-base shadow-lg outline-none transition focus:border-primary/50 focus:ring-4 focus:ring-primary/10"
             />
             <Button type="submit" size="lg" className="absolute right-1.5 top-1/2 h-11 -translate-y-1/2 rounded-xl px-5">Buscar</Button>
           </form>
