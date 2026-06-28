@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { ArrowLeft, Users, Shield, Mail, Ban, Trash2, Search, Calendar, ExternalLink } from "lucide-react";
+import { ArrowLeft, Users, Shield, Mail, Ban, Trash2, Search, Calendar, ExternalLink, Edit3 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +20,6 @@ async function deleteUserAction(formData: FormData) {
   const db = getDb();
   db.prepare("DELETE FROM sessions WHERE user_id = ?").run(userId);
   db.prepare("DELETE FROM users WHERE id = ?").run(userId);
-  // Don't revalidate - we redirect below
 }
 
 async function banUserAction(formData: FormData) {
@@ -30,10 +29,21 @@ async function banUserAction(formData: FormData) {
   const userId = formData.get("user_id") as string;
   if (!userId || userId === admin.id) return;
   const db = getDb();
-  const user = db.prepare("SELECT * FROM users WHERE id = ?").get(userId) as any;
+  const user = db.prepare("SELECT role FROM users WHERE id = ?").get(userId) as any;
   if (!user) return;
   const newRole = user.role === "banned" ? "user" : "banned";
   db.prepare("UPDATE users SET role = ? WHERE id = ?").run(newRole, userId);
+}
+
+async function updateEmailAction(formData: FormData) {
+  "use server";
+  const admin = await getCurrentUser();
+  if (!admin || admin.role !== "admin") return;
+  const userId = formData.get("user_id") as string;
+  const newEmail = (formData.get("email") as string)?.trim();
+  if (!userId || !newEmail || !newEmail.includes("@")) return;
+  const db = getDb();
+  db.prepare("UPDATE users SET email = ? WHERE id = ?").run(newEmail, userId);
 }
 
 export default async function AdminUsuariosPage(props: { searchParams?: Promise<{ q?: string }> }) {
@@ -45,9 +55,8 @@ export default async function AdminUsuariosPage(props: { searchParams?: Promise<
   const db = getDb();
   const q = (await props.searchParams)?.q || "";
   const like = `%${q}%`;
-  const baseQuery = "SELECT * FROM users WHERE (email NOT LIKE '%@external.author' OR ? = '%%' AND email LIKE ? OR username LIKE ? OR display_name LIKE ?)";
   const users = q
-    ? db.prepare("SELECT * FROM users WHERE (username LIKE ? OR email LIKE ? OR display_name LIKE ?) AND (email NOT LIKE '%@external.author' OR ? = '%%') ORDER BY created_at DESC LIMIT 100").all(like, like, like, q)
+    ? db.prepare("SELECT * FROM users WHERE (username LIKE ? OR email LIKE ? OR display_name LIKE ?) AND email NOT LIKE '%@external.author' ORDER BY created_at DESC LIMIT 100").all(like, like, like)
     : db.prepare("SELECT * FROM users WHERE email NOT LIKE '%@external.author' ORDER BY created_at DESC LIMIT 100").all();
 
   return (
@@ -82,7 +91,12 @@ export default async function AdminUsuariosPage(props: { searchParams?: Promise<
                       <span className="text-xs text-red-400/40">@{u.username}</span>
                     </div>
                     <div className="flex items-center gap-3 text-xs text-red-400/60 mt-0.5">
-                      <span className="flex items-center gap-1"><Mail className="h-3 w-3" />{u.email}</span>
+                      <form action={updateEmailAction} className="flex items-center gap-1">
+                        <Mail className="h-3 w-3 shrink-0" />
+                        <input type="hidden" name="user_id" value={u.id} />
+                        <input type="email" name="email" defaultValue={u.email} className="bg-transparent border-b border-red-900/30 text-red-300 text-xs px-1 py-0 w-48 focus:outline-none focus:border-red-400" />
+                        <button type="submit" className="text-red-500/40 hover:text-red-400 p-0.5" title="Salvar email"><Edit3 className="h-3 w-3" /></button>
+                      </form>
                       <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{u.created_at?.slice(0, 10)}</span>
                     </div>
                   </div>
