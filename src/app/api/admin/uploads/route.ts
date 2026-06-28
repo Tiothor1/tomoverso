@@ -16,14 +16,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: `Formato não suportado: ${ext}. Use: ${allowedTypes.join(", ")}` }, { status: 400 });
     }
 
-    // Salva arquivo
+    // Salva arquivo (usa /tmp no Vercel, public/ localmente)
     const uploadId = randomUUID();
     const safeName = `${uploadId}${ext}`;
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "imports");
+    const isVercel = !!process.env.VERCEL;
+    const uploadDir = isVercel 
+      ? path.join("/tmp", "uploads")
+      : path.join(process.cwd(), "public", "uploads", "imports");
     await mkdir(uploadDir, { recursive: true });
     const filePath = path.join(uploadDir, safeName);
     const bytes = await file.arrayBuffer();
     await writeFile(filePath, Buffer.from(bytes));
+    const publicPath = isVercel ? filePath : `/uploads/imports/${safeName}`;
 
     // Extrai texto básico se for TXT
     let extractedContent = null;
@@ -50,7 +54,7 @@ export async function POST(req: NextRequest) {
     db.prepare(`
       INSERT INTO import_queue (id, status, file_type, file_name, file_path, file_size, original_name, detected_title, detected_chapters, extracted_content)
       VALUES (?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(uploadId, ext.replace(".", ""), safeName, `/uploads/imports/${safeName}`, bytes.byteLength, file.name, detectedTitle, detectedChapters, extractedContent);
+    `).run(uploadId, ext.replace(".", ""), safeName, publicPath, bytes.byteLength, file.name, detectedTitle, detectedChapters, extractedContent);
 
     return NextResponse.json({ ok: true, id: uploadId, title: detectedTitle, chapters: detectedChapters, size: bytes.byteLength });
   } catch (e: any) {
