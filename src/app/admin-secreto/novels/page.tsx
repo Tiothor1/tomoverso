@@ -25,15 +25,18 @@ async function deleteNovelAction(formData: FormData) {
 }
 
 export default async function AdminNovelsPage(props: { searchParams?: Promise<{ q?: string }> }) {
+  try {
   const cookieStore = await cookies();
   if (cookieStore.get("admin_validated")?.value !== "1") redirect(`/${SP}`);
   const user = await getCurrentUser().catch(() => null);
   if (!user || user.role !== "admin") redirect(`/${SP}`);
 
   const db = getDb();
-  const q = (await props.searchParams)?.q || "";
+  const sp = await props.searchParams?.catch(() => undefined);
+  const q = sp?.q || "";
+  const like = `%${q}%`;
   const novels = q
-    ? db.prepare("SELECT n.*, u.display_name as author_name FROM novels n LEFT JOIN users u ON u.id = n.author_id WHERE n.title LIKE ? OR n.slug LIKE ? ORDER BY n.updated_at DESC LIMIT 100").all(`%${q}%`, `%${q}%`)
+    ? db.prepare("SELECT n.*, u.display_name as author_name FROM novels n LEFT JOIN users u ON u.id = n.author_id WHERE n.title LIKE ? OR n.slug LIKE ? ORDER BY n.updated_at DESC LIMIT 100").all(like, like)
     : db.prepare("SELECT n.*, u.display_name as author_name FROM novels n LEFT JOIN users u ON u.id = n.author_id ORDER BY n.updated_at DESC LIMIT 100").all();
 
   const chapterCounts = db.prepare("SELECT novel_id, COUNT(*) c FROM chapters GROUP BY novel_id").all() as any[];
@@ -86,4 +89,8 @@ export default async function AdminNovelsPage(props: { searchParams?: Promise<{ 
       </main>
     </div>
   );
+  } catch (e) {
+    console.error("Novels admin error:", e);
+    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-red-400 text-sm">Erro ao carregar novels. <a href={`/${SP}`} className="underline ml-2">Voltar</a></div>;
+  }
 }

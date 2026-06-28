@@ -21,6 +21,7 @@ async function deleteCommentAction(formData: FormData) {
 }
 
 export default async function AdminComentariosPage() {
+  try {
   const cookieStore = await cookies();
   if (cookieStore.get("admin_validated")?.value !== "1") redirect(`/${SP}`);
   const user = await getCurrentUser().catch(() => null);
@@ -80,4 +81,8 @@ export default async function AdminComentariosPage() {
       </main>
     </div>
   );
+  } catch (e) {
+    console.error("Comments admin error:", e);
+    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-red-400 text-sm">Erro ao carregar comentários. <a href={`/${SP}`} className="underline ml-2">Voltar</a></div>;
+  }
 }

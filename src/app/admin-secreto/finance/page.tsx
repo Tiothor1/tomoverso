@@ -10,21 +10,23 @@ import { formatBRLCents } from "@/lib/marketplace/money";
 import { adminConfirmWithdrawalAction } from "@/lib/actions/marketplace-actions";
 
 export const dynamic = "force-dynamic";
+const SP = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
 
 export default async function AdminSecretoFinancePage() {
+  try {
   const cookieStore = await cookies();
   const validated = cookieStore.get("admin_validated");
   if (!validated || validated.value !== "1") {
-    redirect(`/${process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f"}`);
+    redirect(`/${SP}`);
   }
 
   const user = await getCurrentUser().catch(() => null);
   if (!user || user.role !== "admin") {
-    redirect(`/${process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f"}`);
+    redirect(`/${SP}`);
   }
 
   const db = getDb();
-  const secretPath = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
+  const secretPath = SP;
 
   const totalSales = (db.prepare("SELECT COALESCE(SUM(gross_amount_cents),0) FROM marketplace_payments WHERE status = 'approved'").get() as any)["COALESCE(SUM(gross_amount_cents),0)"];
   const totalAuthorPayouts = (db.prepare("SELECT COALESCE(SUM(amount_cents),0) FROM withdrawal_requests WHERE status = 'paid'").get() as any)["COALESCE(SUM(amount_cents),0)"];
@@ -129,4 +131,8 @@ export default async function AdminSecretoFinancePage() {
       </main>
     </div>
   );
+  } catch (e) {
+    console.error("Finance admin error:", e);
+    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-red-400 text-sm">Erro ao carregar financeiro. <a href={`/${SP}`} className="underline ml-2">Voltar</a></div>;
+  }
 }

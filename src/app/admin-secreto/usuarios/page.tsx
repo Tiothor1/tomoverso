@@ -47,13 +47,15 @@ async function updateEmailAction(formData: FormData) {
 }
 
 export default async function AdminUsuariosPage(props: { searchParams?: Promise<{ q?: string }> }) {
+  try {
   const cookieStore = await cookies();
   if (cookieStore.get("admin_validated")?.value !== "1") redirect(`/${SP}`);
   const user = await getCurrentUser().catch(() => null);
   if (!user || user.role !== "admin") redirect(`/${SP}`);
 
   const db = getDb();
-  const q = (await props.searchParams)?.q || "";
+  const sp = await props.searchParams?.catch(() => undefined);
+  const q = sp?.q || "";
   const like = `%${q}%`;
   const users = q
     ? db.prepare("SELECT * FROM users WHERE (username LIKE ? OR email LIKE ? OR display_name LIKE ?) AND email NOT LIKE '%@external.author' ORDER BY created_at DESC LIMIT 100").all(like, like, like)
@@ -131,4 +133,8 @@ export default async function AdminUsuariosPage(props: { searchParams?: Promise<
       </main>
     </div>
   );
+  } catch (e) {
+    console.error("Users admin error:", e);
+    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-red-400 text-sm">Erro ao carregar usuários. <a href={`/${SP}`} className="underline ml-2">Voltar</a></div>;
+  }
 }

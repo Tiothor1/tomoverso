@@ -23,13 +23,15 @@ async function deleteMangaAction(formData: FormData) {
 }
 
 export default async function AdminMangasPage(props: { searchParams?: Promise<{ q?: string }> }) {
+  try {
   const cookieStore = await cookies();
   if (cookieStore.get("admin_validated")?.value !== "1") redirect(`/${SP}`);
   const user = await getCurrentUser().catch(() => null);
   if (!user || user.role !== "admin") redirect(`/${SP}`);
 
   const db = getDb();
-  const q = (await props.searchParams)?.q || "";
+  const sp = await props.searchParams?.catch(() => undefined);
+  const q = sp?.q || "";
   const mangas = q
     ? db.prepare("SELECT * FROM mangas WHERE title LIKE ? OR slug LIKE ? ORDER BY updated_at DESC LIMIT 100").all(`%${q}%`, `%${q}%`)
     : db.prepare("SELECT * FROM mangas ORDER BY updated_at DESC LIMIT 100").all();
@@ -81,4 +83,8 @@ export default async function AdminMangasPage(props: { searchParams?: Promise<{ 
       </main>
     </div>
   );
+  } catch (e) {
+    console.error("Mangas admin error:", e);
+    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-red-400 text-sm">Erro ao carregar mangás. <a href={`/${SP}`} className="underline ml-2">Voltar</a></div>;
+  }
 }
