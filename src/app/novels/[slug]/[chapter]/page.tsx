@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { ReadingProgress } from "@/components/reader/reading-progress";
 import { PremiumReaderControls } from "@/components/reader/premium-controls";
 import { ChapterActions } from "@/components/reader/chapter-actions";
+import { ParagraphComments } from "@/components/reader/paragraph-comments";
 import { ChapterAd, InterChapterAd } from "@/components/ads/inline-ad";
 import { getDb } from "@/lib/db";
 import { publicReadableNovelSql, readableNovelChapterSql } from "@/lib/public-catalog";
@@ -110,6 +111,38 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
     is_subscriber: number;
   }>;
 
+  // Comentários por parágrafo
+  const paragraphCommentsRaw = db.prepare(`
+    SELECT c.id, c.content, c.paragraph_number, c.created_at,
+           u.display_name, u.username, u.avatar_url,
+           sp.badge_label AS comment_badge,
+           CASE WHEN us.status IN ('active', 'trialing') THEN 1 ELSE 0 END AS is_subscriber
+    FROM comments c
+    JOIN users u ON u.id = c.user_id
+    LEFT JOIN user_subscriptions us ON us.user_id = u.id AND us.status IN ('active', 'trialing')
+    LEFT JOIN subscription_plans sp ON sp.id = us.plan_id
+    WHERE c.chapter_id = ? AND c.is_hidden = 0 AND c.paragraph_number IS NOT NULL
+    ORDER BY c.created_at DESC
+  `).all(safeChapter.id) as Array<{
+    id: string;
+    content: string;
+    paragraph_number: number;
+    created_at: string;
+    display_name: string;
+    username: string;
+    avatar_url: string | null;
+    comment_badge: string | null;
+    is_subscriber: number;
+  }>;
+
+  // Agrupa por parágrafo
+  const paragraphCommentsMap = new Map<number, typeof paragraphCommentsRaw>();
+  for (const pc of paragraphCommentsRaw) {
+    const arr = paragraphCommentsMap.get(pc.paragraph_number) || [];
+    arr.push(pc as any);
+    paragraphCommentsMap.set(pc.paragraph_number, arr);
+  }
+
 
   async function postComment(formData: FormData) {
     "use server";
@@ -177,7 +210,21 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
                 </figure>
               );
             }
-            return <p key={i}>{trimmed}</p>;
+            const paraComments = paragraphCommentsMap.get(i + 1) || [];
+            return (
+              <p key={i} className="group relative">
+                {trimmed}
+                <ParagraphComments
+                  paragraphIndex={i}
+                  chapterId={safeChapter.id}
+                  novelId={safeNovel.id}
+                  novelSlug={safeNovel.slug}
+                  chapterNumber={safeChapter.chapter_number}
+                  comments={paraComments as any}
+                  isLoggedIn={!!user}
+                />
+              </p>
+            );
           })}
         </div>
       </article>

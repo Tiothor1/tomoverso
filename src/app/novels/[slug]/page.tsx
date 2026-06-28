@@ -106,6 +106,7 @@ export default async function NovelPage({ params }: { params: Promise<{ slug: st
 
   const user = await getCurrentUser();
   const isFavorite = user ? !!db.prepare("SELECT 1 FROM favorites WHERE user_id = ? AND novel_id = ?").get(user.id, novelRow.id) : false;
+  const isFollowing = user && author ? !!db.prepare("SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?").get(user.id, novelRow.author_id) : false;
 
   return (
     <div>
@@ -151,6 +152,24 @@ export default async function NovelPage({ params }: { params: Promise<{ slug: st
                   <Button variant="outline" className="w-full" type="submit">
                     <Heart className={`h-4 w-4 mr-2 ${isFavorite ? "fill-red-500 text-red-500" : ""}`} />
                     {isFavorite ? "Favoritado" : "Favoritar"}
+                  </Button>
+                </form>
+              )}
+              {user && author && (
+                <form action={async () => {
+                  "use server";
+                  const dbase = getDb();
+                  const cur = await getCurrentUser();
+                  if (!cur) return;
+                  if (isFollowing) {
+                    dbase.prepare("DELETE FROM follows WHERE follower_id = ? AND following_id = ?").run(cur.id, novelRow.author_id);
+                  } else {
+                    dbase.prepare("INSERT INTO follows (follower_id, following_id) VALUES (?, ?)").run(cur.id, novelRow.author_id);
+                  }
+                  revalidatePath(`/novels/${slug}`);
+                }}>
+                  <Button variant="outline" className="w-full" type="submit" size="sm">
+                    {isFollowing ? "Seguindo" : "Seguir autor"}
                   </Button>
                 </form>
               )}
