@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import AdminSecretoLogin from "./login";
 
 export const dynamic = "force-dynamic";
-const SECRET = process.env.SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
+const SECRET = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
 
 export default async function AdminSecretoPage() {
   ensureAdminAuthTable();

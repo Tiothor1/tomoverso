@@ -67,9 +67,11 @@ export default function AdminSecretoLogin() {
     }
 
     // Store admin session token
-    document.cookie = `admin_validated=1; path=/; max-age=3600; SameSite=Strict`;
-    router.refresh();
-    window.location.href = window.location.pathname;
+    document.cookie = `admin_validated=1; path=/; max-age=3600; SameSite=Lax`;
+    sessionStorage.removeItem("admin_user_id");
+    // Pequeno delay pra garantir que o cookie foi salvo
+    await new Promise(r => setTimeout(r, 100));
+    window.location.href = window.location.href;
   }
 
   return (
