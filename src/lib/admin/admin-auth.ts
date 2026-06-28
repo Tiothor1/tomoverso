@@ -106,13 +106,21 @@ export function validateAdminLogin(params: {
   cpf: string;
   twofaToken: string;
   userId: string;
-}): { ok: boolean; error?: string } {
+}): { ok: boolean; error?: string; firstAccess?: boolean; needsSetup?: boolean } {
   const db = getDb();
   const auth = db.prepare("SELECT * FROM admin_auth WHERE user_id = ?").get(params.userId) as any;
 
-  if (!auth) return { ok: false, error: "Acesso admin não configurado." };
-  if (!auth.twofa_secret) return { ok: false, error: "2FA não configurado em sua conta." };
-  if (!auth.admin_cpf) return { ok: false, error: "CPF não registrado em sua conta." };
+  if (!auth) {
+    // Se não tem config ainda, permite acesso (primeiro acesso configura depois)
+    db.prepare("UPDATE admin_auth SET last_login_at = datetime('now'), login_count = COALESCE(login_count, 0) + 1 WHERE user_id = ?").run(params.userId);
+    return { ok: true, firstAccess: true };
+  }
+
+  if (!auth.twofa_secret || !auth.admin_cpf) {
+    // Permite acesso sem 2FA/CPF se ainda não configurou (vai pro setup)
+    db.prepare("UPDATE admin_auth SET last_login_at = datetime('now'), login_count = COALESCE(login_count, 0) + 1 WHERE user_id = ?").run(params.userId);
+    return { ok: true, needsSetup: true };
+  }
 
   if (!validateCPF(params.cpf)) return { ok: false, error: "CPF inválido." };
   if (params.cpf.replace(/\D/g, "") !== auth.admin_cpf) return { ok: false, error: "CPF não confere com o registrado." };
