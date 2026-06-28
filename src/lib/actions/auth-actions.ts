@@ -188,7 +188,15 @@ export async function signupAction(formData: FormData): Promise<ActionResult> {
 
   // Envia codigo de verificacao (fire-and-forget)
   const { sendVerificationCode } = await import("@/lib/verify-email");
-  sendVerificationCode(email).catch(() => {});
+  const sent = await sendVerificationCode(email).catch(() => false);
+
+  if (!sent) {
+    // Sem email configurado: auto-verifica o email
+    db.prepare("UPDATE users SET email_verified = 1 WHERE id = ?").run(id);
+    await createPersistentSession(db, user);
+    revalidatePath("/", "layout");
+    return { ok: true, redirect: "/dashboard" };
+  }
 
   revalidatePath("/", "layout");
   return { ok: true, redirect: `/auth/verify?email=${encodeURIComponent(email)}` };

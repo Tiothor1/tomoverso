@@ -72,11 +72,6 @@ export async function sendEmail(params: {
     }
   }
 
-  // Dev mode: log no console
-  console.log("\n========== EMAIL (dev) ==========");
-  console.log(`To: ${to}`);
-  console.log(`Subject: ${subject}`);
-  console.log(`Body: ${html.replace(/<[^>]+>/g, "").substring(0, 500)}`);
-  console.log("=================================\n");
-  return true; // dev mode sempre "envia"
+  // Dev mode: sem email configurado
+  return false; // indica que nao enviou — o sistema auto-verifica
 }
