@@ -6,33 +6,23 @@
 REPROVADO / BLOQUEADO
 ```
 
-O Capítulo 2 não pode ser aprovado porque o candidato visual completo não existe. A geração parou em 4/22 blocos devido a créditos insuficientes na Pollo.
+Não há aprovação possível. A tentativa de retomada de 2026-06-27 22:10:05 -0300 falhou antes do bloco 05 por falta de créditos na Pollo.
 
 ## Notas completas
 
-Não há notas visuais finais válidas. A auditoria final exige o scroll completo, preview e HTML. Esses arquivos não foram gerados.
+Não aplicável. O capítulo possui apenas 4/22 blocos e não possui scroll/preview/HTML.
 
 ## Blocos mais fortes
 
-Ainda não avaliado. Apenas 4/22 blocos existem.
+Ainda não avaliado como capítulo completo.
 
 ## Blocos mais fracos
 
-Ainda não avaliado. Capítulo incompleto.
+Ainda não avaliado como capítulo completo.
 
-## Problemas corrigidos do Capítulo 1
+## Continuidade para Capítulo 3
 
-Corrigidos no planejamento/prompts, mas não validados visualmente ainda:
-
-- Darian mais distinto.
-- Soren mais icônico/institucional.
-- Balões mais curtos.
-- Mistério do Cicatrizário mais central.
-- Estrutura com mais variação visual que o Capítulo 1.
-
-## Continuidade deixada para Capítulo 3
-
-Planejada em `chapter2-continuity-state.md`, mas ainda não validada visualmente.
+Planejada em `chapter2-continuity-state.md`, mas não aprovada visualmente.
 
 ## Pode avançar para Capítulo 3?
 
@@ -40,10 +30,8 @@ Planejada em `chapter2-continuity-state.md`, mas ainda não validada visualmente
 NÃO
 ```
 
-É preciso concluir o Capítulo 2 visual, compor o scroll e passar no QA antes de avançar.
-
 ## Motivo exato
 
 ```txt
-Créditos insuficientes na Pollo; apenas 4/22 blocos foram gerados.
+produção bloqueada por backend/créditos antes de completar todos os blocos
 ```

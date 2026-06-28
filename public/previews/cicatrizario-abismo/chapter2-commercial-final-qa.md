@@ -6,13 +6,14 @@
 NÃO EXECUTADO / BLOQUEADO
 ```
 
-O QA visual final não pode ser executado porque o candidato comercial completo não existe. A geração parou em 4/22 blocos por falta de créditos na Pollo.
+A retomada de 2026-06-27 22:10:05 -0300 falhou antes de gerar o bloco 05 porque a Pollo retornou falta de créditos. O QA visual final continua impossível porque o candidato completo não existe.
 
-## Critério de integridade antes do QA
+## Integridade antes do QA
 
 | Item | Resultado |
 |---|---|
 | 18–24 blocos gerados | FALHOU — 4/22 |
+| Blocos 05–22 | FALTANDO |
 | scroll final criado | FALHOU |
 | preview criado | FALHOU |
 | HTML criado | FALHOU |
@@ -20,7 +21,7 @@ O QA visual final não pode ser executado porque o candidato comercial completo 
 
 ## Notas solicitadas
 
-Como o capítulo não foi completado, notas visuais finais seriam enganosas. Status por categoria:
+Notas finais continuam inválidas até existir scroll completo.
 
 | Categoria | Nota |
 |---|---:|
@@ -42,8 +43,8 @@ Como o capítulo não foi completado, notas visuais finais seriam enganosas. Sta
 | Soren icônico | N/A |
 | Mistério do Cicatrizário | N/A |
 
-## Motivo da reprovação
+## Motivo
 
 ```txt
-Créditos insuficientes na Pollo; apenas 4/22 blocos foram gerados.
+create HTTP 403: Not enough credits. Please add more.
 ```
