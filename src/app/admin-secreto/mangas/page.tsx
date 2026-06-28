@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { ArrowLeft, Activity, Search, Bookmark } from "lucide-react";
+import { ArrowLeft, Activity, Search, Bookmark, Trash2 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { Input } from "@/components/ui/input";
@@ -10,6 +10,17 @@ import { Badge } from "@/components/ui/badge";
 
 export const dynamic = "force-dynamic";
 const SP = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
+
+async function deleteMangaAction(formData: FormData) {
+  "use server";
+  const admin = await getCurrentUser();
+  if (!admin || admin.role !== "admin") return;
+  const id = formData.get("manga_id") as string;
+  if (!id) return;
+  const db = getDb();
+  db.prepare("DELETE FROM manga_chapters WHERE manga_id = ?").run(id);
+  db.prepare("DELETE FROM mangas WHERE id = ?").run(id);
+}
 
 export default async function AdminMangasPage(props: { searchParams?: Promise<{ q?: string }> }) {
   const cookieStore = await cookies();
@@ -53,8 +64,14 @@ export default async function AdminMangasPage(props: { searchParams?: Promise<{ 
                     {m.author || "Autor desconhecido"} · {ccMap[m.id] || 0} caps · {m.slug}
                   </p>
                 </div>
-                <div className="text-right shrink-0 text-xs text-red-400/40">
+                <div className="text-right shrink-0 text-xs text-red-400/40 flex items-center gap-2">
                   <p>{m.updated_at?.slice(0, 10)}</p>
+                  <form action={deleteMangaAction}>
+                    <input type="hidden" name="manga_id" value={m.id} />
+                    <Button type="submit" size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500/30 hover:text-red-400" title="Excluir mangá" onClick={async (e) => { if (!confirm('Excluir este mangá permanentemente?')) e.preventDefault() }}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </form>
                 </div>
               </div>
             </div>

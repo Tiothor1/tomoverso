@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { ArrowLeft, BookOpen, Eye, Star, Search, Calendar, Ban, CheckCircle } from "lucide-react";
+import { ArrowLeft, BookOpen, Eye, Star, Search, Calendar, Ban, CheckCircle, ExternalLink, Trash2 } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,19 @@ import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 const SP = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
+
+async function deleteNovelAction(formData: FormData) {
+  "use server";
+  const admin = await getCurrentUser();
+  if (!admin || admin.role !== "admin") return;
+  const id = formData.get("novel_id") as string;
+  if (!id) return;
+  const db = getDb();
+  db.prepare("DELETE FROM chapters WHERE novel_id = ?").run(id);
+  db.prepare("DELETE FROM comments WHERE novel_id = ?").run(id);
+  db.prepare("DELETE FROM bookmarks WHERE chapter_id IN (SELECT id FROM chapters WHERE novel_id = ?)").run(id);
+  db.prepare("DELETE FROM novels WHERE id = ?").run(id);
+}
 
 export default async function AdminNovelsPage(props: { searchParams?: Promise<{ q?: string }> }) {
   const cookieStore = await cookies();
@@ -53,9 +66,17 @@ export default async function AdminNovelsPage(props: { searchParams?: Promise<{ 
                     {n.author_name} · {ccMap[n.id] || 0} caps · {n.views?.toLocaleString() || 0} views · {n.slug}
                   </p>
                 </div>
-                <div className="text-right shrink-0 text-xs text-red-400/40">
+                <div className="text-right shrink-0 text-xs text-red-400/40 flex items-center gap-2">
                   <p>{n.updated_at?.slice(0, 10)}</p>
-                  <Link href={`/novels/${n.slug}`} className="text-red-500 hover:text-red-400">ver</Link>
+                  <div className="flex gap-1">
+                    <Link href={`/novels/${n.slug}`} target="_blank" className="text-red-500/40 hover:text-red-400 p-1"><ExternalLink className="h-3.5 w-3.5" /></Link>
+                    <form action={deleteNovelAction}>
+                      <input type="hidden" name="novel_id" value={n.id} />
+                      <Button type="submit" size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500/30 hover:text-red-400" title="Excluir novel" onClick={async (e) => { if (!confirm('Excluir esta novel permanentemente?')) e.preventDefault() }}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>
