@@ -50,11 +50,9 @@ export async function createNovelAction(formData: FormData) {
 
   const db = getDb();
 
-  // Limite de obras gratis: 3 works (novels + mangas) sem plano Autor
-  const userWorkCount = (db.prepare(`
-    SELECT (SELECT COUNT(*) FROM novels WHERE author_id = ?) +
-           (SELECT COUNT(*) FROM mangas WHERE author_id = ?) AS total
-  `).get(user.id, user.id) as { total: number }).total as number;
+  // Limite de obras gratis: 3 works sem plano Autor
+  const userCount = db.prepare("SELECT COUNT(*) as c FROM novels WHERE author_id = ?").get(user.id) as { c: number };
+  const userWorkCount = userCount.c;
 
   const isAuthor = db.prepare(`
     SELECT 1 FROM user_subscriptions us
