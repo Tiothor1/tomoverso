@@ -35,6 +35,15 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // ── Secret Admin Path ─────────────────────────────────────────
+  const adminSecret = process.env.ADMIN_SECRET_PATH || "adm1n-t0m0v3rs0";
+  if (pathname === `/${adminSecret}` || pathname.startsWith(`/${adminSecret}/`)) {
+    const newPath = pathname.replace(`/${adminSecret}`, "/admin-secreto");
+    const url = request.nextUrl.clone();
+    url.pathname = newPath;
+    return NextResponse.rewrite(url);
+  }
+
   // ── Security Headers ───────────────────────────────────────────
   const response = NextResponse.next();
 
