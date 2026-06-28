@@ -19,19 +19,17 @@ export const dynamic = "force-dynamic";
 const SECRET = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
 
 export default async function AdminSecretoPage() {
-  ensureAdminAuthTable();
-
-  const cookieStore = await cookies();
-  const adminValidated = cookieStore.get("admin_validated");
-  if (!adminValidated || adminValidated.value !== "1") return <AdminSecretoLogin />;
-
-  const user = await getCurrentUser().catch(() => null);
-  if (!user || user.role !== "admin") return <AdminSecretoLogin />;
-
-  const db = getDb();
-  const has2FA = is2FAEnabled(user.id);
-  const cpf = getAdminCPF(user.id);
-  const needsSetup = !has2FA || !cpf;
+  try {
+    ensureAdminAuthTable();
+    const cookieStore = await cookies();
+    const adminValidated = cookieStore.get("admin_validated");
+    if (!adminValidated || adminValidated.value !== "1") return <AdminSecretoLogin />;
+    const user = await getCurrentUser().catch(() => null);
+    if (!user || user.role !== "admin") return <AdminSecretoLogin />;
+    const db = getDb();
+    const has2FA = is2FAEnabled(user.id);
+    const cpf = getAdminCPF(user.id);
+    const needsSetup = !has2FA || !cpf;
 
   const stats = {
     users: (db.prepare("SELECT COUNT(*) c FROM users").get() as any).c,
@@ -233,4 +231,18 @@ export default async function AdminSecretoPage() {
       </main>
     </div>
   );
+  } catch (e: any) {
+    console.error("Admin crash:", e);
+    return (
+      <div className="min-h-screen bg-gray-950 flex items-center justify-center p-8">
+        <div className="max-w-md text-center space-y-4">
+          <Shield className="h-12 w-12 text-red-400 mx-auto" />
+          <h1 className="text-xl text-red-200 font-bold">Erro no painel</h1>
+          <p className="text-sm text-red-400/60">Ocorreu um erro ao carregar o painel administrativo.</p>
+          <p className="text-xs text-red-500/40 font-mono">{String(e).slice(0, 200)}</p>
+          <a href={`/${SECRET}`} className="text-sm text-red-400 underline">Tentar novamente</a>
+        </div>
+      </div>
+    );
+  }
 }
