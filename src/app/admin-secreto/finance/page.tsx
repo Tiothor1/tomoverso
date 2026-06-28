@@ -15,16 +15,16 @@ export default async function AdminSecretoFinancePage() {
   const cookieStore = await cookies();
   const validated = cookieStore.get("admin_validated");
   if (!validated || validated.value !== "1") {
-    redirect(`/${process.env.ADMIN_SECRET_PATH || "adm1n-t0m0v3rs0"}`);
+    redirect(`/${process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f"}`);
   }
 
   const user = await getCurrentUser().catch(() => null);
   if (!user || user.role !== "admin") {
-    redirect(`/${process.env.ADMIN_SECRET_PATH || "adm1n-t0m0v3rs0"}`);
+    redirect(`/${process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f"}`);
   }
 
   const db = getDb();
-  const secretPath = process.env.ADMIN_SECRET_PATH || "adm1n-t0m0v3rs0";
+  const secretPath = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
 
   const totalSales = (db.prepare("SELECT COALESCE(SUM(amount_cents),0) FROM marketplace_payments WHERE status = 'approved'").get() as any)["COALESCE(SUM(amount_cents),0)"];
   const totalAuthorPayouts = (db.prepare("SELECT COALESCE(SUM(amount_cents),0) FROM withdrawal_requests WHERE status = 'paid'").get() as any)["COALESCE(SUM(amount_cents),0)"];

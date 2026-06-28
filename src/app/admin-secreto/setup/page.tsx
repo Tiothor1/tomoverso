@@ -24,7 +24,7 @@ async function setup2FAAction(formData: FormData) {
   setAdminCPF(user.id, cpf);
 
   // Re-grava o path para redirect
-  const secretPath = process.env.ADMIN_SECRET_PATH || "adm1n-t0m0v3rs0";
+  const secretPath = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
   redirect(`/${secretPath}`);
 }
 
@@ -34,13 +34,13 @@ export default async function AdminSecretoSetupPage() {
   const cookieStore = await cookies();
   const validated = cookieStore.get("admin_validated");
   if (!validated || validated.value !== "1") {
-    const secretPath = process.env.ADMIN_SECRET_PATH || "adm1n-t0m0v3rs0";
+    const secretPath = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
     redirect(`/${secretPath}`);
   }
 
   const user = await getCurrentUser().catch(() => null);
   if (!user || user.role !== "admin") {
-    const secretPath = process.env.ADMIN_SECRET_PATH || "adm1n-t0m0v3rs0";
+    const secretPath = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
     redirect(`/${secretPath}`);
   }
 
@@ -107,7 +107,7 @@ export default async function AdminSecretoSetupPage() {
                   if (!user2 || user2.role !== "admin") return;
                   const { base32: sec } = generate2FASecret(user2.id);
                   enable2FA(user2.id, sec);
-                  const sp = process.env.ADMIN_SECRET_PATH || "adm1n-t0m0v3rs0";
+                  const sp = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
                   redirect(`/${sp}/setup`);
                 }}>
                   <Button type="submit" size="sm" className="w-full bg-red-900 hover:bg-red-800 text-red-100">

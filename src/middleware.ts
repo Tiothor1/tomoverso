@@ -36,7 +36,7 @@ export function middleware(request: NextRequest) {
   }
 
   // ── Secret Admin Path ─────────────────────────────────────────
-  const adminSecret = process.env.ADMIN_SECRET_PATH || "adm1n-t0m0v3rs0";
+  const adminSecret = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
   if (pathname === `/${adminSecret}` || pathname.startsWith(`/${adminSecret}/`)) {
     const newPath = pathname.replace(`/${adminSecret}`, "/admin-secreto");
     const url = request.nextUrl.clone();
