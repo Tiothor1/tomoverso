@@ -40,7 +40,7 @@ export default async function AdminSecretoPage() {
     comments: (db.prepare("SELECT COUNT(*) c FROM comments").get() as any).c,
     sessions: (db.prepare("SELECT COUNT(*) c FROM sessions").get() as any).c,
     sellers: (db.prepare("SELECT COUNT(*) c FROM seller_profiles WHERE status='approved'").get() as any).c,
-    totalSales: (db.prepare("SELECT COALESCE(SUM(amount_cents),0) FROM marketplace_payments WHERE status='approved'").get() as any)["COALESCE(SUM(amount_cents),0)"],
+    totalSales: (db.prepare("SELECT COALESCE(SUM(gross_amount_cents),0) FROM marketplace_payments WHERE status='approved'").get() as any)["COALESCE(SUM(gross_amount_cents),0)"],
     pendingWithdrawals: (db.prepare("SELECT COUNT(*) c, COALESCE(SUM(amount_cents),0) total FROM withdrawal_requests WHERE status='pending'").get() as any),
     totalViews: (db.prepare("SELECT COALESCE(SUM(views),0) FROM novels").get() as any)["COALESCE(SUM(views),0)"],
   };
