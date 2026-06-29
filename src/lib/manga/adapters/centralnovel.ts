@@ -110,17 +110,18 @@ function parseSeriesDetail(html: string, slug: string): ParsedNovelDetail {
   }
 
   // Chapters: links /{slug}-volume-{V}-capitulo-{N}/ ou /{slug}-capitulo-{N}/
+  // ou /{slug}-ano-{A}-volume-{V}-capitulo-{N}/
   const chapterRegex = new RegExp(
-    `<a[^>]*href="https?://centralnovel\\.com/${escapeRegex(slug)}-?(volume-(\\d+)-)?capitulo-([0-9.]+)[a-z-]*/?"[^>]*>([\\s\\S]*?)</a>`,
+    `<a[^>]*href="https?://centralnovel\\.com/${escapeRegex(slug)}-?(ano-(\\d+)-)?(volume-(\\d+)-)?capitulo-([0-9.]+)[a-z-]*/?"[^>]*>([\\s\\S]*?)</a>`,
     "g"
   );
   const matches = [...html.matchAll(chapterRegex)];
   const chapters: ParsedNovelDetail["chapters"] = [];
   for (const m of matches) {
-    const number = parseFloat(m[3]);
+    const number = parseFloat(m[5]);
     if (isNaN(number)) continue;
-    const volume = m[2] ? parseInt(m[2], 10) : undefined;
-    const inner = stripTags(m[4]).trim();
+    const volume = m[4] ? parseInt(m[4], 10) : undefined;
+    const inner = stripTags(m[6]).trim();
     const title = inner.length > 1 && inner.length < 200 ? decodeEntities(inner) : `Capítulo ${number}`;
     // Slug: pega o que vem depois de /centralnovel.com/ na URL
     const urlMatch = m[0].match(/href="([^"]+)"/);
