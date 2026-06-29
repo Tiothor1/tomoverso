@@ -111,33 +111,32 @@ function parseSeriesDetail(html: string, slug: string): ParsedNovelDetail {
 
   // Chapters: links /{slug}-volume-{V}-capitulo-{N}/ ou /{slug}-capitulo-{N}/
   // ou /{slug}-ano-{A}-volume-{V}-capitulo-{N}/
-  const chapterRegex = new RegExp(
-    `<a[^>]*href="https?://centralnovel\\.com/${escapeRegex(slug)}-?(ano-(\\d+)-)?(volume-(\\d+)-)?capitulo-([0-9.]+)[a-z-]*/?"[^>]*>([\\s\\S]*?)</a>`,
-    "g"
-  );
-  const matches = [...html.matchAll(chapterRegex)];
+  // Alguns slugs têm data no final (-20230516) mas as URLs usam sem ela
+  const baseSlugs = [slug, slug.replace(/-\d{8}$/, "")];
   const chapters: ParsedNovelDetail["chapters"] = [];
-  for (const m of matches) {
-    const number = parseFloat(m[5]);
-    if (isNaN(number)) continue;
-    const volume = m[4] ? parseInt(m[4], 10) : undefined;
-    const inner = stripTags(m[6]).trim();
-    const title = inner.length > 1 && inner.length < 200 ? decodeEntities(inner) : `Capítulo ${number}`;
-    // Slug: pega o que vem depois de /centralnovel.com/ na URL
-    const urlMatch = m[0].match(/href="([^"]+)"/);
-    const urlPath = urlMatch ? urlMatch[1].replace(BASE + "/", "").replace(/\/$/, "") : "";
-    chapters.push({
-      number,
-      title,
-      slug: urlPath,
-      sourceUrl: `${BASE}/${urlPath}/`,
-      volume,
-    });
+  for (const baseSlug of [...new Set(baseSlugs)]) {
+    const chapterRegex = new RegExp(
+      `<a[^>]*href="https?://centralnovel\\.com/${escapeRegex(baseSlug)}-?(ano-(\\d+)-)?(volume-(\\d+)-)?capitulo-([0-9.]+)[a-z-]*/?"[^>]*>([\\s\\S]*?)</a>`,
+      "g"
+    );
+    const matches = [...html.matchAll(chapterRegex)];
+    for (const m of matches) {
+      const number = parseFloat(m[5]);
+      if (isNaN(number)) continue;
+      const volume = m[4] ? parseInt(m[4], 10) : undefined;
+      const inner = stripTags(m[6]).trim();
+      const title = inner.length > 1 && inner.length < 200 ? decodeEntities(inner) : `Capítulo ${number}`;
+      const urlMatch = m[0].match(/href="([^"]+)"/);
+      const urlPath = urlMatch ? urlMatch[1].replace(BASE + "/", "").replace(/\/$/, "") : "";
+      chapters.push({ number, title, slug: urlPath, sourceUrl: `${BASE}/${urlPath}/`, volume });
+    }
   }
 
+  // Remove itens com /pdf/ no slug
+  const filtered = chapters.filter(c => !c.slug.includes('/pdf/'));
   // Dedup
   const seen = new Set<number>();
-  const uniq = chapters.filter((c) => {
+  const uniq = filtered.filter((c) => {
     if (seen.has(c.number)) return false;
     seen.add(c.number);
     return true;
