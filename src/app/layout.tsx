@@ -49,6 +49,9 @@ export default function RootLayout({
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2780687772948357"
           crossOrigin="anonymous"
         />
+        <script dangerouslySetInnerHTML={{
+          __html: `(function(){try{var e=JSON.parse(localStorage.getItem('tomoverso-ui-theme')||'{}');var t=e.theme||'dark',c=e.color||'purple';document.documentElement.classList.add(t);document.documentElement.setAttribute('data-color',c);}catch(e){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-color','purple');}})()`
+        }} />
       </head>
       <body className="antialiased min-h-screen flex flex-col">
         <ThemeProvider defaultTheme="dark" defaultColor="purple">
