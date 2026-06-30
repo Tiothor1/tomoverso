@@ -32,7 +32,7 @@ export function ContinueReadingBanner() {
   if (!data || dismissed) return null;
 
   return (
-    <div className="border-b border-border/40 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
+    <div className="continue-reading-banner border-b border-border/40 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent">
       <div className="container mx-auto max-w-7xl px-4 py-3 flex items-center gap-4">
         <div className="p-2 rounded-md bg-primary/20 flex-shrink-0">
           <BookOpen className="h-5 w-5 text-primary" />

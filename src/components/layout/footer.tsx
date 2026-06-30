@@ -7,7 +7,7 @@ export async function Footer() {
   const config = getSiteConfig();
 
   return (
-    <footer className="mt-20 border-t border-border/40 bg-card/30">
+    <footer className="site-footer mt-20 border-t border-border/40 bg-card/30">
       <div className="container mx-auto max-w-7xl px-4 py-16">
         <div className="mb-12 grid grid-cols-2 gap-8 md:grid-cols-5">
           <div className="col-span-2 space-y-3 md:col-span-2">

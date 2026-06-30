@@ -361,6 +361,27 @@
   background: var(--accent);
 }
 
+body.feed-immersive {
+  overflow: hidden !important;
+  background: #030006;
+}
+
+body.feed-immersive .site-navbar,
+body.feed-immersive .site-footer,
+body.feed-immersive .continue-reading-banner {
+  display: none !important;
+}
+
+.feed-reels-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-padding-block: 0;
+}
+
+.feed-reels-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 /* Animações suaves */
 * {
   transition-property: background-color, border-color, color, fill, stroke;

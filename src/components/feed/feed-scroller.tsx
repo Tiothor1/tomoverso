@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { Loader2, Plus, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, ChevronUp, Home, Loader2, Plus, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FeedCard } from "@/components/feed/feed-card";
 import { FeedCommentDrawer } from "@/components/feed/feed-comment-drawer";
@@ -26,6 +27,12 @@ type Props = {
   isLoggedIn: boolean;
 };
 
+function isTypingTarget(target: EventTarget | null) {
+  if (!(target instanceof HTMLElement)) return false;
+  const tag = target.tagName.toLowerCase();
+  return tag === "input" || tag === "textarea" || tag === "select" || target.isContentEditable;
+}
+
 export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
   const [items, setItems] = useState<FeedItem[]>(initialFeed.items);
   const [nextCursor, setNextCursor] = useState<number | null>(initialFeed.nextCursor);
@@ -33,49 +40,135 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
   const [commentItem, setCommentItem] = useState<FeedItem | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const [isLoadingMore, startLoadMore] = useTransition();
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const loadingMoreRef = useRef(false);
   const seenRef = useRef<Set<string>>(new Set());
+  const viewTimersRef = useRef<Map<string, number>>(new Map());
 
   const itemIds = useMemo(() => items.map((i) => i.id).join("|"), [items]);
 
   useEffect(() => {
-    if (typeof IntersectionObserver === "undefined") return;
-    const sentinel = sentinelRef.current;
-    if (!sentinel || nextCursor === null) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) loadMore();
-      },
-      { rootMargin: "900px 0px" }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [nextCursor, sessionId]);
+    const previousOverflow = document.body.style.overflow;
+    const previousOverscroll = document.documentElement.style.overscrollBehavior;
+    document.body.classList.add("feed-immersive");
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overscrollBehavior = "none";
+    return () => {
+      document.body.classList.remove("feed-immersive");
+      document.body.style.overflow = previousOverflow;
+      document.documentElement.style.overscrollBehavior = previousOverscroll;
+    };
+  }, []);
 
   useEffect(() => {
-    if (typeof document === "undefined" || typeof IntersectionObserver === "undefined") return;
-    const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-feed-card='true']"));
+    if (!message) return;
+    const timer = window.setTimeout(() => setMessage(""), 4200);
+    return () => window.clearTimeout(timer);
+  }, [message]);
+
+  async function loadMore() {
+    if (nextCursor === null || loadingMoreRef.current) return;
+    loadingMoreRef.current = true;
+    setIsLoadingMore(true);
+    try {
+      const page = await getFeedPageAction({ cursor: nextCursor, limit: 8, sessionId });
+      setSessionId(page.sessionId);
+      setItems((current) => {
+        const existing = new Set(current.map((item) => item.id));
+        const fresh = page.items.filter((item) => !existing.has(item.id));
+        return fresh.length ? [...current, ...fresh] : current;
+      });
+      setNextCursor(page.nextCursor);
+    } catch (error) {
+      console.error("[feed] loadMore failed", error);
+      setMessage("Não foi possível carregar mais cards agora.");
+    } finally {
+      loadingMoreRef.current = false;
+      setIsLoadingMore(false);
+    }
+  }
+
+  function scrollToIndex(index: number) {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const cards = Array.from(scroller.querySelectorAll<HTMLElement>("[data-feed-card='true']"));
+    const target = cards[Math.max(0, Math.min(index, cards.length - 1))];
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  useEffect(() => {
+    if (items.length && activeIndex >= Math.max(0, items.length - 3)) {
+      void loadMore();
+    }
+  }, [activeIndex, items.length, nextCursor, sessionId]);
+
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (isTypingTarget(event.target) || commentItem || createOpen) return;
+      const nextKeys = ["ArrowDown", "PageDown", " "];
+      const previousKeys = ["ArrowUp", "PageUp"];
+      if (nextKeys.includes(event.key)) {
+        event.preventDefault();
+        scrollToIndex(activeIndex + 1);
+      }
+      if (previousKeys.includes(event.key)) {
+        event.preventDefault();
+        scrollToIndex(activeIndex - 1);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [activeIndex, commentItem, createOpen, items.length]);
+
+  useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const cards = Array.from(scroller.querySelectorAll<HTMLElement>("[data-feed-card='true']"));
     if (!cards.length) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (!entry.isIntersecting || entry.intersectionRatio < 0.65) continue;
           const el = entry.target as HTMLElement;
+          const position = Number(el.dataset.feedIndex || 0);
+          if (entry.isIntersecting && entry.intersectionRatio >= 0.72) {
+            setActiveIndex(position);
+          }
+
           const itemType = el.dataset.feedItemType;
           const itemId = el.dataset.feedItemId;
-          const position = Number(el.dataset.feedIndex || 0);
           if (!itemType || !itemId) continue;
           const key = `${itemType}:${itemId}:${sessionId}`;
-          if (seenRef.current.has(key)) continue;
-          seenRef.current.add(key);
-          registerFeedImpressionAction({ itemType, itemId, position, sessionId }).catch(() => undefined);
+
+          if (!entry.isIntersecting || entry.intersectionRatio < 0.72) {
+            const timer = viewTimersRef.current.get(key);
+            if (timer) window.clearTimeout(timer);
+            viewTimersRef.current.delete(key);
+            continue;
+          }
+
+          if (seenRef.current.has(key) || viewTimersRef.current.has(key)) continue;
+          const timer = window.setTimeout(() => {
+            if (seenRef.current.has(key)) return;
+            seenRef.current.add(key);
+            viewTimersRef.current.delete(key);
+            registerFeedImpressionAction({ itemType, itemId, position, sessionId }).catch(() => undefined);
+          }, 800);
+          viewTimersRef.current.set(key, timer);
         }
       },
-      { threshold: [0.65] }
+      { root: scroller, threshold: [0, 0.5, 0.72, 0.9] }
     );
+
     cards.forEach((card) => observer.observe(card));
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      viewTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+      viewTimersRef.current.clear();
+    };
   }, [itemIds, sessionId]);
 
   function patchItem(item: FeedItem, patch: Partial<FeedItem>) {
@@ -103,38 +196,6 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
     return false;
   }
 
-  function loadMore() {
-    if (nextCursor === null || isLoadingMore) return;
-    startLoadMore(async () => {
-      try {
-        const page = await getFeedPageAction({ cursor: nextCursor, limit: 8, sessionId });
-        setSessionId(page.sessionId);
-        setItems((current) => {
-          const existing = new Set(current.map((item) => item.id));
-          const fresh = page.items.filter((item) => !existing.has(item.id));
-          return [...current, ...fresh];
-        });
-        setNextCursor(page.nextCursor);
-      } catch (error) {
-        console.error("[feed] loadMore failed", error);
-        setNextCursor(null);
-        setMessage("Não foi possível carregar mais cards agora.");
-      }
-    });
-  }
-
-  async function refreshFirstPage() {
-    try {
-      const page = await getFeedPageAction({ cursor: 0, limit: Math.max(8, items.length), sessionId });
-      setItems(page.items);
-      setNextCursor(page.nextCursor);
-      setSessionId(page.sessionId);
-    } catch (error) {
-      console.error("[feed] refreshFirstPage failed", error);
-      setMessage("Não foi possível atualizar o feed agora.");
-    }
-  }
-
   async function onLike(item: FeedItem) {
     if (!isLoggedIn) {
       setMessage("Entra na conta pra curtir.");
@@ -144,13 +205,19 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
       state: { ...item.state, liked: !item.state.liked },
       counts: { ...item.counts, likes: Math.max(0, item.counts.likes + (item.state.liked ? -1 : 1)) },
     });
-    const response = await toggleFeedLikeAction(item.targetType, item.targetId);
-    if (!response?.ok) {
+    try {
+      const response = await toggleFeedLikeAction(item.targetType, item.targetId);
+      if (!response?.ok) {
+        patchItem(item, { counts: item.counts, state: item.state });
+        requireLoginIfNeeded(response);
+        return;
+      }
+      patchCountsAndState(item, response, { liked: "liked" in response ? !!response.liked : item.state.liked });
+    } catch (error) {
+      console.error("[feed] like failed", error);
       patchItem(item, { counts: item.counts, state: item.state });
-      requireLoginIfNeeded(response);
-      return;
+      setMessage("Não foi possível curtir agora.");
     }
-    patchCountsAndState(item, response, { liked: "liked" in response ? !!response.liked : item.state.liked });
   }
 
   async function onSave(item: FeedItem) {
@@ -162,13 +229,19 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
       state: { ...item.state, saved: !item.state.saved },
       counts: { ...item.counts, favorites: Math.max(0, item.counts.favorites + (item.state.saved ? -1 : 1)) },
     });
-    const response = await toggleFeedSaveAction(item.targetType, item.targetId, item.work ? { type: item.work.type, id: item.work.id } : undefined);
-    if (!response?.ok) {
+    try {
+      const response = await toggleFeedSaveAction(item.targetType, item.targetId, item.work ? { type: item.work.type, id: item.work.id } : undefined);
+      if (!response?.ok) {
+        patchItem(item, { counts: item.counts, state: item.state });
+        requireLoginIfNeeded(response);
+        return;
+      }
+      patchCountsAndState(item, response, { saved: "saved" in response ? !!response.saved : item.state.saved });
+    } catch (error) {
+      console.error("[feed] save failed", error);
       patchItem(item, { counts: item.counts, state: item.state });
-      requireLoginIfNeeded(response);
-      return;
+      setMessage("Não foi possível salvar agora.");
     }
-    patchCountsAndState(item, response, { saved: "saved" in response ? !!response.saved : item.state.saved });
   }
 
   async function onFollow(item: FeedItem) {
@@ -177,9 +250,14 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
       return;
     }
     if (!item.user) return;
-    const response = await toggleFeedFollowAction(item.user.id);
-    if (!response?.ok) return requireLoginIfNeeded(response);
-    setItems((current) => current.map((entry) => (entry.user?.id === item.user?.id ? { ...entry, user: entry.user ? { ...entry.user, isFollowed: "following" in response ? response.following : entry.user.isFollowed } : null } : entry)));
+    try {
+      const response = await toggleFeedFollowAction(item.user.id);
+      if (!response?.ok) return requireLoginIfNeeded(response);
+      setItems((current) => current.map((entry) => (entry.user?.id === item.user?.id ? { ...entry, user: entry.user ? { ...entry.user, isFollowed: "following" in response ? response.following : entry.user.isFollowed } : null } : entry)));
+    } catch (error) {
+      console.error("[feed] follow failed", error);
+      setMessage("Não foi possível seguir agora.");
+    }
   }
 
   async function onShare(item: FeedItem) {
@@ -210,8 +288,7 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
       const response = await repostFeedItemAction(item.targetType, item.targetId, `Recomendo: ${item.title}`);
       if (!response?.ok) return requireLoginIfNeeded(response);
       patchItem(item, { counts: "counts" in response ? response.counts || item.counts : item.counts });
-      setMessage("Republicado no feed.");
-      await refreshFirstPage();
+      setMessage("Republicado. Ele entra no feed em instantes.");
     } catch (error) {
       console.error("[feed] repost failed", error);
       setMessage("Não foi possível republicar agora.");
@@ -223,6 +300,7 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
     try {
       const response = await markFeedItemAction(item.targetType, item.targetId, "not_interested");
       if (!response?.ok) requireLoginIfNeeded(response);
+      if (items.length < 5) void loadMore();
     } catch (error) {
       console.error("[feed] hide failed", error);
       setMessage("Card ocultado só nesta sessão.");
@@ -256,8 +334,7 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
     try {
       const response = await createFeedPostAction(input);
       if (!response?.ok) return requireLoginIfNeeded(response);
-      setMessage("Post publicado.");
-      await refreshFirstPage();
+      setMessage("Post publicado. Ele entra no feed em instantes.");
       return true;
     } catch (error) {
       console.error("[feed] createPost failed", error);
@@ -267,27 +344,44 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
   }
 
   return (
-    <div className="relative bg-black text-white">
-      <div className="fixed bottom-5 left-1/2 z-[90] flex -translate-x-1/2 gap-2 rounded-full border border-white/10 bg-black/50 p-2 shadow-2xl backdrop-blur-xl md:bottom-7">
-        <Button type="button" size="sm" onClick={() => setCreateOpen(true)} className="rounded-full bg-white text-black hover:bg-fuchsia-100">
-          <Plus className="mr-1 h-4 w-4" /> Postar
-        </Button>
-        <Button type="button" size="sm" variant="secondary" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="rounded-full bg-white/10 text-white hover:bg-white/15">
-          <Sparkles className="mr-1 h-4 w-4" /> Pra você
-        </Button>
+    <section className="fixed inset-0 z-[60] overflow-hidden bg-[#030006] text-white" aria-label="Feed Tomoverso em tela cheia">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(217,70,239,0.22),transparent_32%),radial-gradient(circle_at_10%_80%,rgba(124,58,237,0.20),transparent_30%),#030006]" />
+
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[90] flex justify-center px-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+        <div className="pointer-events-auto flex w-full max-w-[42rem] items-center justify-between gap-2 rounded-full border border-white/10 bg-black/35 p-1.5 shadow-2xl backdrop-blur-2xl">
+          <Button asChild size="sm" variant="ghost" className="rounded-full text-white hover:bg-white/10 hover:text-white">
+            <Link href="/">
+              <Home className="mr-1.5 h-4 w-4" /> Tomoverso
+            </Link>
+          </Button>
+          <div className="hidden min-w-0 flex-1 items-center justify-center text-center text-[11px] font-black uppercase tracking-[0.22em] text-white/50 sm:flex">
+            {items.length ? `${activeIndex + 1} / ${items.length}` : "Feed"}
+          </div>
+          <div className="flex items-center gap-1">
+            <Button type="button" size="sm" variant="ghost" onClick={() => scrollToIndex(activeIndex - 1)} className="hidden rounded-full text-white hover:bg-white/10 hover:text-white sm:inline-flex" aria-label="Card anterior">
+              <ChevronUp className="h-4 w-4" />
+            </Button>
+            <Button type="button" size="sm" variant="ghost" onClick={() => scrollToIndex(activeIndex + 1)} className="hidden rounded-full text-white hover:bg-white/10 hover:text-white sm:inline-flex" aria-label="Próximo card">
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+            <Button type="button" size="sm" onClick={() => setCreateOpen(true)} className="rounded-full bg-white px-3 font-black text-black hover:bg-fuchsia-100">
+              <Plus className="mr-1 h-4 w-4" /> Postar
+            </Button>
+          </div>
+        </div>
       </div>
 
       {message ? (
         <button
           type="button"
           onClick={() => setMessage("")}
-          className="fixed left-1/2 top-20 z-[150] max-w-[90vw] -translate-x-1/2 rounded-full border border-white/10 bg-zinc-950 px-4 py-2 text-sm font-bold text-white shadow-2xl"
+          className="fixed left-1/2 top-[calc(env(safe-area-inset-top)+4.5rem)] z-[150] max-w-[90vw] -translate-x-1/2 rounded-full border border-white/10 bg-zinc-950/90 px-4 py-2 text-sm font-bold text-white shadow-2xl backdrop-blur-xl"
         >
           {message}
         </button>
       ) : null}
 
-      <div className="h-[calc(100dvh-4rem)] snap-y snap-mandatory overflow-y-auto scroll-smooth bg-black">
+      <div ref={scrollerRef} className="feed-reels-scroll relative z-10 h-[100dvh] w-full snap-y snap-mandatory overflow-y-auto overscroll-y-contain scroll-smooth">
         {items.length ? (
           items.map((item, index) => (
             <FeedCard
@@ -304,18 +398,27 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
             />
           ))
         ) : (
-          <div className="flex min-h-[calc(100dvh-4rem)] items-center justify-center p-6 text-center">
-            <div className="max-w-md rounded-[2rem] border border-white/10 bg-white/[0.04] p-8">
+          <div className="flex h-[100dvh] snap-start items-center justify-center p-6 text-center">
+            <div className="max-w-md rounded-[2rem] border border-white/10 bg-white/[0.06] p-8 shadow-2xl backdrop-blur-xl">
               <Sparkles className="mx-auto mb-4 h-10 w-10 text-fuchsia-300" />
-              <h2 className="font-heading text-2xl font-black">Feed vazio por enquanto</h2>
-              <p className="mt-2 text-white/60">Quando houver obras, posts ou interações, o recomendador monta sua fila aqui.</p>
+              <h2 className="font-heading text-2xl font-black">Ainda não há recomendações suficientes</h2>
+              <p className="mt-2 text-white/65">Explore algumas obras para personalizar seu feed.</p>
+              <Button asChild className="mt-6 rounded-full bg-white text-black hover:bg-fuchsia-100">
+                <Link href="/explore">Explorar obras</Link>
+              </Button>
             </div>
           </div>
         )}
+      </div>
 
-        <div ref={sentinelRef} className="flex h-24 items-center justify-center bg-black text-white/50">
-          {isLoadingMore ? <Loader2 className="h-5 w-5 animate-spin" /> : nextCursor === null ? "Fim do feed por agora" : "Carregando mais..."}
+      {isLoadingMore ? (
+        <div className="pointer-events-none fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] left-1/2 z-[95] flex -translate-x-1/2 items-center gap-2 rounded-full border border-white/10 bg-black/55 px-3 py-2 text-xs font-bold text-white/80 shadow-2xl backdrop-blur-xl">
+          <Loader2 className="h-4 w-4 animate-spin" /> Carregando mais
         </div>
+      ) : null}
+
+      <div className="pointer-events-none fixed bottom-4 right-4 z-[80] hidden rounded-full border border-white/10 bg-black/35 px-3 py-1.5 text-[11px] font-bold text-white/40 backdrop-blur-xl xl:block">
+        ↑ ↓ para navegar
       </div>
 
       <FeedCommentDrawer
@@ -327,6 +430,6 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
         sendComment={sendComment}
       />
       <FeedCreatePostModal open={createOpen} isLoggedIn={isLoggedIn} workOptions={workOptions} onClose={() => setCreateOpen(false)} onCreate={createPost} />
-    </div>
+    </section>
   );
 }

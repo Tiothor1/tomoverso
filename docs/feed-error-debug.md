@@ -107,6 +107,93 @@ curl -sS -o .feed-prod.html -w "%{http_code}" https://tomoverso.vercel.app/feed
 
 Observação: `next build` ainda mostra o aviso existente de `src/lib/email.ts` sobre `nodemailer` opcional, mas compila com sucesso.
 
+## Correção UX Shorts/Reels aplicada em 2026-06-30
+
+### Sintoma visual real
+
+Mesmo com `/feed` abrindo sem erro, a experiência ainda parecia uma landing page/lista:
+
+- o layout dependia do header/footer globais;
+- a rota tinha altura `calc(100dvh - 4rem)`, então o footer aparecia depois do feed;
+- o contêiner era uma página rolável comum;
+- cada card ocupava uma seção, mas sem shell imersivo real;
+- action rail ficava dentro do fluxo do card em vez de se comportar como rail fixo do card atual;
+- fechar comentários/criar post precisava preservar o scroll do card ativo.
+
+### Causa UX
+
+A causa não era banco, migration, auth nem Vercel. Era layout/client component:
+
+- `src/app/layout.tsx` sempre renderiza `Navbar`, `ContinueReadingBanner` e `Footer` para todas as rotas;
+- `/feed` não colocava a experiência acima do layout global em tela cheia;
+- `FeedScroller` usava `h-[calc(100dvh-4rem)]`, herdando a mentalidade de página com navbar;
+- `FeedCard` tinha slide vertical, mas o frame desktop não estava isolado como um celular centralizado;
+- o carregamento infinito existia, mas era acionado por sentinel/fim de lista, reforçando a sensação de página comprida.
+
+### Correção UX
+
+- `FeedScroller` virou shell fixo `100dvh`, com `body.feed-immersive`, `overflow: hidden`, scroll interno e snap obrigatório.
+- `Navbar`, `Footer` e `ContinueReadingBanner` receberam classes (`site-navbar`, `site-footer`, `continue-reading-banner`) e são escondidos só quando `body.feed-immersive` está ativo.
+- `FeedCard` agora é um slide `100dvh` com card vertical centralizado no desktop (`520px`) e full-screen no mobile.
+- Action rail fica ancorada ao card: ao lado no desktop, lateral direita no mobile.
+- O feed carrega mais itens antes do fim quando o usuário se aproxima dos últimos cards, sem recarregar a página e sem botão obrigatório.
+- Teclado no desktop: `ArrowDown`, `PageDown` e espaço avançam; `ArrowUp`/`PageUp` voltam.
+- Impressões/views só registram após o card ficar visível por ~800ms.
+- Comentários e criar post abrem overlay/modal sem resetar o scroll.
+- `like`, `save` e `follow` agora também têm `try/catch` no client para não gerar rejection sem tratamento.
+- Botões da action rail receberam `aria-label` real para acessibilidade/teste.
+
+### Verificação UX local controlada
+
+Todos os comandos foram rodados separadamente com timeout/log. Servidores `dev`/`start` foram iniciados em background, testados e finalizados.
+
+```text
+npm run migrate                 PASS exit 0
+npx tsc --noEmit                PASS exit 0
+npm run build                   PASS exit 0
+GET /feed em npm run start      PASS HTTP 200
+GET /feed em npm run dev        PASS HTTP 200
+```
+
+Playwright desktop `1365x768`:
+
+```text
+PASS cards>=8
+PASS body immersive
+PASS snap mandatory
+PASS card fills viewport height
+PASS footer hidden
+PASS navbar hidden
+PASS no app error
+PASS keyboard moved feed
+PASS comment dialog opens
+PASS comment no reset
+PASS create modal opens
+PASS like no reset
+PASS desktop frame vertical width: 520px
+PASS desktop rail beside card
+```
+
+Playwright mobile `390x844`:
+
+```text
+PASS cards>=8
+PASS body immersive
+PASS snap mandatory
+PASS card fills viewport height
+PASS footer hidden
+PASS navbar hidden
+PASS no app error
+PASS mobile frame full width
+PASS mobile rail in viewport
+PASS mobile CTA visible
+PASS comment dialog opens/no reset
+PASS create modal opens
+PASS like no reset
+```
+
+Observação: o ambiente dev ainda mostra avisos já existentes de `nodemailer` opcional e CSP do script de ads; eles não impedem build nem `/feed`.
+
 ## Arquivos fora de escopo
 
 Durante a correção, arquivos já modificados fora do feed foram deixados fora do commit:

@@ -27,7 +27,7 @@ export async function Navbar() {
           {config.maintenance_message}
         </div>
       ) : null}
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
+      <header className="site-navbar sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
         <div className="container mx-auto flex h-16 max-w-7xl items-center gap-3 px-4">
           <Link href="/" className="flex items-center gap-2 group flex-shrink-0">
             <div className="relative">

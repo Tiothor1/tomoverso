@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 function FeedUnavailable() {
   return (
-    <main className="min-h-[calc(100dvh-4rem)] bg-black px-6 py-16 text-white">
+    <main className="min-h-[100dvh] bg-black px-6 py-16 text-white">
       <div className="mx-auto flex min-h-[60dvh] max-w-xl flex-col items-center justify-center text-center">
         <div className="mb-5 rounded-full border border-fuchsia-300/25 bg-fuchsia-400/10 px-4 py-2 text-xs font-black uppercase tracking-[0.22em] text-fuchsia-100">
           Feed indisponível
@@ -43,7 +43,7 @@ export default async function FeedPage() {
     const workOptions = getFeedWorkOptions(db);
 
     return (
-      <main className="min-h-[calc(100dvh-4rem)] bg-black text-white">
+      <main className="h-[100dvh] overflow-hidden bg-black text-white">
         <FeedScroller initialFeed={initialFeed} workOptions={workOptions} isLoggedIn={!!user} />
       </main>
     );
