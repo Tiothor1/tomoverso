@@ -30,6 +30,7 @@ interface MobileMenuProps {
 }
 
 const mainLinks = [
+  { href: "/feed", icon: Sparkles, label: "Feed" },
   { href: "/explore", icon: BookOpen, label: "Light Novels" },
   { href: "/manga", icon: BookText, label: "Mangás" },
   { href: "/livros", icon: BookText, label: "Livros" },

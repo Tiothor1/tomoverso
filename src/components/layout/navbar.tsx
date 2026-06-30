@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, Crown, Library, PenLine, Shield, Store } from "lucide-react";
+import { BookOpen, Crown, Library, PenLine, Shield, Sparkles, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { ColorThemePicker } from "@/components/theme/color-theme-picker";
@@ -45,6 +45,12 @@ export async function Navbar() {
           </div>
 
           <nav className="hidden lg:flex items-center gap-1">
+            <Button variant="ghost" asChild>
+              <Link href="/feed" className="text-fuchsia-400 hover:text-fuchsia-300">
+                <Sparkles className="h-4 w-4 mr-1.5" />
+                Feed
+              </Link>
+            </Button>
             <Button variant="ghost" asChild><Link href="/explore">Light Novels</Link></Button>
             <Button variant="ghost" asChild><Link href="/manga">Mangás</Link></Button>
             <Button variant="ghost" asChild><Link href="/livros">Livros</Link></Button>
