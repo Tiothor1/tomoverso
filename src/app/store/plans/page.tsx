@@ -2,7 +2,8 @@ import Link from "next/link";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getActivePlans, getUserActiveSubscription, formatBRL, formatInterval } from "@/lib/subscriptions";
-import { Check, Crown, Sparkles } from "lucide-react";
+import { Check, Crown, QrCode, Sparkles } from "lucide-react";
+import { PixPaymentButton } from "@/components/payments/pix-payment-button";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +80,7 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
                     {user ? "Assinar agora" : "Faça login para assinar"}
                   </button>
                 </form>
+                {user ? <PixPaymentButton planId={plan.id} /> : null}
               </div>
             );
           })}

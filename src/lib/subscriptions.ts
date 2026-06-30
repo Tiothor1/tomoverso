@@ -99,6 +99,63 @@ export function getUserTransactions(userId: string, limit = 10) {
   ).all(userId, limit);
 }
 
+/** Cria pagamento PIX direto na API do Mercado Pago */
+export async function createPixPayment(params: {
+  planId: string;
+  planName: string;
+  priceCents: number;
+  interval: string;
+  userId: string;
+  userEmail: string;
+  userName?: string;
+}): Promise<{ paymentId: string; qrCodeBase64: string; qrCodeText: string } | null> {
+  const token = await getMercadoPagoAccessToken();
+  if (!token) return null;
+
+  const label = params.interval === "year" ? "anual" : "mensal";
+  const title = `Tomoverso ${params.planName} — ${label}`;
+
+  const body = {
+    transaction_amount: params.priceCents / 100,
+    description: title,
+    payment_method_id: "pix",
+    payer: {
+      email: params.userEmail,
+      first_name: params.userName || undefined,
+    },
+    external_reference: `${params.userId}:${params.planId}`,
+    notification_url: `${SITE_URL}/api/payments/mercadopago-webhook`,
+  };
+
+  const res = await fetch(`${MP_API}/v1/payments`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+      "X-Idempotency-Key": `${params.userId}:${params.planId}:${Date.now()}`,
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    console.error("[MP] create pix payment error:", await res.text());
+    return null;
+  }
+
+  const data = await res.json();
+  const txData = data?.point_of_interaction?.transaction_data;
+  if (!txData?.qr_code_base64 || !txData?.qr_code) {
+    console.error("[MP] pix response missing qr_code:", JSON.stringify(data));
+    return null;
+  }
+
+  return {
+    paymentId: data.id,
+    qrCodeBase64: txData.qr_code_base64,
+    qrCodeText: txData.qr_code,
+  };
+}
+
 /** Cria preferência no Mercado Pago e retorna o checkout URL */
 export async function createCheckoutPreference(params: {
   planId: string;
