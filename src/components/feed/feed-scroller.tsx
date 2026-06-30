@@ -40,6 +40,7 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
   const itemIds = useMemo(() => items.map((i) => i.id).join("|"), [items]);
 
   useEffect(() => {
+    if (typeof IntersectionObserver === "undefined") return;
     const sentinel = sentinelRef.current;
     if (!sentinel || nextCursor === null) return;
     const observer = new IntersectionObserver(
@@ -53,6 +54,7 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
   }, [nextCursor, sessionId]);
 
   useEffect(() => {
+    if (typeof document === "undefined" || typeof IntersectionObserver === "undefined") return;
     const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-feed-card='true']"));
     if (!cards.length) return;
     const observer = new IntersectionObserver(
@@ -93,6 +95,10 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
       setMessage("Entra na conta pra usar essa ação.");
       return false;
     }
+    if (response?.error === "feed_unavailable") {
+      setMessage("Não foi possível acessar o feed agora. Tenta novamente.");
+      return false;
+    }
     if (response?.error) setMessage(String(response.error));
     return false;
   }
@@ -100,22 +106,33 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
   function loadMore() {
     if (nextCursor === null || isLoadingMore) return;
     startLoadMore(async () => {
-      const page = await getFeedPageAction({ cursor: nextCursor, limit: 8, sessionId });
-      setSessionId(page.sessionId);
-      setItems((current) => {
-        const existing = new Set(current.map((item) => item.id));
-        const fresh = page.items.filter((item) => !existing.has(item.id));
-        return [...current, ...fresh];
-      });
-      setNextCursor(page.nextCursor);
+      try {
+        const page = await getFeedPageAction({ cursor: nextCursor, limit: 8, sessionId });
+        setSessionId(page.sessionId);
+        setItems((current) => {
+          const existing = new Set(current.map((item) => item.id));
+          const fresh = page.items.filter((item) => !existing.has(item.id));
+          return [...current, ...fresh];
+        });
+        setNextCursor(page.nextCursor);
+      } catch (error) {
+        console.error("[feed] loadMore failed", error);
+        setNextCursor(null);
+        setMessage("Não foi possível carregar mais cards agora.");
+      }
     });
   }
 
   async function refreshFirstPage() {
-    const page = await getFeedPageAction({ cursor: 0, limit: Math.max(8, items.length), sessionId });
-    setItems(page.items);
-    setNextCursor(page.nextCursor);
-    setSessionId(page.sessionId);
+    try {
+      const page = await getFeedPageAction({ cursor: 0, limit: Math.max(8, items.length), sessionId });
+      setItems(page.items);
+      setNextCursor(page.nextCursor);
+      setSessionId(page.sessionId);
+    } catch (error) {
+      console.error("[feed] refreshFirstPage failed", error);
+      setMessage("Não foi possível atualizar o feed agora.");
+    }
   }
 
   async function onLike(item: FeedItem) {
@@ -168,16 +185,18 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
   async function onShare(item: FeedItem) {
     const url = `${window.location.origin}${item.work?.href || `/feed?item=${item.targetType}:${item.targetId}`}`;
     try {
-      if (navigator.share) {
+      if (typeof navigator !== "undefined" && navigator.share) {
         await navigator.share({ title: item.title, text: item.reason || item.body, url });
-      } else {
+      } else if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(url);
         setMessage("Link copiado.");
+      } else {
+        setMessage(url);
       }
       const response = await markFeedItemAction(item.targetType, item.targetId, "share", { url });
       if (response?.ok && "counts" in response) patchItem(item, { counts: response.counts || item.counts });
     } catch {
-      await navigator.clipboard.writeText(url).catch(() => undefined);
+      await navigator.clipboard?.writeText?.(url).catch(() => undefined);
       setMessage("Link copiado.");
     }
   }
@@ -187,36 +206,64 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
       setMessage("Entra na conta pra republicar.");
       return;
     }
-    const response = await repostFeedItemAction(item.targetType, item.targetId, `Recomendo: ${item.title}`);
-    if (!response?.ok) return requireLoginIfNeeded(response);
-    patchItem(item, { counts: "counts" in response ? response.counts || item.counts : item.counts });
-    setMessage("Republicado no feed.");
-    await refreshFirstPage();
+    try {
+      const response = await repostFeedItemAction(item.targetType, item.targetId, `Recomendo: ${item.title}`);
+      if (!response?.ok) return requireLoginIfNeeded(response);
+      patchItem(item, { counts: "counts" in response ? response.counts || item.counts : item.counts });
+      setMessage("Republicado no feed.");
+      await refreshFirstPage();
+    } catch (error) {
+      console.error("[feed] repost failed", error);
+      setMessage("Não foi possível republicar agora.");
+    }
   }
 
   async function onHide(item: FeedItem) {
     setItems((current) => current.filter((entry) => entry.id !== item.id));
-    const response = await markFeedItemAction(item.targetType, item.targetId, "not_interested");
-    if (!response?.ok) requireLoginIfNeeded(response);
+    try {
+      const response = await markFeedItemAction(item.targetType, item.targetId, "not_interested");
+      if (!response?.ok) requireLoginIfNeeded(response);
+    } catch (error) {
+      console.error("[feed] hide failed", error);
+      setMessage("Card ocultado só nesta sessão.");
+    }
   }
 
   async function loadComments(item: FeedItem): Promise<FeedCommentItem[]> {
-    return getFeedCommentsAction(item.targetType, item.targetId);
+    try {
+      return await getFeedCommentsAction(item.targetType, item.targetId);
+    } catch (error) {
+      console.error("[feed] loadComments failed", error);
+      setMessage("Não foi possível carregar os comentários.");
+      return [];
+    }
   }
 
   async function sendComment(item: FeedItem, body: string) {
-    const response = await createFeedCommentAction(item.targetType, item.targetId, body);
-    if (!response?.ok) return requireLoginIfNeeded(response);
-    patchItem(item, { counts: "counts" in response ? response.counts || { ...item.counts, comments: item.counts.comments + 1 } : item.counts });
-    return true;
+    try {
+      const response = await createFeedCommentAction(item.targetType, item.targetId, body);
+      if (!response?.ok) return requireLoginIfNeeded(response);
+      patchItem(item, { counts: "counts" in response ? response.counts || { ...item.counts, comments: item.counts.comments + 1 } : item.counts });
+      return true;
+    } catch (error) {
+      console.error("[feed] sendComment failed", error);
+      setMessage("Não foi possível comentar agora.");
+      return false;
+    }
   }
 
   async function createPost(input: Parameters<typeof createFeedPostAction>[0]) {
-    const response = await createFeedPostAction(input);
-    if (!response?.ok) return requireLoginIfNeeded(response);
-    setMessage("Post publicado.");
-    await refreshFirstPage();
-    return true;
+    try {
+      const response = await createFeedPostAction(input);
+      if (!response?.ok) return requireLoginIfNeeded(response);
+      setMessage("Post publicado.");
+      await refreshFirstPage();
+      return true;
+    } catch (error) {
+      console.error("[feed] createPost failed", error);
+      setMessage("Não foi possível publicar agora.");
+      return false;
+    }
   }
 
   return (

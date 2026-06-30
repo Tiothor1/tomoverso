@@ -26,6 +26,7 @@ export function FeedCommentDrawer({ item, open, isLoggedIn, onClose, loadComment
     setLoading(true);
     loadComments(item)
       .then(setComments)
+      .catch(() => setComments([]))
       .finally(() => setLoading(false));
   }, [open, item?.id]);
 

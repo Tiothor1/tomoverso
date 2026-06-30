@@ -15,77 +15,144 @@ import {
   toggleLike,
   toggleSave,
 } from "@/lib/feed/service";
-import type { FeedTargetType, FeedWorkType } from "@/lib/feed/types";
+import type { FeedPageResult, FeedTargetType, FeedWorkType } from "@/lib/feed/types";
 
 function isTargetType(value: string): value is FeedTargetType {
   return value === "post" || value === "novel" || value === "manga";
 }
 
+function fallbackFeedPage(input?: { sessionId?: string }): FeedPageResult {
+  return { items: [], nextCursor: null, sessionId: input?.sessionId || "feed-fallback" };
+}
+
+function logFeedActionError(action: string, error: unknown) {
+  console.error(`[feed] ${action} failed`, error);
+}
+
+function feedUnavailable() {
+  return { ok: false, error: "feed_unavailable" };
+}
+
 export async function getFeedPageAction(input?: { cursor?: number; limit?: number; sessionId?: string }) {
-  const db = getDb();
-  const user = await getCurrentUser().catch(() => null);
-  return getFeedPage(db, user, input);
+  try {
+    const db = getDb();
+    const user = await getCurrentUser().catch(() => null);
+    return getFeedPage(db, user, input);
+  } catch (error) {
+    logFeedActionError("getFeedPageAction", error);
+    return fallbackFeedPage(input);
+  }
 }
 
 export async function getFeedWorkOptionsAction() {
-  return getFeedWorkOptions(getDb());
+  try {
+    return getFeedWorkOptions(getDb());
+  } catch (error) {
+    logFeedActionError("getFeedWorkOptionsAction", error);
+    return [];
+  }
 }
 
 export async function toggleFeedLikeAction(targetType: FeedTargetType, targetId: string) {
-  const user = await getCurrentUser().catch(() => null);
-  if (!user) return { ok: false, error: "login_required" };
-  if (!isTargetType(targetType) || !targetId) return { ok: false, error: "invalid_target" };
-  return { ok: true, ...toggleLike(getDb(), user.id, targetType, targetId) };
+  try {
+    const user = await getCurrentUser().catch(() => null);
+    if (!user) return { ok: false, error: "login_required" };
+    if (!isTargetType(targetType) || !targetId) return { ok: false, error: "invalid_target" };
+    return { ok: true, ...toggleLike(getDb(), user.id, targetType, targetId) };
+  } catch (error) {
+    logFeedActionError("toggleFeedLikeAction", error);
+    return feedUnavailable();
+  }
 }
 
 export async function toggleFeedSaveAction(targetType: FeedTargetType, targetId: string, work?: { type?: FeedWorkType | null; id?: string | null }) {
-  const user = await getCurrentUser().catch(() => null);
-  if (!user) return { ok: false, error: "login_required" };
-  if (!isTargetType(targetType) || !targetId) return { ok: false, error: "invalid_target" };
-  return { ok: true, ...toggleSave(getDb(), user.id, targetType, targetId, work) };
+  try {
+    const user = await getCurrentUser().catch(() => null);
+    if (!user) return { ok: false, error: "login_required" };
+    if (!isTargetType(targetType) || !targetId) return { ok: false, error: "invalid_target" };
+    return { ok: true, ...toggleSave(getDb(), user.id, targetType, targetId, work) };
+  } catch (error) {
+    logFeedActionError("toggleFeedSaveAction", error);
+    return feedUnavailable();
+  }
 }
 
 export async function toggleFeedFollowAction(followingId: string) {
-  const user = await getCurrentUser().catch(() => null);
-  if (!user) return { ok: false, error: "login_required" };
-  if (!followingId) return { ok: false, error: "invalid_user" };
-  return { ok: true, ...toggleFollow(getDb(), user.id, followingId) };
+  try {
+    const user = await getCurrentUser().catch(() => null);
+    if (!user) return { ok: false, error: "login_required" };
+    if (!followingId) return { ok: false, error: "invalid_user" };
+    return { ok: true, ...toggleFollow(getDb(), user.id, followingId) };
+  } catch (error) {
+    logFeedActionError("toggleFeedFollowAction", error);
+    return feedUnavailable();
+  }
 }
 
 export async function createFeedPostAction(input: { title?: string; body: string; workType?: FeedWorkType | ""; workId?: string; type?: string }) {
-  const user = await getCurrentUser().catch(() => null);
-  if (!user) return { ok: false, error: "login_required" };
-  return createFeedPost(getDb(), user.id, input);
+  try {
+    const user = await getCurrentUser().catch(() => null);
+    if (!user) return { ok: false, error: "login_required" };
+    return createFeedPost(getDb(), user.id, input);
+  } catch (error) {
+    logFeedActionError("createFeedPostAction", error);
+    return feedUnavailable();
+  }
 }
 
 export async function getFeedCommentsAction(targetType: FeedTargetType, targetId: string) {
-  const user = await getCurrentUser().catch(() => null);
-  if (!isTargetType(targetType) || !targetId) return [];
-  return getComments(getDb(), targetType, targetId, user?.id || null);
+  try {
+    const user = await getCurrentUser().catch(() => null);
+    if (!isTargetType(targetType) || !targetId) return [];
+    return getComments(getDb(), targetType, targetId, user?.id || null);
+  } catch (error) {
+    logFeedActionError("getFeedCommentsAction", error);
+    return [];
+  }
 }
 
 export async function createFeedCommentAction(targetType: FeedTargetType, targetId: string, body: string) {
-  const user = await getCurrentUser().catch(() => null);
-  if (!user) return { ok: false, error: "login_required" };
-  if (!isTargetType(targetType) || !targetId) return { ok: false, error: "invalid_target" };
-  return createComment(getDb(), user.id, targetType, targetId, body);
+  try {
+    const user = await getCurrentUser().catch(() => null);
+    if (!user) return { ok: false, error: "login_required" };
+    if (!isTargetType(targetType) || !targetId) return { ok: false, error: "invalid_target" };
+    return createComment(getDb(), user.id, targetType, targetId, body);
+  } catch (error) {
+    logFeedActionError("createFeedCommentAction", error);
+    return feedUnavailable();
+  }
 }
 
 export async function repostFeedItemAction(targetType: FeedTargetType, targetId: string, text?: string) {
-  const user = await getCurrentUser().catch(() => null);
-  if (!user) return { ok: false, error: "login_required" };
-  if (!isTargetType(targetType) || !targetId) return { ok: false, error: "invalid_target" };
-  return repostItem(getDb(), user.id, targetType, targetId, text);
+  try {
+    const user = await getCurrentUser().catch(() => null);
+    if (!user) return { ok: false, error: "login_required" };
+    if (!isTargetType(targetType) || !targetId) return { ok: false, error: "invalid_target" };
+    return repostItem(getDb(), user.id, targetType, targetId, text);
+  } catch (error) {
+    logFeedActionError("repostFeedItemAction", error);
+    return feedUnavailable();
+  }
 }
 
 export async function markFeedItemAction(targetType: FeedTargetType, targetId: string, interaction: "hide" | "not_interested" | "share" | "open_work" | "open_chapter", metadata?: Record<string, unknown>) {
-  const user = await getCurrentUser().catch(() => null);
-  if (!user) return { ok: false, error: "login_required" };
-  if (!isTargetType(targetType) || !targetId) return { ok: false, error: "invalid_target" };
-  return markFeedItem(getDb(), user.id, targetType, targetId, interaction, metadata);
+  try {
+    const user = await getCurrentUser().catch(() => null);
+    if (!user) return { ok: false, error: "login_required" };
+    if (!isTargetType(targetType) || !targetId) return { ok: false, error: "invalid_target" };
+    return markFeedItem(getDb(), user.id, targetType, targetId, interaction, metadata);
+  } catch (error) {
+    logFeedActionError("markFeedItemAction", error);
+    return feedUnavailable();
+  }
 }
 
 export async function registerFeedImpressionAction(input: { itemType: string; itemId: string; position?: number; sessionId?: string }) {
-  const user = await getCurrentUser().catch(() => null);
-  return registerImpression(getDb(), user?.id || null, input);
+  try {
+    const user = await getCurrentUser().catch(() => null);
+    return registerImpression(getDb(), user?.id || null, input);
+  } catch (error) {
+    logFeedActionError("registerFeedImpressionAction", error);
+    return { ok: false, error: "feed_unavailable" };
+  }
 }
