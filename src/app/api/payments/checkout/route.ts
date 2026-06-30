@@ -53,11 +53,14 @@ export async function POST(req: NextRequest) {
       VALUES (?, ?, ?, 'pending', ?, ?, ?)
     `).run(subId, user.id, planId, now, endDate.toISOString(), pref.preferenceId);
 
-    // 303 redirect: browser follows with GET (Mercado Pago expects GET on init_point)
-    return new Response(null, {
-      status: 303,
-      headers: { Location: pref.checkoutUrl },
-    });
+    // ✅ Retorna HTML com redirect imediato — funciona mesmo com CSP restritivo
+    return new Response(
+      `<!DOCTYPE html><html><head><meta charset="utf-8"><title>Redirecionando...</title></head><body><script>location.href=${JSON.stringify(pref.checkoutUrl)}</script><noscript><meta http-equiv="refresh" content="0;url=${pref.checkoutUrl}"></noscript><p>Redirecionando para o Mercado Pago...</p></body></html>`,
+      {
+        status: 200,
+        headers: { "Content-Type": "text/html; charset=utf-8" },
+      }
+    );
   } catch (err: any) {
     console.error("[checkout] error:", err?.message);
     return NextResponse.redirect(new URL("/store/plans?error=server_error", req.url));
