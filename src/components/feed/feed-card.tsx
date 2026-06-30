@@ -1,12 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
   Bookmark,
   BookOpen,
-  ChevronLeft,
-  ChevronRight,
   Eye,
   Flag,
   Heart,
@@ -53,9 +51,18 @@ function fallbackGradient(seed: string) {
 
 export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRepost, onFollow, onHide }: Props) {
   const image = item.mediaUrl || item.work?.coverUrl || null;
-  const isPagePreview = item.mediaKind === "page";
+  const isPageMedia = item.mediaKind === "page";
   const canFollow = item.user && item.user.id !== item.work?.authorId;
   const titleInitial = (item.work?.title || item.title || "T").slice(0, 1).toUpperCase();
+  const [isLongStrip, setIsLongStrip] = useState(false);
+  const imgRef = useRef<HTMLImageElement | null>(null);
+
+  function onImgLoad(event: React.SyntheticEvent<HTMLImageElement>) {
+    const img = event.currentTarget;
+    if (img.naturalWidth && img.naturalHeight) {
+      setIsLongStrip(img.naturalHeight / img.naturalWidth >= 2.5);
+    }
+  }
 
   return (
     <article
@@ -68,22 +75,35 @@ export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRe
       <div className="relative h-full w-full overflow-visible md:h-[min(860px,calc(100dvh-2rem))] md:w-[min(100vw-10rem,520px)]">
         <div className="absolute inset-0 overflow-hidden bg-black shadow-[0_30px_90px_rgba(0,0,0,0.65)] md:rounded-[2rem] md:border md:border-white/10">
           <div className={`absolute inset-0 bg-gradient-to-br ${fallbackGradient(item.id)}`} />
+
           {image ? (
-            isPagePreview ? (
-              <PageSlicePreview src={image} alt={item.work?.title || item.title} eager={index < 3} />
-            ) : (
+            <>
+              {isPageMedia ? (
+                <div
+                  className="absolute inset-0 bg-cover bg-center opacity-30 blur-2xl scale-110"
+                  style={{ backgroundImage: `url(${image})` }}
+                />
+              ) : null}
+
               <img
+                ref={imgRef}
                 src={image}
                 alt={item.work?.title || item.title}
                 loading={index < 3 ? "eager" : "lazy"}
-                className="absolute inset-0 h-full w-full scale-[1.01] object-cover opacity-90"
+                onLoad={onImgLoad}
+                className={`absolute inset-0 h-full w-full scale-[1.01] ${
+                  isLongStrip
+                    ? "object-cover object-top"
+                    : "object-cover"
+                } opacity-90`}
               />
-            )
+            </>
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-[42vw] font-black text-white/5 md:text-[15rem]">
               {titleInitial}
             </div>
           )}
+
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_48%_12%,rgba(255,255,255,0.20),transparent_28%),linear-gradient(to_top,rgba(0,0,0,0.96),rgba(0,0,0,0.64)_34%,rgba(0,0,0,0.12)_62%,rgba(0,0,0,0.62))]" />
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-black/72 to-transparent" />
 
@@ -195,133 +215,6 @@ export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRe
         </aside>
       </div>
     </article>
-  );
-}
-
-function PageSlicePreview({ src, alt, eager }: { src: string; alt: string; eager: boolean }) {
-  const [segments, setSegments] = useState(1);
-  const [active, setActive] = useState(0);
-  const scrollerRef = useRef<HTMLDivElement | null>(null);
-  const imageRef = useRef<HTMLImageElement | null>(null);
-
-  useEffect(() => {
-    setActive(0);
-    scrollerRef.current?.scrollTo({ left: 0 });
-    const image = imageRef.current;
-    if (image?.complete && image.naturalWidth) {
-      updateSegments(image.naturalWidth, image.naturalHeight);
-    }
-  }, [src]);
-
-  function updateSegments(width: number, height: number) {
-    const ratio = height / Math.max(1, width);
-    const nextSegments = ratio > 2.35 ? Math.min(7, Math.max(3, Math.ceil(ratio / 1.65))) : 1;
-    setSegments(nextSegments);
-  }
-
-  function scrollToSlice(next: number) {
-    const scroller = scrollerRef.current;
-    if (!scroller) return;
-    const clamped = Math.max(0, Math.min(next, segments - 1));
-    scroller.scrollTo({ left: scroller.clientWidth * clamped, behavior: "smooth" });
-    setActive(clamped);
-  }
-
-  if (segments <= 1) {
-    return (
-      <img
-        ref={imageRef}
-        src={src}
-        alt={alt}
-        loading={eager ? "eager" : "lazy"}
-        onLoad={(event) => updateSegments(event.currentTarget.naturalWidth, event.currentTarget.naturalHeight)}
-        className="absolute inset-0 h-full w-full scale-[1.01] object-contain opacity-95"
-      />
-    );
-  }
-
-  return (
-    <div className="absolute inset-0 bg-black" data-feed-page-slice-carousel="true" data-feed-page-slices={segments}>
-      <img
-        ref={imageRef}
-        src={src}
-        alt=""
-        loading={eager ? "eager" : "lazy"}
-        aria-hidden="true"
-        onLoad={(event) => updateSegments(event.currentTarget.naturalWidth, event.currentTarget.naturalHeight)}
-        className="pointer-events-none absolute h-0 w-0 opacity-0"
-      />
-
-      <div
-        ref={scrollerRef}
-        className="feed-page-slices flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth"
-        aria-label="Recortes horizontais da página"
-        onScroll={(event) => {
-          const el = event.currentTarget;
-          if (!el.clientWidth) return;
-          setActive(Math.round(el.scrollLeft / el.clientWidth));
-        }}
-      >
-        {Array.from({ length: segments }).map((_, sliceIndex) => {
-          const y = segments === 1 ? 50 : Math.round((sliceIndex / (segments - 1)) * 100);
-          return (
-            <div
-              key={sliceIndex}
-              className="relative h-full min-w-full snap-center bg-black bg-center bg-no-repeat"
-              role="img"
-              aria-label={`${alt} — recorte ${sliceIndex + 1} de ${segments}`}
-              style={{
-                backgroundImage: `url(${src})`,
-                backgroundPosition: `center ${y}%`,
-                backgroundSize: "100% auto",
-              }}
-            />
-          );
-        })}
-      </div>
-
-      <div className="pointer-events-none absolute left-4 top-[calc(env(safe-area-inset-top)+3.4rem)] z-40 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white/80 backdrop-blur-md md:top-14">
-        Arraste para o lado · {active + 1}/{segments}
-      </div>
-
-      <button
-        type="button"
-        aria-label="Recorte anterior da página"
-        onClick={(event) => {
-          event.stopPropagation();
-          scrollToSlice(active - 1);
-        }}
-        className="absolute left-3 top-1/2 z-40 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white shadow-xl backdrop-blur-md transition hover:bg-white/15 md:flex"
-      >
-        <ChevronLeft className="h-5 w-5" />
-      </button>
-      <button
-        type="button"
-        aria-label="Próximo recorte da página"
-        onClick={(event) => {
-          event.stopPropagation();
-          scrollToSlice(active + 1);
-        }}
-        className="absolute right-3 top-1/2 z-40 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white shadow-xl backdrop-blur-md transition hover:bg-white/15 md:flex"
-      >
-        <ChevronRight className="h-5 w-5" />
-      </button>
-
-      <div className="absolute inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-40 flex justify-center gap-1.5 md:bottom-4">
-        {Array.from({ length: segments }).map((_, sliceIndex) => (
-          <button
-            key={sliceIndex}
-            type="button"
-            aria-label={`Ir para recorte ${sliceIndex + 1}`}
-            onClick={(event) => {
-              event.stopPropagation();
-              scrollToSlice(sliceIndex);
-            }}
-            className={`h-1.5 rounded-full transition-all ${active === sliceIndex ? "w-6 bg-white" : "w-1.5 bg-white/35"}`}
-          />
-        ))}
-      </div>
-    </div>
   );
 }
 

@@ -510,25 +510,25 @@ function buildWorkItems(db: SqliteDb, userId: string | null, profile: InterestPr
     const chapterLabel = row.preview_chapter_number ? `cap. ${row.preview_chapter_number}` : "capítulo";
     const pageLabel = row.preview_page_number ? `pág. ${row.preview_page_number}` : "página";
     items.push(decorateItem(db, {
-      id: `manga:${work.id}`,
+      id: `manga:${row.id}`,
       kind: "trend",
       targetType: "manga",
-      targetId: work.id,
-      title: hasPreviewPage ? `Página de ${work.title}` : `${work.title} em alta`,
-      body: hasPreviewPage
+      targetId: row.id,
+      title: hasPreviewPage ? `${work.title} em destaque` : `${work.title} em alta`,
+      body: hasPreviewPage && !work.coverUrl
         ? `Prévia real de ${chapterLabel}, ${pageLabel}. Se bater a curiosidade, abre o capítulo e continua direto no leitor.`
         : work.synopsis,
-      reason: hasPreviewPage ? "Mostrando página real do capítulo, não só capa de catálogo." : scored.reason,
-      score: scored.score + (hasPreviewPage ? 12 : 4),
+      reason: scored.reason,
+      score: scored.score + 4,
       createdAt: row.updated_at || row.created_at,
       user: null,
       work,
-      mediaUrl: row.preview_page_url || work.coverUrl,
-      mediaKind: hasPreviewPage ? "page" : "cover",
-      mediaCaption: hasPreviewPage ? `Página real · ${chapterLabel} · ${pageLabel}` : "Capa da obra",
+      mediaUrl: work.coverUrl || row.preview_page_url,
+      mediaKind: work.coverUrl ? "cover" : hasPreviewPage ? "page" : null,
+      mediaCaption: !work.coverUrl && hasPreviewPage ? `Página real · ${chapterLabel} · ${pageLabel}` : null,
       actionLabel: "Ler mangá",
       actionHref: work.readHref,
-      badges: [hasPreviewPage ? "Página real" : "Mangá", `${work.chapterCount} caps`, ...work.tags.slice(0, 1)],
+      badges: ["Mangá", `${work.chapterCount} caps`, ...work.tags.slice(0, 1)],
     }, userId));
   }
 
