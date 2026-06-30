@@ -93,14 +93,16 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
     </main>
     <script dangerouslySetInnerHTML={{ __html: `
 document.querySelectorAll('.checkout-form').forEach(function(f){
-  f.addEventListener('submit',async function(e){
-    e.preventDefault();
+  f.addEventListener('submit',async function(ev){
+    ev.preventDefault();
     var b=this.querySelector('button');b.disabled=true;b.textContent='Aguarde...';
     try {
-      var r=await fetch('/api/payments/checkout',{method:'POST',body:new FormData(this),redirect:'manual'});
-      var loc=r.headers.get('Location');
-      if(r.status<400 && loc){window.location.href=loc;return;}
-      window.location.href='/store/plans?error=checkout_failed';
+      var r=await fetch('/api/payments/checkout',{method:'POST',body:new FormData(this)});
+      var j=await r.json();
+      if(j.ok && j.checkoutUrl){window.location.href=j.checkoutUrl;return;}
+      if(j.redirect){window.location.href=j.redirect;return;}
+      if(j.error==='login'){window.location.href=j.redirect;return;}
+      window.location.href='/store/plans?error='+(j.error||'checkout_failed');
     }catch(e){window.location.href='/store/plans?error=network_error';}
   });
 });
