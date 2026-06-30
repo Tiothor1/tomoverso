@@ -210,8 +210,8 @@ function targetKey(type: FeedTargetType, id: string) {
   return `${type}:${id}`;
 }
 
-function getMangaPreviewMedia(db: SqliteDb, mangaId: string): { url: string | null; caption: string | null } {
-  const row = db.prepare(`
+function getMangaPreviewMedia(db: SqliteDb, mangaId: string, count = 4): { items: Array<{ url: string; caption: string | null }> } {
+  const rows = db.prepare(`
     SELECT mp.image_url, mc.chapter_number, mp.page_number
     FROM manga_pages mp
     JOIN manga_chapters mc ON mc.id = mp.chapter_id
@@ -224,12 +224,16 @@ function getMangaPreviewMedia(db: SqliteDb, mangaId: string): { url: string | nu
         ELSE 2
       END,
       mp.page_number ASC
-    LIMIT 1
-  `).get(mangaId) as { image_url: string | null; chapter_number: number | null; page_number: number | null } | undefined;
-  if (!row?.image_url) return { url: null, caption: null };
-  const chapter = row.chapter_number ? `cap. ${row.chapter_number}` : "capítulo";
-  const page = row.page_number ? `pág. ${row.page_number}` : "página";
-  return { url: row.image_url, caption: `Página real · ${chapter} · ${page}` };
+    LIMIT ?
+  `).all(mangaId, count) as Array<{ image_url: string | null; chapter_number: number | null; page_number: number | null }>;
+  const items = rows
+    .filter((r): r is { image_url: string; chapter_number: number | null; page_number: number | null } => !!r.image_url)
+    .map((r) => {
+      const chapter = r.chapter_number ? `cap. ${r.chapter_number}` : "capítulo";
+      const page = r.page_number ? `pág. ${r.page_number}` : "página";
+      return { url: r.image_url, caption: `Página real · ${chapter} · ${page}` };
+    });
+  return { items };
 }
 
 function getCounts(db: SqliteDb, targetType: FeedTargetType, targetId: string): FeedCounts {
@@ -506,26 +510,33 @@ function buildWorkItems(db: SqliteDb, userId: string | null, profile: InterestPr
     const work = mangaWork(row);
     if (profile.hidden.has(targetKey("manga", work.id))) continue;
     const scored = scoreWork(work, profile, { kind: "trend" });
-    const hasPreviewPage = Boolean(row.preview_page_url);
-    const chapterLabel = row.preview_chapter_number ? `cap. ${row.preview_chapter_number}` : "capítulo";
-    const pageLabel = row.preview_page_number ? `pág. ${row.preview_page_number}` : "página";
+    const hasCover = Boolean(work.coverUrl);
+    const previewPages = hasCover ? getMangaPreviewMedia(db, row.id, 3).items : [];
+    const allImages: Array<{ url: string; caption: string | null }> = [];
+    if (work.coverUrl) allImages.push({ url: work.coverUrl, caption: null });
+    for (const p of previewPages) {
+      if (!allImages.some((i) => i.url === p.url)) allImages.push(p);
+    }
+    const hasVisual = allImages.length > 0;
+    if (!hasVisual) continue;
+    const mediaUrl = allImages[0]?.url || null;
+    const mediaItems = allImages.length > 1 ? allImages : null;
     items.push(decorateItem(db, {
       id: `manga:${row.id}`,
       kind: "trend",
       targetType: "manga",
       targetId: row.id,
-      title: hasPreviewPage ? `${work.title} em destaque` : `${work.title} em alta`,
-      body: hasPreviewPage && !work.coverUrl
-        ? `Prévia real de ${chapterLabel}, ${pageLabel}. Se bater a curiosidade, abre o capítulo e continua direto no leitor.`
-        : work.synopsis,
+      title: work.title,
+      body: work.synopsis,
       reason: scored.reason,
       score: scored.score + 4,
       createdAt: row.updated_at || row.created_at,
       user: null,
       work,
-      mediaUrl: work.coverUrl || row.preview_page_url,
-      mediaKind: work.coverUrl ? "cover" : hasPreviewPage ? "page" : null,
-      mediaCaption: !work.coverUrl && hasPreviewPage ? `Página real · ${chapterLabel} · ${pageLabel}` : null,
+      mediaUrl,
+      mediaKind: "cover",
+      mediaCaption: null,
+      mediaItems,
       actionLabel: "Ler mangá",
       actionHref: work.readHref,
       badges: ["Mangá", `${work.chapterCount} caps`, ...work.tags.slice(0, 1)],
@@ -590,8 +601,9 @@ function buildPostItems(db: SqliteDb, userId: string | null, profile: InterestPr
     .map((row) => {
       const work = row.work_type && row.work_id ? getWorkById(db, row.work_type, row.work_id) : null;
       const linkedMangaPreview = !row.media_url && row.work_type === "manga" && row.work_id
-        ? getMangaPreviewMedia(db, row.work_id)
-        : { url: null, caption: null };
+        ? getMangaPreviewMedia(db, row.work_id, 1)
+        : { items: [] as Array<{ url: string; caption: string | null }> };
+      const firstPage = linkedMangaPreview.items[0] || null;
       let score = 70;
       if (row.user_id && profile.authors.has(row.user_id)) score += 35;
       if (work) score += scoreWork(work, profile).score / 3;
@@ -610,9 +622,9 @@ function buildPostItems(db: SqliteDb, userId: string | null, profile: InterestPr
         createdAt: row.created_at,
         user: makeUserBadge({ id: row.user_id, username: row.username, display_name: row.display_name, avatar_url: row.avatar_url, role: row.role }, userId, db),
         work,
-        mediaUrl: row.media_url || linkedMangaPreview.url || null,
-        mediaKind: row.media_url ? "post" : linkedMangaPreview.url ? "page" : null,
-        mediaCaption: row.media_url ? "Mídia da comunidade" : linkedMangaPreview.caption,
+        mediaUrl: row.media_url || firstPage?.url || null,
+        mediaKind: row.media_url ? "post" : firstPage?.url ? "page" : null,
+        mediaCaption: row.media_url ? "Mídia da comunidade" : firstPage?.caption || null,
         actionLabel: work ? "Abrir obra" : "Ver conversa",
         actionHref: work?.href || `/feed?post=${row.id}`,
         badges: [row.type === "review" ? "Review" : row.type === "repost" ? "Republicação" : "Post"],
@@ -661,6 +673,12 @@ function diversify(items: FeedItem[]): FeedItem[] {
   return result;
 }
 
+function isEligibleForShortsFeed(item: FeedItem): boolean {
+  if (item.state.hidden || item.state.notInterested) return false;
+  const hasVisual = !!(item.mediaUrl || item.mediaItems?.length || item.work?.coverUrl);
+  return hasVisual;
+}
+
 export function getFeedPage(db: SqliteDb, user: UserRecord | null, input?: { cursor?: number; limit?: number; sessionId?: string }): FeedPageResult {
   ensure(db);
   const userId = user?.id || null;
@@ -672,7 +690,7 @@ export function getFeedPage(db: SqliteDb, user: UserRecord | null, input?: { cur
     ...buildContinueItems(db, userId),
     ...buildPostItems(db, userId, profile),
     ...buildWorkItems(db, userId, profile),
-  ]).filter((item) => !item.state.hidden && !item.state.notInterested);
+  ]).filter(isEligibleForShortsFeed);
 
   const items = all.slice(cursor, cursor + limit);
   return {

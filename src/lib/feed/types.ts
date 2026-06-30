@@ -47,6 +47,12 @@ export interface FeedState {
   notInterested: boolean;
 }
 
+export interface FeedMediaItem {
+  url: string;
+  kind?: "cover" | "page" | "post" | null;
+  caption?: string | null;
+}
+
 export interface FeedItem {
   id: string;
   kind: FeedItemKind;
@@ -63,6 +69,7 @@ export interface FeedItem {
   mediaUrl?: string | null;
   mediaKind?: "cover" | "page" | "post" | null;
   mediaCaption?: string | null;
+  mediaItems?: FeedMediaItem[] | null;
   actionLabel: string;
   actionHref: string;
   badges: string[];
