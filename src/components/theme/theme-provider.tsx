@@ -1,66 +1,121 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-type Theme = "dark" | "light";
-type ColorTheme = "purple" | "blue" | "sepia" | "emerald" | "rose" | "amber" | "ocean";
+export type ThemePreference = "dark" | "light" | "system";
+export type ResolvedTheme = "dark" | "light";
+export type ColorTheme = "purple" | "blue" | "rose" | "cyan" | "emerald" | "red" | "amber";
+
+type StoredTheme = {
+  theme?: unknown;
+  color?: unknown;
+};
 
 type ThemeProviderProps = {
   children: React.ReactNode;
-  defaultTheme?: Theme;
+  defaultTheme?: ThemePreference;
   defaultColor?: ColorTheme;
   storageKey?: string;
 };
 
 type ThemeProviderState = {
-  theme: Theme;
+  theme: ThemePreference;
+  resolvedTheme: ResolvedTheme;
   colorTheme: ColorTheme;
-  setTheme: (theme: Theme) => void;
+  setTheme: (theme: ThemePreference) => void;
   setColorTheme: (color: ColorTheme) => void;
   toggleTheme: () => void;
 };
 
-const ThemeProviderContext = createContext<ThemeProviderState | undefined>(
-  undefined
-);
+const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undefined);
+
+const validThemes: ThemePreference[] = ["dark", "light", "system"];
+const validColors: ColorTheme[] = ["purple", "blue", "rose", "cyan", "emerald", "red", "amber"];
+
+function normalizeTheme(value: unknown, fallback: ThemePreference): ThemePreference {
+  return validThemes.includes(value as ThemePreference) ? (value as ThemePreference) : fallback;
+}
+
+function normalizeColor(value: unknown, fallback: ColorTheme): ColorTheme {
+  if (validColors.includes(value as ColorTheme)) return value as ColorTheme;
+  if (value === "sepia") return "amber";
+  if (value === "ocean") return "cyan";
+  return fallback;
+}
+
+function getSystemTheme(): ResolvedTheme {
+  if (typeof window === "undefined") return "dark";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function readStoredPreferences(storageKey: string, defaultTheme: ThemePreference, defaultColor: ColorTheme) {
+  if (typeof window === "undefined") {
+    return { theme: defaultTheme, color: defaultColor };
+  }
+
+  try {
+    const stored = window.localStorage.getItem(storageKey);
+    if (!stored) return { theme: defaultTheme, color: defaultColor };
+    const parsed = JSON.parse(stored) as StoredTheme;
+    return {
+      theme: normalizeTheme(parsed.theme, defaultTheme),
+      color: normalizeColor(parsed.color, defaultColor),
+    };
+  } catch {
+    return { theme: defaultTheme, color: defaultColor };
+  }
+}
+
+function applyPreferences(theme: ThemePreference, resolvedTheme: ResolvedTheme, color: ColorTheme) {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  root.classList.remove("light", "dark");
+  root.classList.add(resolvedTheme);
+  root.setAttribute("data-theme", theme);
+  root.setAttribute("data-color", color);
+}
 
 export function ThemeProvider({
   children,
   defaultTheme = "dark",
-  defaultColor = "sepia",
+  defaultColor = "purple",
   storageKey = "tomoverso-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
-  const [colorTheme, setColorThemeState] = useState<ColorTheme>(defaultColor);
+  const initial = useMemo(
+    () => readStoredPreferences(storageKey, defaultTheme, defaultColor),
+    [storageKey, defaultTheme, defaultColor]
+  );
+
+  const [theme, setThemeState] = useState<ThemePreference>(initial.theme);
+  const [colorTheme, setColorThemeState] = useState<ColorTheme>(initial.color);
+  const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(() => getSystemTheme());
+
+  const resolvedTheme: ResolvedTheme = theme === "system" ? systemTheme : theme;
 
   useEffect(() => {
-    const stored = localStorage.getItem(storageKey);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored);
-        if (parsed.theme) setThemeState(parsed.theme);
-        if (parsed.color) setColorThemeState(parsed.color);
-      } catch {}
-    }
-  }, [storageKey]);
+    const query = window.matchMedia("(prefers-color-scheme: dark)");
+    const update = () => setSystemTheme(query.matches ? "dark" : "light");
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.remove("light", "dark");
-    root.classList.add(theme);
-    root.setAttribute("data-color", colorTheme);
-    localStorage.setItem(
-      storageKey,
-      JSON.stringify({ theme, color: colorTheme })
-    );
-  }, [theme, colorTheme, storageKey]);
+    applyPreferences(theme, resolvedTheme, colorTheme);
+    try {
+      window.localStorage.setItem(storageKey, JSON.stringify({ theme, color: colorTheme }));
+      document.cookie = `tomoverso-ui-theme=${theme};path=/;max-age=31536000;SameSite=Lax`;
+      document.cookie = `tomoverso-ui-color=${colorTheme};path=/;max-age=31536000;SameSite=Lax`;
+    } catch {}
+  }, [theme, resolvedTheme, colorTheme, storageKey]);
 
   const value: ThemeProviderState = {
     theme,
+    resolvedTheme,
     colorTheme,
-    setTheme: (t) => setThemeState(t),
-    setColorTheme: (c) => setColorThemeState(c),
+    setTheme: (t) => setThemeState(normalizeTheme(t, "dark")),
+    setColorTheme: (c) => setColorThemeState(normalizeColor(c, "purple")),
     toggleTheme: () => setThemeState((t) => (t === "dark" ? "light" : "dark")),
   };
 

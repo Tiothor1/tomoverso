@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 
-type Lang = 'pt' | 'en' | 'jp';
+type Lang = 'pt' | 'en' | 'es';
 
 function getCookie(name: string): string | null {
   if (typeof document === 'undefined') return null;
@@ -11,7 +11,7 @@ function getCookie(name: string): string | null {
 
 function getLang(): Lang {
   const stored = getCookie('novel_lang');
-  if (stored && ['pt', 'en', 'jp'].includes(stored)) return stored as Lang;
+  if (stored && ['pt', 'en', 'es'].includes(stored)) return stored as Lang;
   return 'pt';
 }
 
@@ -34,7 +34,6 @@ export function useNovelTitle(novel: NovelData): string {
     return () => window.removeEventListener('novel-lang-change', handler);
   }, []);
 
-  if (lang === 'jp' && novel.title_jp) return novel.title_jp;
   if (lang === 'en' && novel.title_en) return novel.title_en;
   return novel.title || novel.title_en || novel.title_jp || '';
 }

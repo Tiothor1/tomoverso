@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MobilePreferencesPanel } from "@/components/layout/site-preferences-menu";
 
 interface MobileMenuProps {
   isLoggedIn: boolean;
@@ -78,7 +79,7 @@ export function MobileMenu({
       <Button
         variant="ghost"
         size="icon"
-        className="rounded-full hover:bg-primary/10 hover:text-primary 2xl:hidden"
+        className="rounded-full hover:bg-primary/10 hover:text-primary lg:hidden"
         aria-label="Abrir menu"
         aria-expanded={open}
         onClick={() => setOpen(true)}
@@ -96,13 +97,10 @@ export function MobileMenu({
                 onClick={() => setOpen(false)}
               />
 
-              <aside className="glass-panel absolute right-0 top-0 flex h-dvh w-[min(90vw,22rem)] flex-col overflow-hidden border-l border-primary/25 bg-background/95 shadow-2xl shadow-black/60">
-                <header className="relative shrink-0 overflow-hidden border-b border-border/50 px-4 py-4">
-                  <div className="pointer-events-none absolute -right-12 -top-16 h-32 w-32 rounded-full bg-primary/25 blur-3xl" />
-                  <div className="pointer-events-none absolute -bottom-16 left-4 h-28 w-28 rounded-full bg-amber-400/15 blur-3xl" />
-
+              <aside className="absolute right-0 top-0 flex h-dvh w-[min(90vw,22rem)] flex-col overflow-hidden border-l border-border bg-background/98 shadow-2xl shadow-black/45 backdrop-blur-xl">
+                <header className="relative shrink-0 overflow-hidden border-b border-border/60 px-4 py-4">
                   <div className="relative flex items-center gap-3 pr-11">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary ring-1 ring-primary/25 shadow-[0_0_24px_rgba(168,85,247,0.22)]">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20">
                       <BookOpen className="h-5 w-5" />
                     </div>
                     <div className="min-w-0">
@@ -142,6 +140,10 @@ export function MobileMenu({
                       <MobileLink key={item.href} href={item.href} icon={item.icon} label={item.label} onClose={() => setOpen(false)} />
                     ))}
                   </nav>
+
+                  <div className="my-3 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+                  <MobilePreferencesPanel />
 
                   <div className="my-3 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 

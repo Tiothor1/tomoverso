@@ -50,7 +50,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <script dangerouslySetInnerHTML={{
-          __html: `(function(){try{var e=JSON.parse(localStorage.getItem('tomoverso-ui-theme')||'{}');var t=e.theme||'dark',c=e.color||'purple';document.documentElement.classList.add(t);document.documentElement.setAttribute('data-color',c);}catch(e){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-color','purple');}})()`
+          __html: `(function(){try{var s=JSON.parse(localStorage.getItem('tomoverso-ui-theme')||'{}');var themes=['dark','light','system'];var colors=['purple','blue','rose','cyan','emerald','red','amber'];var pref=themes.indexOf(s.theme)>=0?s.theme:'dark';var color=colors.indexOf(s.color)>=0?s.color:(s.color==='sepia'?'amber':(s.color==='ocean'?'cyan':'purple'));var resolved=pref==='system'?(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):pref;document.documentElement.classList.remove('light','dark');document.documentElement.classList.add(resolved);document.documentElement.setAttribute('data-theme',pref);document.documentElement.setAttribute('data-color',color);}catch(e){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-theme','dark');document.documentElement.setAttribute('data-color','purple');}})()`
         }} />
       </head>
       <body className="antialiased min-h-screen flex flex-col">

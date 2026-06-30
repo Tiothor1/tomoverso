@@ -1,7 +1,6 @@
 "use client";
 
-import { useTheme } from "@/components/theme/theme-provider";
-import { Crown, Lock, Palette } from "lucide-react";
+import { Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,75 +10,39 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getCookie } from "@/lib/client-cookies";
-import { useEffect, useState } from "react";
+import { ColorTheme, useTheme } from "@/components/theme/theme-provider";
 
-const freeColors = [
-  { id: "purple" as const, name: "Roxo", preview: "oklch(0.55 0.2 295)" },
-  { id: "blue" as const, name: "Azul", preview: "oklch(0.55 0.2 240)" },
-  { id: "sepia" as const, name: "Sépia", preview: "oklch(0.55 0.1 50)" },
-];
-
-const premiumColors = [
-  { id: "emerald" as const, name: "Esmeralda", preview: "oklch(0.55 0.18 160)" },
-  { id: "rose" as const, name: "Rose Gold", preview: "oklch(0.55 0.18 10)" },
-  { id: "amber" as const, name: "Âmbar", preview: "oklch(0.65 0.18 80)" },
-  { id: "ocean" as const, name: "Oceano", preview: "oklch(0.5 0.15 220)" },
+const colors: Array<{ id: ColorTheme; name: string; preview: string }> = [
+  { id: "purple", name: "Roxo", preview: "oklch(0.58 0.2 295)" },
+  { id: "blue", name: "Azul", preview: "oklch(0.58 0.18 240)" },
+  { id: "rose", name: "Rosa", preview: "oklch(0.62 0.2 340)" },
+  { id: "cyan", name: "Ciano", preview: "oklch(0.7 0.15 205)" },
+  { id: "emerald", name: "Verde", preview: "oklch(0.65 0.16 155)" },
+  { id: "red", name: "Vermelho", preview: "oklch(0.6 0.2 25)" },
+  { id: "amber", name: "Dourado", preview: "oklch(0.72 0.16 78)" },
 ];
 
 export function ColorThemePicker() {
   const { colorTheme, setColorTheme } = useTheme();
-  const [isSubscriber, setIsSubscriber] = useState(false);
-
-  useEffect(() => {
-    setIsSubscriber(!!getCookie("tomoverso-subscriber"));
-  }, []);
-
-  const allColors = isSubscriber ? [...freeColors, ...premiumColors] : freeColors;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Mudar cor">
-          <Palette className="h-5 w-5" />
+        <Button variant="ghost" size="sm" className="gap-2 rounded-full" aria-label="Mudar cor do site">
+          <Palette className="h-4 w-4" />
+          <span className="hidden sm:inline">Cor</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel className="flex items-center gap-2">
-          Cor do tema
-          {isSubscriber && <Crown className="h-3 w-3 text-amber-400" />}
-        </DropdownMenuLabel>
+      <DropdownMenuContent align="end" className="w-52">
+        <DropdownMenuLabel>Cor do site</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {allColors.map((c) => (
-          <DropdownMenuItem
-            key={c.id}
-            onClick={() => setColorTheme(c.id)}
-            className="flex items-center gap-3 cursor-pointer"
-          >
-            <span
-              className="h-5 w-5 rounded-full border-2 border-border shrink-0"
-              style={{ background: c.preview }}
-            />
+        {colors.map((c) => (
+          <DropdownMenuItem key={c.id} onClick={() => setColorTheme(c.id)} className="cursor-pointer gap-3">
+            <span className="h-5 w-5 shrink-0 rounded-full border border-border" style={{ background: c.preview }} />
             <span className="flex-1">{c.name}</span>
-            {colorTheme === c.id && (
-              <span className="text-primary text-xs">✓</span>
-            )}
+            {colorTheme === c.id ? <span className="text-primary">✓</span> : null}
           </DropdownMenuItem>
         ))}
-        {!isSubscriber && (
-          <>
-            <DropdownMenuSeparator />
-            <div className="px-2 py-2 text-center">
-              <a
-                href="/store/plans"
-                className="flex items-center justify-center gap-1.5 text-xs text-amber-400 hover:text-amber-300"
-              >
-                <Lock className="h-3 w-3" />
-                Assine Pro para +4 cores exclusivas
-              </a>
-            </div>
-          </>
-        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
