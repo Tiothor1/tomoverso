@@ -50,6 +50,7 @@ function fallbackGradient(seed: string) {
 
 export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRepost, onFollow, onHide }: Props) {
   const image = item.mediaUrl || item.work?.coverUrl || null;
+  const isPagePreview = item.mediaKind === "page";
   const canFollow = item.user && item.user.id !== item.work?.authorId;
   const titleInitial = (item.work?.title || item.title || "T").slice(0, 1).toUpperCase();
 
@@ -69,7 +70,7 @@ export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRe
               src={image}
               alt={item.work?.title || item.title}
               loading={index < 3 ? "eager" : "lazy"}
-              className="absolute inset-0 h-full w-full scale-[1.01] object-cover opacity-90"
+              className={`absolute inset-0 h-full w-full scale-[1.01] ${isPagePreview ? "object-contain opacity-95" : "object-cover opacity-90"}`}
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-[42vw] font-black text-white/5 md:text-[15rem]">
@@ -78,6 +79,12 @@ export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRe
           )}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_48%_12%,rgba(255,255,255,0.20),transparent_28%),linear-gradient(to_top,rgba(0,0,0,0.96),rgba(0,0,0,0.64)_34%,rgba(0,0,0,0.12)_62%,rgba(0,0,0,0.62))]" />
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-black/72 to-transparent" />
+
+          {item.mediaCaption ? (
+            <div className="absolute left-4 top-[calc(env(safe-area-inset-top)+1rem)] z-10 rounded-full border border-white/15 bg-black/45 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] text-white/85 shadow-lg backdrop-blur-md md:left-5 md:top-5">
+              {item.mediaCaption}
+            </div>
+          ) : null}
 
           <div className="relative z-10 flex h-full flex-col justify-end px-4 pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pr-24 pt-[calc(env(safe-area-inset-top)+5rem)] sm:px-6 sm:pr-28 md:px-7 md:pb-8 md:pr-7 md:pt-20">
             <div className="min-w-0">

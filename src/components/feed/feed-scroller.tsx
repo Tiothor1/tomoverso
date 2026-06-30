@@ -364,8 +364,11 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
             <Button type="button" size="sm" variant="ghost" onClick={() => scrollToIndex(activeIndex + 1)} className="hidden rounded-full text-white hover:bg-white/10 hover:text-white sm:inline-flex" aria-label="Próximo card">
               <ChevronDown className="h-4 w-4" />
             </Button>
-            <Button type="button" size="sm" onClick={() => setCreateOpen(true)} className="rounded-full bg-white px-3 font-black text-black hover:bg-fuchsia-100">
-              <Plus className="mr-1 h-4 w-4" /> Postar
+            <Button asChild size="sm" variant="ghost" className="hidden rounded-full px-3 text-white hover:bg-white/10 hover:text-white sm:inline-flex">
+              <Link href="/dashboard/novels/new">Publicar obra</Link>
+            </Button>
+            <Button type="button" size="sm" onClick={() => setCreateOpen(true)} className="rounded-full bg-white px-3 font-black text-black hover:bg-fuchsia-100" aria-label="Criar post ou recomendação no feed">
+              <Plus className="mr-1 h-4 w-4" /> <span className="hidden sm:inline">Postar</span><span className="sm:hidden">Criar</span>
             </Button>
           </div>
         </div>

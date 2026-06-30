@@ -61,6 +61,8 @@ export interface FeedItem {
   work: FeedWorkRef | null;
   postId?: string | null;
   mediaUrl?: string | null;
+  mediaKind?: "cover" | "page" | "post" | null;
+  mediaCaption?: string | null;
   actionLabel: string;
   actionHref: string;
   badges: string[];

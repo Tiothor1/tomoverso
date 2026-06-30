@@ -59,8 +59,8 @@ export function FeedCreatePostModal({ open, isLoggedIn, workOptions, onClose, on
             <p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-fuchsia-300">
               <PenLine className="h-4 w-4" /> criar postagem
             </p>
-            <h2 className="mt-2 font-heading text-2xl font-black">Indica uma leitura pro feed</h2>
-            <p className="mt-1 text-sm text-white/55">Post curto, review, teaser ou recomendação ligada a uma obra real.</p>
+            <h2 className="mt-2 font-heading text-2xl font-black">Publica no Tomoverso</h2>
+            <p className="mt-1 text-sm text-white/55">Post curto, review, teaser ou chamada para a sua própria novel/mangá/manhwa.</p>
           </div>
           <Button type="button" variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/10 hover:text-white">
             <X className="h-5 w-5" />
@@ -68,6 +68,19 @@ export function FeedCreatePostModal({ open, isLoggedIn, workOptions, onClose, on
         </header>
 
         <div className="relative space-y-4 p-5">
+          <div className="rounded-3xl border border-fuchsia-300/20 bg-fuchsia-400/10 p-4 text-sm text-fuchsia-50">
+            <p className="font-bold">Sua obra também pode aparecer aqui.</p>
+            <p className="mt-1 text-white/65">Publique capítulos pelo painel e use posts para chamar leitores para suas páginas, cenas, reviews e novidades.</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button asChild size="sm" className="rounded-full bg-white text-black hover:bg-fuchsia-100">
+                <a href="/dashboard/novels/new">Criar minha novel</a>
+              </Button>
+              <Button asChild size="sm" variant="secondary" className="rounded-full bg-white/10 text-white hover:bg-white/15">
+                <a href="/dashboard">Meu painel</a>
+              </Button>
+            </div>
+          </div>
+
           {!isLoggedIn ? (
             <div className="rounded-3xl border border-amber-300/20 bg-amber-300/10 p-5 text-sm text-amber-50">
               Você precisa entrar para criar postagem.
@@ -98,7 +111,7 @@ export function FeedCreatePostModal({ open, isLoggedIn, workOptions, onClose, on
               <Textarea
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                placeholder="Ex: Se você gosta de fantasia sombria com protagonista frio, começa por essa obra..."
+                placeholder="Ex: Publiquei uma cena nova / Essa página ficou insana / Se você curte fantasia sombria, começa por aqui..."
                 maxLength={1200}
                 className="min-h-40 resize-none border-white/10 bg-white/[0.06] text-white placeholder:text-white/35"
               />

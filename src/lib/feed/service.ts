@@ -64,6 +64,9 @@ type MangaRow = {
   tags: string | null;
   latest_chapter_number?: number | null;
   latest_chapter_title?: string | null;
+  preview_page_url?: string | null;
+  preview_chapter_number?: number | null;
+  preview_page_number?: number | null;
 };
 
 type PostRow = {
@@ -205,6 +208,28 @@ function mangaWork(row: MangaRow): FeedWorkRef {
 
 function targetKey(type: FeedTargetType, id: string) {
   return `${type}:${id}`;
+}
+
+function getMangaPreviewMedia(db: SqliteDb, mangaId: string): { url: string | null; caption: string | null } {
+  const row = db.prepare(`
+    SELECT mp.image_url, mc.chapter_number, mp.page_number
+    FROM manga_pages mp
+    JOIN manga_chapters mc ON mc.id = mp.chapter_id
+    WHERE mc.manga_id = ?
+      AND COALESCE(mp.image_url, '') <> ''
+    ORDER BY mc.chapter_number DESC,
+      CASE
+        WHEN mp.page_number BETWEEN 2 AND 6 THEN 0
+        WHEN mp.page_number > 6 THEN 1
+        ELSE 2
+      END,
+      mp.page_number ASC
+    LIMIT 1
+  `).get(mangaId) as { image_url: string | null; chapter_number: number | null; page_number: number | null } | undefined;
+  if (!row?.image_url) return { url: null, caption: null };
+  const chapter = row.chapter_number ? `cap. ${row.chapter_number}` : "capítulo";
+  const page = row.page_number ? `pág. ${row.page_number}` : "página";
+  return { url: row.image_url, caption: `Página real · ${chapter} · ${page}` };
 }
 
 function getCounts(db: SqliteDb, targetType: FeedTargetType, targetId: string): FeedCounts {
@@ -394,7 +419,52 @@ function getMangaRows(db: SqliteDb): MangaRow[] {
         WHERE mc.manga_id = m.id
         ORDER BY mc.chapter_number DESC
         LIMIT 1
-      ) AS latest_chapter_title
+      ) AS latest_chapter_title,
+      (
+        SELECT mp.image_url
+        FROM manga_pages mp
+        JOIN manga_chapters mc ON mc.id = mp.chapter_id
+        WHERE mc.manga_id = m.id
+          AND COALESCE(mp.image_url, '') <> ''
+        ORDER BY mc.chapter_number DESC,
+          CASE
+            WHEN mp.page_number BETWEEN 2 AND 6 THEN 0
+            WHEN mp.page_number > 6 THEN 1
+            ELSE 2
+          END,
+          mp.page_number ASC
+        LIMIT 1
+      ) AS preview_page_url,
+      (
+        SELECT mc.chapter_number
+        FROM manga_pages mp
+        JOIN manga_chapters mc ON mc.id = mp.chapter_id
+        WHERE mc.manga_id = m.id
+          AND COALESCE(mp.image_url, '') <> ''
+        ORDER BY mc.chapter_number DESC,
+          CASE
+            WHEN mp.page_number BETWEEN 2 AND 6 THEN 0
+            WHEN mp.page_number > 6 THEN 1
+            ELSE 2
+          END,
+          mp.page_number ASC
+        LIMIT 1
+      ) AS preview_chapter_number,
+      (
+        SELECT mp.page_number
+        FROM manga_pages mp
+        JOIN manga_chapters mc ON mc.id = mp.chapter_id
+        WHERE mc.manga_id = m.id
+          AND COALESCE(mp.image_url, '') <> ''
+        ORDER BY mc.chapter_number DESC,
+          CASE
+            WHEN mp.page_number BETWEEN 2 AND 6 THEN 0
+            WHEN mp.page_number > 6 THEN 1
+            ELSE 2
+          END,
+          mp.page_number ASC
+        LIMIT 1
+      ) AS preview_page_number
     FROM mangas m
     JOIN manga_chapters ch ON ch.manga_id = m.id
     JOIN manga_pages p ON p.chapter_id = ch.id
@@ -436,21 +506,29 @@ function buildWorkItems(db: SqliteDb, userId: string | null, profile: InterestPr
     const work = mangaWork(row);
     if (profile.hidden.has(targetKey("manga", work.id))) continue;
     const scored = scoreWork(work, profile, { kind: "trend" });
+    const hasPreviewPage = Boolean(row.preview_page_url);
+    const chapterLabel = row.preview_chapter_number ? `cap. ${row.preview_chapter_number}` : "capítulo";
+    const pageLabel = row.preview_page_number ? `pág. ${row.preview_page_number}` : "página";
     items.push(decorateItem(db, {
       id: `manga:${work.id}`,
       kind: "trend",
       targetType: "manga",
       targetId: work.id,
-      title: `${work.title} em alta`,
-      body: work.synopsis,
-      reason: scored.reason,
-      score: scored.score + 4,
+      title: hasPreviewPage ? `Página de ${work.title}` : `${work.title} em alta`,
+      body: hasPreviewPage
+        ? `Prévia real de ${chapterLabel}, ${pageLabel}. Se bater a curiosidade, abre o capítulo e continua direto no leitor.`
+        : work.synopsis,
+      reason: hasPreviewPage ? "Mostrando página real do capítulo, não só capa de catálogo." : scored.reason,
+      score: scored.score + (hasPreviewPage ? 12 : 4),
       createdAt: row.updated_at || row.created_at,
       user: null,
       work,
+      mediaUrl: row.preview_page_url || work.coverUrl,
+      mediaKind: hasPreviewPage ? "page" : "cover",
+      mediaCaption: hasPreviewPage ? `Página real · ${chapterLabel} · ${pageLabel}` : "Capa da obra",
       actionLabel: "Ler mangá",
       actionHref: work.readHref,
-      badges: ["Mangá", `${work.chapterCount} caps`, ...work.tags.slice(0, 1)],
+      badges: [hasPreviewPage ? "Página real" : "Mangá", `${work.chapterCount} caps`, ...work.tags.slice(0, 1)],
     }, userId));
   }
 
@@ -511,6 +589,9 @@ function buildPostItems(db: SqliteDb, userId: string | null, profile: InterestPr
     .filter((row) => !profile.hidden.has(targetKey("post", row.id)))
     .map((row) => {
       const work = row.work_type && row.work_id ? getWorkById(db, row.work_type, row.work_id) : null;
+      const linkedMangaPreview = !row.media_url && row.work_type === "manga" && row.work_id
+        ? getMangaPreviewMedia(db, row.work_id)
+        : { url: null, caption: null };
       let score = 70;
       if (row.user_id && profile.authors.has(row.user_id)) score += 35;
       if (work) score += scoreWork(work, profile).score / 3;
@@ -529,7 +610,9 @@ function buildPostItems(db: SqliteDb, userId: string | null, profile: InterestPr
         createdAt: row.created_at,
         user: makeUserBadge({ id: row.user_id, username: row.username, display_name: row.display_name, avatar_url: row.avatar_url, role: row.role }, userId, db),
         work,
-        mediaUrl: row.media_url || null,
+        mediaUrl: row.media_url || linkedMangaPreview.url || null,
+        mediaKind: row.media_url ? "post" : linkedMangaPreview.url ? "page" : null,
+        mediaCaption: row.media_url ? "Mídia da comunidade" : linkedMangaPreview.caption,
         actionLabel: work ? "Abrir obra" : "Ver conversa",
         actionHref: work?.href || `/feed?post=${row.id}`,
         badges: [row.type === "review" ? "Review" : row.type === "repost" ? "Republicação" : "Post"],
