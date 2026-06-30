@@ -117,9 +117,9 @@ export function MangaReader({
   }, [mode, chapter.chapter_number]);
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-[#0a0a0a] text-foreground">
+    <div ref={containerRef} className="min-h-screen bg-[#06040a] text-foreground">
       {/* Topbar */}
-      <div className="sticky top-0 z-40 bg-[#0a0a0a]/95 backdrop-blur border-b border-white/10">
+      <div className="sticky top-0 z-40 border-b border-white/10 bg-[#06040a]/92 shadow-[0_8px_28px_rgba(0,0,0,0.35)] backdrop-blur-xl">
         <div className="container mx-auto max-w-7xl px-4 h-14 flex items-center justify-between gap-2">
           <Button variant="ghost" size="sm" asChild className="text-white hover:bg-white/10 shrink-0">
             <Link href={`/manga/${manga.slug}`}>
@@ -129,13 +129,13 @@ export function MangaReader({
             </Link>
           </Button>
           <div className="flex items-center gap-1 min-w-0">
-            <Badge variant="outline" className="text-white border-white/20 shrink-0 text-xs">
+            <Badge variant="outline" className="shrink-0 border-primary/35 bg-primary/10 text-xs text-white shadow-[0_0_18px_rgba(168,85,247,0.18)]">
               Cap {chapter.chapter_number}
             </Badge>
             {/* Mode toggle */}
             <button
               onClick={() => { setMode(mode === "scroll" ? "page" : "scroll"); setPageIdx(0); }}
-              className="px-2 py-1 text-[10px] rounded bg-white/10 text-white/70 hover:bg-white/20 whitespace-nowrap"
+              className="whitespace-nowrap rounded-full border border-white/10 bg-white/10 px-2 py-1 text-[10px] text-white/75 hover:bg-primary/15 hover:text-white"
               title={mode === "scroll" ? "Modo página" : "Modo scroll"}
             >
               {mode === "scroll" ? "📄 Pág" : "📜 Scroll"}
@@ -143,7 +143,7 @@ export function MangaReader({
             {/* Fullscreen */}
             <button
               onClick={toggleFullscreen}
-              className="p-1.5 rounded text-white/70 hover:bg-white/10"
+              className="rounded-full p-1.5 text-white/70 hover:bg-primary/15 hover:text-white"
               title={fullscreen ? "Sair da tela cheia" : "Tela cheia"}
             >
               {fullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
@@ -151,7 +151,7 @@ export function MangaReader({
             {/* Bookmark */}
             <button
               onClick={toggleBookmark}
-              className={`p-1.5 rounded ${bookmarked ? "text-yellow-400" : "text-white/70"} hover:bg-white/10`}
+              className={`rounded-full p-1.5 ${bookmarked ? "text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.45)]" : "text-white/70"} hover:bg-primary/15 hover:text-white`}
               title={bookmarked ? "Remover marcador" : "Marcar página"}
             >
               {bookmarked ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
@@ -205,7 +205,7 @@ export function MangaReader({
           )}
 
           {/* Page counter / overlay bottom */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-3 pointer-events-none">
+          <div className="pointer-events-none absolute bottom-4 left-1/2 flex -translate-x-1/2 items-center gap-3 rounded-full border border-white/10 bg-black/60 px-3 py-1.5 text-xs text-white shadow-[0_0_24px_rgba(0,0,0,0.45)] backdrop-blur-md">
             <span>{pageIdx + 1} / {pages.length}</span>
             {prevChapter && pageIdx === 0 && (
               <span className="text-white/50 text-[10px]">« Anterior</span>
@@ -229,10 +229,10 @@ export function MangaReader({
       )}
 
       {/* Footer navigation (both modes) */}
-      <div className="border-t border-white/10 bg-[#0a0a0a]/95 backdrop-blur">
+      <div className="border-t border-white/10 bg-[#06040a]/95 backdrop-blur-xl">
         <div className="container mx-auto max-w-7xl px-4 py-3 flex items-center justify-between gap-3">
           {prevChapter ? (
-            <Button asChild variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10">
+            <Button asChild variant="outline" size="sm" className="border-white/20 text-white hover:bg-primary/15">
               <Link href={`/manga/${manga.slug}/${prevChapter.slug}`}>
                 <ChevronLeft className="h-4 w-4 mr-1" />
                 <span className="hidden sm:inline">Cap {prevChapter.chapter_number}</span>
@@ -248,7 +248,7 @@ export function MangaReader({
             {pages.length} {pages.length === 1 ? "página" : "páginas"}
           </div>
           {nextChapter ? (
-            <Button asChild size="sm" className="bg-primary hover:bg-primary/90">
+            <Button asChild size="sm" className="neon-button bg-primary hover:bg-primary/90">
               <Link href={`/manga/${manga.slug}/${nextChapter.slug}`}>
                 <span className="hidden sm:inline">Cap {nextChapter.chapter_number}</span>
                 <span className="sm:hidden">Próximo</span>

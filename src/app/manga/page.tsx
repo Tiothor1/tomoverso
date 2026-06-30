@@ -68,11 +68,11 @@ function MangaPoster({ manga, dense = false }: { manga: any; dense?: boolean }) 
   const cover = getCover(manga);
   return (
     <Link href={`/manga/${manga.slug}`} className="group block h-full">
-      <Card className="h-full overflow-hidden border-border/45 bg-card/80 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
+      <Card className="neon-card h-full overflow-hidden">
         <div className="relative aspect-[2/3] overflow-hidden bg-muted">
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={cover} alt={manga.title} loading="lazy" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+            <img src={cover} alt={manga.title} loading="lazy" className="story-cover h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/15 to-secondary/30 p-3 text-center text-xs text-muted-foreground">
               {manga.title}
@@ -175,28 +175,28 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
     `).all() as Array<{ tag: string; c: number }>;
 
     return (
-      <main className="min-h-screen">
-        <section className="border-b border-border/40 bg-gradient-to-b from-primary/8 via-background to-background">
+      <main className="aurora-bg min-h-screen">
+        <section className="border-b border-primary/15 bg-gradient-to-b from-primary/12 via-background to-background">
           <div className="container mx-auto grid max-w-7xl gap-8 px-4 py-8 md:grid-cols-[1fr_260px] md:items-center md:py-12">
             <div className="space-y-5">
-              <Badge variant="secondary" className="gap-2 rounded-full px-3 py-1">
+              <Badge variant="secondary" className="neon-badge gap-2 rounded-full px-3 py-1">
                 <Sparkles className="h-3.5 w-3.5" /> {stats.mangas} obras · {stats.chapters.toLocaleString("pt-BR")} capítulos com páginas
               </Badge>
               <div className="space-y-2">
-                <h1 className="font-heading text-4xl font-black tracking-tight md:text-6xl">
+                <h1 className="gradient-text font-heading text-4xl font-black tracking-tight md:text-6xl">
                   Mangás, manhwas e manhuas
                 </h1>
                 <p className="max-w-2xl text-muted-foreground">
                   Catálogo limpo: só aparece obra que tem capítulo com páginas para ler.
                 </p>
               </div>
-              <form action="/manga" method="get" className="relative max-w-2xl">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <form action="/manga" method="get" className="glass-panel relative max-w-2xl rounded-2xl p-1.5">
+                <Search className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-primary/80" />
                 <input
                   name="q"
                   defaultValue={search}
                   placeholder="Pesquisar título, autor ou sinopse..."
-                  className="h-14 w-full rounded-2xl border border-border/60 bg-card/85 pl-12 pr-14 text-base shadow-sm outline-none transition focus:border-primary/50 focus:ring-4 focus:ring-primary/10"
+                  className="h-14 w-full rounded-xl border border-border/40 bg-background/55 pl-12 pr-14 text-base shadow-inner outline-none transition focus:border-primary/55 focus:ring-4 focus:ring-primary/15"
                 />
                 {search ? (
                   <Link href="/manga" className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground">
@@ -207,7 +207,7 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
               <div className="flex flex-wrap gap-2">
                 {topGenres.slice(0, 8).map(g => (
                   <Link key={g.tag} href={buildHref(filterParams, { genre: g.tag, page: null })}>
-                    <Badge variant={genre === g.tag ? "default" : "outline"} className="rounded-full px-3 py-1">
+                    <Badge variant={genre === g.tag ? "default" : "outline"} className="neon-badge rounded-full px-3 py-1">
                       {g.tag}
                     </Badge>
                   </Link>
@@ -217,11 +217,11 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
 
             {heroManga && (
               <Link href={`/manga/${heroManga.slug}`} className="group hidden md:block">
-                <Card className="overflow-hidden border-primary/20 bg-card/80 shadow-2xl shadow-primary/10 transition group-hover:-translate-y-1">
+                <Card className="neon-card overflow-hidden">
                   <div className="relative aspect-[2/3] bg-muted">
                     {getCover(heroManga) ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={getCover(heroManga)} alt={heroManga.title} className="h-full w-full object-cover" />
+                      <img src={getCover(heroManga)} alt={heroManga.title} className="story-cover h-full w-full object-cover" />
                     ) : null}
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent p-4 pt-16">
                       <p className="line-clamp-2 text-sm font-bold text-white">{heroManga.title}</p>
@@ -238,7 +238,7 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
           {featured.length > 0 && (
             <section className="space-y-3">
               <div className="flex items-center justify-between gap-3">
-                <h2 className="flex items-center gap-2 font-heading text-xl font-bold">
+                <h2 className="flex items-center gap-2 font-heading text-xl font-black">
                   <Flame className="h-5 w-5 text-orange-500" /> Mais extensos
                 </h2>
                 <Link href={buildHref(filterParams, { sort: "popular", page: null })} className="text-sm font-medium text-primary hover:underline">
@@ -252,7 +252,7 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
           )}
 
           <section className="space-y-4">
-            <div className="flex flex-col gap-3 rounded-2xl border border-border/45 bg-card/55 p-3 md:flex-row md:items-center md:justify-between">
+            <div className="glass-panel flex flex-col gap-3 rounded-2xl p-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <h2 className="font-heading text-xl font-bold">{hasActiveFilter(sp) ? "Resultados" : "Catálogo"}</h2>
                 <p className="text-sm text-muted-foreground">{totalFiltered.toLocaleString("pt-BR")} obras com leitura disponível</p>
@@ -278,11 +278,11 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
             )}
 
             {rows.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border/50 py-16 text-center">
-                <BookOpen className="mx-auto mb-3 h-14 w-14 text-muted-foreground/30" />
+              <div className="glass-panel rounded-2xl border-dashed py-16 text-center">
+                <BookOpen className="neon-icon-pop mx-auto mb-3 h-14 w-14 text-primary/70" />
                 <p className="text-lg font-semibold">Nenhum resultado</p>
                 <p className="text-sm text-muted-foreground">Tente outro termo ou limpe os filtros.</p>
-                <Button asChild className="mt-4"><Link href="/manga">Limpar filtros</Link></Button>
+                <Button asChild className="neon-button mt-4"><Link href="/manga">Limpar filtros</Link></Button>
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">

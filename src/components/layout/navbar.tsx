@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BookOpen, Crown, Library, PenLine, Shield, Sparkles, Store } from "lucide-react";
+import { BookOpen, Crown, Library, PenLine, Sparkles, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { ColorThemePicker } from "@/components/theme/color-theme-picker";
@@ -27,57 +27,57 @@ export async function Navbar() {
           {config.maintenance_message}
         </div>
       ) : null}
-      <header className="site-navbar sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-md">
+      <header className="site-navbar sticky top-0 z-50 w-full border-b border-primary/15 bg-background/72 shadow-[0_8px_35px_rgba(0,0,0,0.18)] backdrop-blur-xl">
         <div className="container mx-auto flex h-16 max-w-7xl items-center gap-3 px-4">
-          <Link href="/" className="flex items-center gap-2 group flex-shrink-0">
+          <Link href="/" className="group flex flex-shrink-0 items-center gap-2">
             <div className="relative">
-              <BookOpen className="h-7 w-7 text-primary transition-transform group-hover:scale-110" />
-              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
+              <BookOpen className="neon-icon-pop relative z-10 h-7 w-7 text-primary transition-transform group-hover:scale-110" />
+              <div className="absolute inset-0 rounded-full bg-primary/35 blur-xl" />
             </div>
             <div className="hidden sm:block">
-              <span className="font-heading text-2xl font-bold tracking-tight block leading-none">{config.site_name}</span>
+              <span className="gradient-text block font-heading text-2xl font-black leading-none tracking-tight">{config.site_name}</span>
               <span className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">{config.site_tagline}</span>
             </div>
           </Link>
 
-          <div className="hidden flex-1 md:block max-w-md mx-2">
+          <div className="mx-2 hidden max-w-md flex-1 md:block">
             <HeaderSearch />
           </div>
 
-          <nav className="hidden lg:flex items-center gap-1">
-            <Button variant="ghost" asChild>
+          <nav className="hidden items-center gap-1 2xl:flex">
+            <Button variant="ghost" asChild className="rounded-full hover:bg-primary/10">
               <Link href="/feed" className="text-fuchsia-400 hover:text-fuchsia-300">
-                <Sparkles className="h-4 w-4 mr-1.5" />
+                <Sparkles className="mr-1.5 h-4 w-4" />
                 Feed
               </Link>
             </Button>
-            <Button variant="ghost" asChild><Link href="/explore">Light Novels</Link></Button>
-            <Button variant="ghost" asChild><Link href="/manga">Mangás</Link></Button>
-            <Button variant="ghost" asChild><Link href="/livros">Livros</Link></Button>
+            <Button variant="ghost" asChild className="rounded-full hover:bg-primary/10 hover:text-primary"><Link href="/explore">Light Novels</Link></Button>
+            <Button variant="ghost" asChild className="rounded-full hover:bg-primary/10 hover:text-primary"><Link href="/manga">Mangás</Link></Button>
+            <Button variant="ghost" asChild className="rounded-full hover:bg-primary/10 hover:text-primary"><Link href="/livros">Livros</Link></Button>
             {config.storefront_enabled ? (
-              <Button variant="ghost" asChild>
+              <Button variant="ghost" asChild className="rounded-full hover:bg-primary/10 hover:text-primary">
                 <Link href={config.storefront_href}>
-                  <Store className="h-4 w-4 mr-1.5" />
+                  <Store className="mr-1.5 h-4 w-4" />
                   Loja
                 </Link>
               </Button>
             ) : null}
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" asChild className="rounded-full hover:bg-primary/10 hover:text-primary">
               <Link href="/library">
-                <Library className="h-4 w-4 mr-1.5" />
+                <Library className="mr-1.5 h-4 w-4" />
                 Estante
               </Link>
             </Button>
-            <Button variant="ghost" asChild><Link href="/how-to">Como criar</Link></Button>
+            <Button variant="ghost" asChild className="rounded-full hover:bg-primary/10 hover:text-primary"><Link href="/how-to">Como criar</Link></Button>
             {sub ? (
-              <span className="flex items-center gap-1 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-400">
+              <span className="flex items-center gap-1 rounded-full border border-amber-400/25 bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-300 shadow-[0_0_24px_rgba(251,191,36,0.15)]">
                 <Crown className="h-3 w-3" />
                 {sub.badge_label || "Pro"}
               </span>
             ) : (
-              <Button variant="ghost" asChild>
+              <Button variant="ghost" asChild className="rounded-full hover:bg-amber-400/10">
                 <Link href="/store/plans" className="text-amber-400 hover:text-amber-300">
-                  <Crown className="h-4 w-4 mr-1" />
+                  <Crown className="mr-1 h-4 w-4" />
                   Pro
                 </Link>
               </Button>
@@ -110,8 +110,8 @@ export async function Navbar() {
               />
             ) : (
               <>
-                <Button variant="ghost" asChild className="hidden md:flex"><Link href="/auth/login">Entrar</Link></Button>
-                <Button asChild className="hidden sm:flex"><Link href={config.publish_cta_href}><PenLine className="h-4 w-4 mr-2" />{config.publish_cta_label}</Link></Button>
+                <Button variant="ghost" asChild className="hidden rounded-full hover:bg-primary/10 hover:text-primary md:flex"><Link href="/auth/login">Entrar</Link></Button>
+                <Button asChild className="neon-button hidden rounded-full sm:flex"><Link href={config.publish_cta_href}><PenLine className="mr-2 h-4 w-4" />{config.publish_cta_label}</Link></Button>
               </>
             )}
           </div>

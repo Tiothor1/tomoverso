@@ -22,13 +22,13 @@ export function HeaderSearch({ className }: HeaderSearchProps) {
   }
 
   return (
-    <form onSubmit={submit} className={cn("relative w-full", className)}>
-      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+    <form onSubmit={submit} className={cn("group relative w-full", className)}>
+      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary" />
       <Input
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Pesquisar..."
-        className="h-10 rounded-full bg-muted/50 pl-9 pr-14 md:pr-20 text-sm focus-visible:bg-background"
+        className="h-10 rounded-full border-primary/10 bg-muted/45 pl-9 pr-14 text-sm shadow-inner focus-visible:border-primary/45 focus-visible:bg-background focus-visible:ring-primary/20 md:pr-20"
       />
       {query && (
         <button
@@ -40,7 +40,7 @@ export function HeaderSearch({ className }: HeaderSearchProps) {
           <X className="h-3.5 w-3.5" />
         </button>
       )}
-      <Button type="submit" size="sm" className="absolute right-1 top-1/2 h-8 -translate-y-1/2 rounded-full px-3">
+      <Button type="submit" size="sm" className="neon-button absolute right-1 top-1/2 h-8 -translate-y-1/2 rounded-full px-3">
         Ir
       </Button>
     </form>

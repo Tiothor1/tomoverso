@@ -14,7 +14,7 @@ export function SignupForm() {
   const [loading, setLoading] = useState(false);
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 relative overflow-hidden">
+    <div className="aurora-bg relative flex min-h-[80vh] items-center justify-center overflow-hidden px-4 py-12">
       {/* Background com partículas */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl" />
@@ -23,16 +23,16 @@ export function SignupForm() {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
-            <BookOpen className="h-7 w-7 text-primary" />
-            <span className="font-heading text-2xl font-bold">Tomoverso</span>
+            <BookOpen className="neon-icon-pop h-7 w-7 text-primary" />
+            <span className="gradient-text font-heading text-2xl font-black">Tomoverso</span>
           </Link>
-          <h1 className="font-heading text-3xl font-bold">Cria sua conta</h1>
+          <h1 className="font-heading text-3xl font-black">Cria sua conta</h1>
           <p className="text-muted-foreground text-sm">
             Comece a ler e escrever Light Novels em segundos
           </p>
         </div>
 
-        <Card>
+        <Card className="glass-panel">
           <CardContent className="pt-6">
             <form
               action={async (formData) => {
@@ -61,7 +61,7 @@ export function SignupForm() {
                     required
                     minLength={2}
                     maxLength={40}
-                    className="pl-9"
+                    className="pl-9 focus-visible:border-primary/45 focus-visible:ring-primary/20"
                   />
                 </div>
               </div>
@@ -78,7 +78,7 @@ export function SignupForm() {
                     minLength={3}
                     maxLength={20}
                     pattern="[a-zA-Z0-9_]+"
-                    className="pl-9"
+                    className="pl-9 focus-visible:border-primary/45 focus-visible:ring-primary/20"
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
@@ -96,7 +96,7 @@ export function SignupForm() {
                     type="email"
                     placeholder="seu@email.com"
                     required
-                    className="pl-9"
+                    className="pl-9 focus-visible:border-primary/45 focus-visible:ring-primary/20"
                   />
                 </div>
               </div>
@@ -112,7 +112,7 @@ export function SignupForm() {
                     placeholder="Mínimo 8 caracteres"
                     required
                     minLength={8}
-                    className="pl-9 pr-10"
+                    className="pl-9 pr-10 focus-visible:border-primary/45 focus-visible:ring-primary/20"
                   />
                   <button
                     type="button"
@@ -130,7 +130,7 @@ export function SignupForm() {
                 </div>
               )}
 
-              <Button type="submit" size="lg" className="w-full" disabled={loading}>
+              <Button type="submit" size="lg" className="neon-button w-full" disabled={loading}>
                 {loading ? "Criando..." : "Criar conta"}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>

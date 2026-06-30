@@ -90,8 +90,10 @@ export default async function MangaDetailPage({
   const lastChapter = chapters[0];
 
   return (
-    <div>
-      <div className="relative h-48 md:h-64 overflow-hidden bg-gradient-to-br from-primary/20 to-secondary/20">
+    <div className="aurora-bg">
+      <div className="relative h-48 overflow-hidden bg-gradient-to-br from-primary/30 via-fuchsia-500/10 to-cyan-500/20 md:h-64">
+        <div className="absolute -left-20 top-8 h-56 w-56 rounded-full bg-fuchsia-500/20 blur-3xl" />
+        <div className="absolute right-0 top-0 h-64 w-64 rounded-full bg-cyan-400/15 blur-3xl" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/60 to-background" />
       </div>
 
@@ -123,13 +125,13 @@ export default async function MangaDetailPage({
                   tags,
                   chapter_count: chapters.length,
                 }}
-                className="aspect-[2/3] shadow-2xl shadow-primary/20 rounded-lg overflow-hidden"
+                className="aspect-[2/3] overflow-hidden rounded-2xl shadow-2xl shadow-primary/30 ring-1 ring-primary/25"
               />
             </div>
 
             <div className="space-y-2">
               {firstChapter && (
-                <Button asChild className="w-full" size="lg">
+                <Button asChild className="neon-button w-full" size="lg">
                   <Link href={`/manga/${manga.slug}/${firstChapter.slug}`}>
                     <BookOpen className="h-4 w-4 mr-2" />
                     Começar a ler
@@ -137,7 +139,7 @@ export default async function MangaDetailPage({
                 </Button>
               )}
               {lastChapter && lastChapter.id !== firstChapter?.id && (
-                <Button asChild variant="outline" className="w-full">
+                <Button asChild variant="outline" className="glass-panel w-full">
                   <Link href={`/manga/${manga.slug}/${lastChapter.slug}`}>
                     Último cap ({lastChapter.chapter_number})
                   </Link>
@@ -200,7 +202,7 @@ export default async function MangaDetailPage({
                   </Badge>
                 ))}
               </div>
-              <h1 className="font-heading text-3xl md:text-5xl font-bold tracking-tight break-words">
+              <h1 className="gradient-text break-words font-heading text-3xl font-black tracking-tight md:text-5xl">
                 {manga.title}
               </h1>
               {alternativeTitles.length > 0 && (
@@ -211,7 +213,7 @@ export default async function MangaDetailPage({
             </div>
 
             {manga.synopsis && (
-              <Card>
+              <Card className="glass-panel">
                 <CardContent className="pt-6">
                   <h3 className="font-heading text-sm font-semibold mb-3 uppercase tracking-wider text-muted-foreground">
                     Sinopse
@@ -235,7 +237,7 @@ export default async function MangaDetailPage({
                 )}
               </div>
               {chapters.length === 0 ? (
-                <Card>
+                <Card className="glass-panel">
                   <CardContent className="py-12 text-center">
                     <p className="text-muted-foreground">
                       Nenhum capítulo importado ainda.
@@ -250,9 +252,9 @@ export default async function MangaDetailPage({
                       href={`/manga/${manga.slug}/${c.slug}`}
                       className="block group"
                     >
-                      <Card className="hover:border-primary/50 transition-all hover:bg-accent/30">
+                      <Card className="neon-card hover:bg-accent/30">
                         <CardContent className="py-3 px-4 flex items-center gap-3">
-                          <div className="font-heading text-lg font-bold text-primary/60 w-12 text-center shrink-0">
+                          <div className="w-12 shrink-0 text-center font-heading text-lg font-black text-primary/75 drop-shadow-[0_0_12px_rgba(168,85,247,0.35)]">
                             {String(c.chapter_number).padStart(3, "0")}
                           </div>
                           <div className="flex-1 min-w-0">

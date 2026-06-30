@@ -72,9 +72,9 @@ export default async function LibraryPage() {
   }
 
   return (
-    <div className="container mx-auto max-w-6xl px-4 py-8 space-y-8">
+    <div className="aurora-bg container mx-auto max-w-6xl space-y-8 px-4 py-8">
       <div>
-        <h1 className="font-heading text-3xl md:text-4xl font-bold tracking-tight">Minha estante</h1>
+        <h1 className="gradient-text font-heading text-3xl font-black tracking-tight md:text-4xl">Minha estante</h1>
         <p className="text-muted-foreground mt-1">Suas novels, organizadas do seu jeito.</p>
       </div>
 
@@ -110,7 +110,7 @@ export default async function LibraryPage() {
                 const progress = Math.min(100, Math.round(r.avg_progress || 0));
                 const novel = parseNovel(r);
                 return (
-                  <Card key={r.id} className="hover:border-primary/50 transition-colors">
+                  <Card key={r.id} className="neon-card">
                     <CardContent className="pt-6">
                       <div className="flex gap-4">
                         <div className="w-20 h-28 rounded-md bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center font-heading text-3xl font-bold text-primary/40 flex-shrink-0">
@@ -157,7 +157,7 @@ export default async function LibraryPage() {
                 const novel = parseNovel(f);
                 return (
                   <Link key={f.id} href={`/novels/${f.slug}`}>
-                    <Card className="hover:border-primary/50 transition-colors">
+                    <Card className="neon-card">
                       <CardContent className="pt-6">
                         <div className="flex flex-col items-center text-center space-y-2">
                           <div className="w-20 h-28 rounded-md bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center font-heading text-3xl font-bold text-primary/40">
@@ -189,7 +189,7 @@ export default async function LibraryPage() {
             <div className="space-y-2">
               {bookmarks.map((b) => (
                 <Link key={b.id} href={`/novels/${b.novel_slug}/${b.chapter_number}`} className="block">
-                  <Card className="hover:border-primary/50 transition-colors">
+                  <Card className="neon-card">
                     <CardContent className="py-3">
                       <div className="flex items-center gap-3">
                         <Bookmark className="h-4 w-4 text-primary fill-primary" />
@@ -210,7 +210,7 @@ export default async function LibraryPage() {
         </TabsContent>
 
         <TabsContent value="historico" className="mt-6">
-          <Card>
+          <Card className="glass-panel">
             <CardContent className="py-12 text-center text-muted-foreground">
               <Clock className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
               Histórico em breve
@@ -224,12 +224,12 @@ export default async function LibraryPage() {
 
 function EmptyState({ title, desc }: { title: string; desc: string }) {
   return (
-    <Card>
+    <Card className="glass-panel">
       <CardContent className="py-12 text-center space-y-2">
-        <BookOpen className="h-12 w-12 mx-auto text-muted-foreground/30" />
+        <BookOpen className="neon-icon-pop mx-auto h-12 w-12 text-primary/65" />
         <h3 className="font-heading text-lg font-semibold">{title}</h3>
         <p className="text-sm text-muted-foreground">{desc}</p>
-        <Button asChild className="mt-3">
+        <Button asChild className="neon-button mt-3">
           <Link href="/explore">Explorar novels</Link>
         </Button>
       </CardContent>

@@ -29,7 +29,7 @@ export function LoginForm() {
   }
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center px-4 py-12 relative overflow-hidden">
+    <div className="aurora-bg relative flex min-h-[80vh] items-center justify-center overflow-hidden px-4 py-12">
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl" />
       </div>
@@ -37,16 +37,16 @@ export function LoginForm() {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
-            <BookOpen className="h-7 w-7 text-primary" />
-            <span className="font-heading text-2xl font-bold">Tomoverso</span>
+            <BookOpen className="neon-icon-pop h-7 w-7 text-primary" />
+            <span className="gradient-text font-heading text-2xl font-black">Tomoverso</span>
           </Link>
-          <h1 className="font-heading text-3xl font-bold">Bem-vindo de volta</h1>
+          <h1 className="font-heading text-3xl font-black">Bem-vindo de volta</h1>
           <p className="text-muted-foreground text-sm">
             Entra pra continuar sua leitura
           </p>
         </div>
 
-        <Card>
+        <Card className="glass-panel">
           <CardContent className="pt-6">
             <form action={handleSubmit} className="space-y-4">
               <div className="space-y-2">
@@ -59,7 +59,7 @@ export function LoginForm() {
                     type="text"
                     placeholder="seu@email.com ou @username"
                     required
-                    className="pl-9"
+                    className="pl-9 focus-visible:border-primary/45 focus-visible:ring-primary/20"
                     autoComplete="username"
                   />
                 </div>
@@ -75,7 +75,7 @@ export function LoginForm() {
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
                     required
-                    className="pl-9 pr-10"
+                    className="pl-9 pr-10 focus-visible:border-primary/45 focus-visible:ring-primary/20"
                     autoComplete="current-password"
                   />
                   <button
@@ -94,7 +94,7 @@ export function LoginForm() {
                 </div>
               )}
 
-              <Button type="submit" size="lg" className="w-full" disabled={loading}>
+              <Button type="submit" size="lg" className="neon-button w-full" disabled={loading}>
                 {loading ? "Entrando..." : "Entrar"}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>

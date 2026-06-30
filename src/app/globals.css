@@ -391,13 +391,189 @@ body.feed-immersive .continue-reading-banner {
   display: none;
 }
 
+/* ===== Tomoverso motion + neon polish ===== */
+.aurora-bg {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.aurora-bg::before,
+.aurora-bg::after {
+  content: "";
+  position: absolute;
+  inset: auto;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(58px);
+  opacity: 0.42;
+  transform: translate3d(0, 0, 0);
+}
+
+.aurora-bg::before {
+  width: min(42rem, 72vw);
+  height: min(42rem, 72vw);
+  left: -12rem;
+  top: -10rem;
+  background: radial-gradient(circle, color-mix(in oklch, var(--primary) 78%, transparent), transparent 68%);
+  animation: aurora-drift 18s ease-in-out infinite alternate;
+}
+
+.aurora-bg::after {
+  width: min(36rem, 65vw);
+  height: min(36rem, 65vw);
+  right: -11rem;
+  top: 7rem;
+  background: radial-gradient(circle, oklch(0.72 0.2 225 / 0.58), transparent 66%);
+  animation: aurora-drift 22s ease-in-out infinite alternate-reverse;
+}
+
+.gradient-text {
+  background: linear-gradient(110deg, var(--foreground), var(--primary), oklch(0.75 0.22 330), oklch(0.78 0.17 220));
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 34px color-mix(in oklch, var(--primary) 28%, transparent);
+}
+
+.neon-button {
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--primary) 30%, transparent), 0 14px 40px color-mix(in oklch, var(--primary) 20%, transparent);
+}
+
+.neon-button::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  translate: -130% 0;
+  background: linear-gradient(100deg, transparent 10%, rgba(255,255,255,.36), transparent 72%);
+  transition: translate .65s ease;
+}
+
+.neon-button:hover::before,
+.neon-button:focus-visible::before {
+  translate: 130% 0;
+}
+
+.neon-button:hover,
+.neon-button:focus-visible {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 1px color-mix(in oklch, var(--primary) 55%, transparent), 0 18px 52px color-mix(in oklch, var(--primary) 34%, transparent);
+}
+
+.glass-panel {
+  border: 1px solid color-mix(in oklch, var(--border) 65%, white 10%);
+  background: color-mix(in oklch, var(--card) 76%, transparent);
+  box-shadow: 0 24px 80px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.08);
+  backdrop-filter: blur(18px) saturate(1.24);
+}
+
+.neon-card {
+  position: relative;
+  border-color: color-mix(in oklch, var(--border) 75%, var(--primary) 20%) !important;
+  background: linear-gradient(180deg, color-mix(in oklch, var(--card) 92%, transparent), color-mix(in oklch, var(--card) 80%, black 8%));
+  box-shadow: 0 18px 55px rgba(0,0,0,.22), 0 0 0 1px color-mix(in oklch, var(--primary) 10%, transparent);
+  transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease, background-color .28s ease;
+}
+
+.neon-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0;
+  background: radial-gradient(circle at 50% 0, color-mix(in oklch, var(--primary) 28%, transparent), transparent 48%);
+  transition: opacity .28s ease;
+}
+
+.group:hover .neon-card,
+.neon-card:hover,
+.hover-lift:hover {
+  transform: translateY(-4px) scale(1.01);
+}
+
+.group:hover .neon-card,
+.neon-card:hover {
+  border-color: color-mix(in oklch, var(--primary) 58%, var(--border)) !important;
+  box-shadow: 0 24px 70px rgba(0,0,0,.32), 0 0 34px color-mix(in oklch, var(--primary) 22%, transparent);
+}
+
+.group:hover .neon-card::after,
+.neon-card:hover::after {
+  opacity: 1;
+}
+
+.neon-badge {
+  border: 1px solid color-mix(in oklch, var(--primary) 30%, transparent);
+  background: color-mix(in oklch, var(--primary) 13%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 0 20px color-mix(in oklch, var(--primary) 12%, transparent);
+}
+
+.story-cover {
+  transition: transform .6s cubic-bezier(.2,.8,.2,1), filter .45s ease;
+}
+
+.group:hover .story-cover {
+  transform: scale(1.065);
+  filter: saturate(1.12) contrast(1.05);
+}
+
+.reveal-up {
+  animation: reveal-up .55s ease both;
+}
+
+.neon-icon-pop {
+  transition: transform .22s ease, filter .22s ease, color .22s ease;
+}
+
+.group:hover .neon-icon-pop,
+.neon-icon-pop:hover {
+  transform: translateY(-1px) scale(1.08) rotate(-3deg);
+  filter: drop-shadow(0 0 12px color-mix(in oklch, var(--primary) 55%, transparent));
+}
+
+@keyframes aurora-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(7%, 5%, 0) scale(1.08); }
+}
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes soft-pulse-glow {
+  0%, 100% { box-shadow: 0 0 18px color-mix(in oklch, var(--primary) 16%, transparent); }
+  50% { box-shadow: 0 0 32px color-mix(in oklch, var(--primary) 30%, transparent); }
+}
+
 /* Animações suaves — aplicadas apenas em elementos interativos, não no html todo */
 button,
 a,
 input,
 select,
 textarea {
-  transition-property: background-color, border-color, color, fill, stroke;
+  transition-property: background-color, border-color, color, fill, stroke, transform, box-shadow, opacity, filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+  transition-duration: 180ms;
+}
+
+:focus-visible {
+  outline: 2px solid color-mix(in oklch, var(--primary) 75%, white 10%);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

@@ -118,7 +118,7 @@ function FeedMediaCarousel({ images } : { images: FeedMediaItem[] }) {
 
       {imageCount > 1 ? (
         <>
-          <div className="pointer-events-none absolute left-4 top-[calc(env(safe-area-inset-top)+2rem)] z-30 rounded-full border border-white/15 bg-black/55 px-2 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-white/75 backdrop-blur-md md:top-12">
+          <div className="pointer-events-none absolute left-4 top-[calc(env(safe-area-inset-top)+2rem)] z-30 rounded-full border border-fuchsia-300/25 bg-black/55 px-2 py-1 text-[9px] font-black uppercase tracking-[0.16em] text-white/85 shadow-[0_0_24px_rgba(217,70,239,0.22)] backdrop-blur-md md:top-12">
             {active + 1}/{imageCount}
           </div>
 
@@ -126,7 +126,7 @@ function FeedMediaCarousel({ images } : { images: FeedMediaItem[] }) {
             type="button"
             aria-label="Imagem anterior"
             onClick={(e) => { e.stopPropagation(); scrollTo(active - 1); }}
-            className="absolute left-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white shadow-xl backdrop-blur-md transition hover:bg-white/15 md:flex"
+            className="absolute left-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white shadow-xl backdrop-blur-md transition hover:scale-105 hover:bg-fuchsia-500/20 hover:shadow-[0_0_22px_rgba(217,70,239,0.35)] md:flex"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -134,7 +134,7 @@ function FeedMediaCarousel({ images } : { images: FeedMediaItem[] }) {
             type="button"
             aria-label="Próxima imagem"
             onClick={(e) => { e.stopPropagation(); scrollTo(active + 1); }}
-            className="absolute right-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white shadow-xl backdrop-blur-md transition hover:bg-white/15 md:flex"
+            className="absolute right-2 top-1/2 z-20 hidden h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white shadow-xl backdrop-blur-md transition hover:scale-105 hover:bg-fuchsia-500/20 hover:shadow-[0_0_22px_rgba(217,70,239,0.35)] md:flex"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -195,7 +195,7 @@ export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRe
       className="relative flex h-[100dvh] min-h-[100dvh] w-full snap-start snap-always items-center justify-center overflow-visible bg-transparent px-0 py-0 text-white md:px-16 md:py-4"
     >
       <div className="relative h-full w-full overflow-visible md:h-[min(860px,calc(100dvh-2rem))] md:w-[min(100vw-10rem,520px)]">
-        <div className="absolute inset-0 overflow-hidden bg-black shadow-[0_30px_90px_rgba(0,0,0,0.65)] md:rounded-[2rem] md:border md:border-white/10">
+        <div className="absolute inset-0 overflow-hidden bg-black shadow-[0_30px_90px_rgba(0,0,0,0.65),0_0_46px_rgba(168,85,247,0.18)] md:rounded-[2rem] md:border md:border-white/10">
           <div className={`absolute inset-0 bg-gradient-to-br ${fallbackGradient(item.id)}`} />
 
           {images.length > 0 ? (
@@ -217,7 +217,7 @@ export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRe
             </>
           ) : null}
 
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_48%_12%,rgba(255,255,255,0.20),transparent_28%),linear-gradient(to_top,rgba(0,0,0,0.96),rgba(0,0,0,0.64)_34%,rgba(0,0,0,0.12)_62%,rgba(0,0,0,0.62))]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_48%_12%,rgba(255,255,255,0.20),transparent_28%),radial-gradient(circle_at_12%_82%,rgba(217,70,239,0.22),transparent_30%),radial-gradient(circle_at_90%_20%,rgba(34,211,238,0.16),transparent_26%),linear-gradient(to_top,rgba(0,0,0,0.96),rgba(0,0,0,0.64)_34%,rgba(0,0,0,0.12)_62%,rgba(0,0,0,0.62))]" />
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black via-black/72 to-transparent" />
 
           {item.mediaCaption && !hasCarousel ? (
@@ -229,7 +229,7 @@ export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRe
           <div className="relative z-10 pointer-events-none flex h-full flex-col justify-end px-4 pb-[calc(env(safe-area-inset-bottom)+4.5rem)] pr-24 pt-[calc(env(safe-area-inset-top)+5rem)] sm:px-6 sm:pr-28 md:px-7 md:pb-7 md:pr-7 md:pt-20">
             <div className="min-w-0 pointer-events-auto">
               <div className="mb-2 flex flex-wrap items-center gap-1.5">
-                <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em] text-white/85 backdrop-blur-md">
+                <span className="inline-flex items-center gap-1 rounded-full border border-fuchsia-300/25 bg-white/10 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.16em] text-white/90 shadow-[0_0_22px_rgba(217,70,239,0.2)] backdrop-blur-md">
                   <Sparkles className="h-2.5 w-2.5 text-fuchsia-300" />
                   {item.kind === "continue" ? "Continue" : item.kind === "post" ? "Comunidade" : item.kind === "trend" ? "Em alta" : "Pra você"}
                 </span>
@@ -274,13 +274,13 @@ export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRe
 
               {item.work ? (
                 <div className="pointer-events-auto mt-3 flex flex-wrap items-center gap-1.5">
-                  <Button asChild size="sm" className="h-8 rounded-full bg-white px-3.5 text-[11px] font-black text-black shadow-xl hover:bg-fuchsia-100">
+                  <Button asChild size="sm" className="neon-button h-8 rounded-full bg-white px-3.5 text-[11px] font-black text-black shadow-xl hover:bg-fuchsia-100">
                     <Link href={item.actionHref}>
                       <BookOpen className="mr-1.5 h-3 w-3" />
                       {item.actionLabel}
                     </Link>
                   </Button>
-                  <Button asChild variant="secondary" size="sm" className="h-8 rounded-full bg-white/10 px-3 text-[11px] text-white backdrop-blur-md hover:bg-white/20">
+                  <Button asChild variant="secondary" size="sm" className="h-8 rounded-full border border-white/15 bg-white/10 px-3 text-[11px] text-white backdrop-blur-md hover:bg-fuchsia-500/20">
                     <Link href={item.work.href}>Ver obra</Link>
                   </Button>
                   <span className="inline-flex items-center gap-1 rounded-full bg-black/35 px-2 py-0.5 text-[10px] text-white/70 backdrop-blur-md">
@@ -331,10 +331,10 @@ function RailButton({ children, label, ariaLabel, onClick, active = false, subtl
       onClick={onClick}
       className={`group flex w-full flex-col items-center gap-0.5 text-[9px] font-black uppercase tracking-tight transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${subtle ? "text-white/50" : "text-white"}`}
     >
-      <span className={`flex h-10 w-10 items-center justify-center rounded-full border shadow-lg backdrop-blur-md transition-colors sm:h-11 sm:w-11 ${active ? "border-white/30 bg-white/25" : "border-white/15 bg-black/40 group-hover:bg-white/20"}`}>
+      <span className={`flex h-10 w-10 items-center justify-center rounded-full border shadow-lg backdrop-blur-md transition-all sm:h-11 sm:w-11 ${active ? "border-fuchsia-300/45 bg-fuchsia-500/25 shadow-[0_0_24px_rgba(217,70,239,0.42)]" : "border-white/15 bg-black/40 group-hover:bg-fuchsia-500/20 group-hover:shadow-[0_0_20px_rgba(217,70,239,0.28)]"}`}>
         {children}
       </span>
-      <span className="max-w-[3.2rem] truncate text-center leading-none drop-shadow">{label}</span>
+      <span className="max-w-[3.2rem] truncate text-center leading-none drop-shadow group-hover:text-fuchsia-100">{label}</span>
     </button>
   );
 }

@@ -78,7 +78,7 @@ export function MobileMenu({
       <Button
         variant="ghost"
         size="icon"
-        className="lg:hidden"
+        className="rounded-full hover:bg-primary/10 hover:text-primary 2xl:hidden"
         aria-label="Abrir menu"
         aria-expanded={open}
         onClick={() => setOpen(true)}
@@ -96,13 +96,13 @@ export function MobileMenu({
                 onClick={() => setOpen(false)}
               />
 
-              <aside className="absolute right-0 top-0 flex h-dvh w-[min(90vw,22rem)] flex-col overflow-hidden border-l border-primary/25 bg-background shadow-2xl shadow-black/60">
+              <aside className="glass-panel absolute right-0 top-0 flex h-dvh w-[min(90vw,22rem)] flex-col overflow-hidden border-l border-primary/25 bg-background/95 shadow-2xl shadow-black/60">
                 <header className="relative shrink-0 overflow-hidden border-b border-border/50 px-4 py-4">
                   <div className="pointer-events-none absolute -right-12 -top-16 h-32 w-32 rounded-full bg-primary/25 blur-3xl" />
                   <div className="pointer-events-none absolute -bottom-16 left-4 h-28 w-28 rounded-full bg-amber-400/15 blur-3xl" />
 
                   <div className="relative flex items-center gap-3 pr-11">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary ring-1 ring-primary/25">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/15 text-primary ring-1 ring-primary/25 shadow-[0_0_24px_rgba(168,85,247,0.22)]">
                       <BookOpen className="h-5 w-5" />
                     </div>
                     <div className="min-w-0">
@@ -192,11 +192,11 @@ function MobileLink({ href, icon: Icon, label, onClose, accent = "primary", comp
       onClick={onClose}
       className={
         compact
-          ? "group flex min-h-20 flex-col items-start justify-between rounded-2xl border border-border/50 bg-card/60 p-3 text-sm font-bold text-foreground transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-          : "group flex min-h-11 items-center gap-3 rounded-2xl px-3 py-2 text-sm font-semibold text-foreground/90 transition-colors hover:bg-muted/70 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+          ? "neon-card group flex min-h-20 flex-col items-start justify-between rounded-2xl border border-border/50 bg-card/60 p-3 text-sm font-bold text-foreground transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+          : "group flex min-h-11 items-center gap-3 rounded-2xl px-3 py-2 text-sm font-semibold text-foreground/90 transition-colors hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
       }
     >
-      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ring-1 ${accentClass}`}>
+      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ring-1 transition-transform group-hover:scale-110 ${accentClass}`}>
         <Icon className="h-4 w-4" />
       </span>
       <span className={compact ? "leading-tight" : "min-w-0 flex-1 truncate"}>{label}</span>

@@ -23,9 +23,9 @@ export function MangaCard({ manga, variant = "default" }: MangaCardProps) {
   if (variant === "compact") {
     return (
       <Link href={href} className="group block">
-        <Card className="overflow-hidden border-border/40 hover:border-primary/50 transition-all hover:shadow-lg hover:shadow-primary/10">
+        <Card className="neon-card overflow-hidden">
           <div className="aspect-[2/3] overflow-hidden bg-muted">
-            <MangaCover manga={manga} className="h-full w-full" />
+            <MangaCover manga={manga} className="story-cover h-full w-full" />
           </div>
           <CardContent className="p-3">
             <h3 className="font-heading text-sm font-semibold line-clamp-2 group-hover:text-primary transition-colors">
@@ -44,13 +44,13 @@ export function MangaCard({ manga, variant = "default" }: MangaCardProps) {
 
   return (
     <Link href={href} className="group block">
-      <Card className="overflow-hidden border-border/40 hover:border-primary/50 transition-all hover:shadow-xl hover:shadow-primary/10">
+      <Card className="neon-card overflow-hidden">
         <div className="aspect-[2/3] overflow-hidden bg-muted relative">
-          <MangaCover manga={manga} className="h-full w-full" />
+          <MangaCover manga={manga} className="story-cover h-full w-full" />
           {status && (
             <Badge
               variant="outline"
-              className={`absolute top-2 right-2 text-[10px] ${status.className}`}
+              className={`absolute top-2 right-2 text-[10px] shadow-[0_0_18px_rgba(255,255,255,0.12)] ${status.className}`}
             >
               {status.label}
             </Badge>
@@ -67,7 +67,7 @@ export function MangaCard({ manga, variant = "default" }: MangaCardProps) {
           )}
           <div className="flex flex-wrap gap-1">
             {(manga.tags || []).slice(0, 3).map((t) => (
-              <Badge key={t} variant="secondary" className="text-[10px]">
+              <Badge key={t} variant="secondary" className="neon-badge text-[10px]">
                 {t}
               </Badge>
             ))}
