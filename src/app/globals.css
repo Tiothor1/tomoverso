@@ -382,6 +382,15 @@ body.feed-immersive .continue-reading-banner {
   display: none;
 }
 
+.feed-page-slices {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.feed-page-slices::-webkit-scrollbar {
+  display: none;
+}
+
 /* Animações suaves */
 * {
   transition-property: background-color, border-color, color, fill, stroke;

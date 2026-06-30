@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import {
   Bookmark,
   BookOpen,
+  ChevronLeft,
+  ChevronRight,
   Eye,
   Flag,
   Heart,
@@ -66,12 +69,16 @@ export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRe
         <div className="absolute inset-0 overflow-hidden bg-black shadow-[0_30px_90px_rgba(0,0,0,0.65)] md:rounded-[2rem] md:border md:border-white/10">
           <div className={`absolute inset-0 bg-gradient-to-br ${fallbackGradient(item.id)}`} />
           {image ? (
-            <img
-              src={image}
-              alt={item.work?.title || item.title}
-              loading={index < 3 ? "eager" : "lazy"}
-              className={`absolute inset-0 h-full w-full scale-[1.01] ${isPagePreview ? "object-contain opacity-95" : "object-cover opacity-90"}`}
-            />
+            isPagePreview ? (
+              <PageSlicePreview src={image} alt={item.work?.title || item.title} eager={index < 3} />
+            ) : (
+              <img
+                src={image}
+                alt={item.work?.title || item.title}
+                loading={index < 3 ? "eager" : "lazy"}
+                className="absolute inset-0 h-full w-full scale-[1.01] object-cover opacity-90"
+              />
+            )
           ) : (
             <div className="absolute inset-0 flex items-center justify-center text-[42vw] font-black text-white/5 md:text-[15rem]">
               {titleInitial}
@@ -86,7 +93,7 @@ export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRe
             </div>
           ) : null}
 
-          <div className="relative z-10 flex h-full flex-col justify-end px-4 pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pr-24 pt-[calc(env(safe-area-inset-top)+5rem)] sm:px-6 sm:pr-28 md:px-7 md:pb-8 md:pr-7 md:pt-20">
+          <div className="relative z-10 pointer-events-none flex h-full flex-col justify-end px-4 pb-[calc(env(safe-area-inset-bottom)+5.75rem)] pr-24 pt-[calc(env(safe-area-inset-top)+5rem)] sm:px-6 sm:pr-28 md:px-7 md:pb-8 md:pr-7 md:pt-20">
             <div className="min-w-0">
               <div className="mb-3 flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white/90 backdrop-blur-md">
@@ -101,7 +108,7 @@ export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRe
               </div>
 
               {item.user ? (
-                <div className="mb-3 flex min-w-0 items-center gap-2 text-sm text-white/90">
+                <div className="pointer-events-auto mb-3 flex min-w-0 items-center gap-2 text-sm text-white/90">
                   <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/15 text-xs font-black backdrop-blur-md">
                     {item.user.avatarUrl ? <img src={item.user.avatarUrl} alt="" className="h-full w-full rounded-full object-cover" /> : item.user.displayName.slice(0, 2).toUpperCase()}
                   </div>
@@ -141,7 +148,7 @@ export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRe
               ) : null}
 
               {item.work ? (
-                <div className="mt-5 flex flex-wrap items-center gap-2.5">
+                <div className="pointer-events-auto mt-5 flex flex-wrap items-center gap-2.5">
                   <Button asChild size="lg" className="h-11 rounded-full bg-white px-5 font-black text-black shadow-xl hover:bg-fuchsia-100">
                     <Link href={item.actionHref}>
                       <BookOpen className="mr-2 h-4 w-4" />
@@ -188,6 +195,133 @@ export function FeedCard({ item, index, onLike, onSave, onComment, onShare, onRe
         </aside>
       </div>
     </article>
+  );
+}
+
+function PageSlicePreview({ src, alt, eager }: { src: string; alt: string; eager: boolean }) {
+  const [segments, setSegments] = useState(1);
+  const [active, setActive] = useState(0);
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const imageRef = useRef<HTMLImageElement | null>(null);
+
+  useEffect(() => {
+    setActive(0);
+    scrollerRef.current?.scrollTo({ left: 0 });
+    const image = imageRef.current;
+    if (image?.complete && image.naturalWidth) {
+      updateSegments(image.naturalWidth, image.naturalHeight);
+    }
+  }, [src]);
+
+  function updateSegments(width: number, height: number) {
+    const ratio = height / Math.max(1, width);
+    const nextSegments = ratio > 2.35 ? Math.min(7, Math.max(3, Math.ceil(ratio / 1.65))) : 1;
+    setSegments(nextSegments);
+  }
+
+  function scrollToSlice(next: number) {
+    const scroller = scrollerRef.current;
+    if (!scroller) return;
+    const clamped = Math.max(0, Math.min(next, segments - 1));
+    scroller.scrollTo({ left: scroller.clientWidth * clamped, behavior: "smooth" });
+    setActive(clamped);
+  }
+
+  if (segments <= 1) {
+    return (
+      <img
+        ref={imageRef}
+        src={src}
+        alt={alt}
+        loading={eager ? "eager" : "lazy"}
+        onLoad={(event) => updateSegments(event.currentTarget.naturalWidth, event.currentTarget.naturalHeight)}
+        className="absolute inset-0 h-full w-full scale-[1.01] object-contain opacity-95"
+      />
+    );
+  }
+
+  return (
+    <div className="absolute inset-0 bg-black" data-feed-page-slice-carousel="true" data-feed-page-slices={segments}>
+      <img
+        ref={imageRef}
+        src={src}
+        alt=""
+        loading={eager ? "eager" : "lazy"}
+        aria-hidden="true"
+        onLoad={(event) => updateSegments(event.currentTarget.naturalWidth, event.currentTarget.naturalHeight)}
+        className="pointer-events-none absolute h-0 w-0 opacity-0"
+      />
+
+      <div
+        ref={scrollerRef}
+        className="feed-page-slices flex h-full w-full snap-x snap-mandatory overflow-x-auto overscroll-x-contain scroll-smooth"
+        aria-label="Recortes horizontais da página"
+        onScroll={(event) => {
+          const el = event.currentTarget;
+          if (!el.clientWidth) return;
+          setActive(Math.round(el.scrollLeft / el.clientWidth));
+        }}
+      >
+        {Array.from({ length: segments }).map((_, sliceIndex) => {
+          const y = segments === 1 ? 50 : Math.round((sliceIndex / (segments - 1)) * 100);
+          return (
+            <div
+              key={sliceIndex}
+              className="relative h-full min-w-full snap-center bg-black bg-center bg-no-repeat"
+              role="img"
+              aria-label={`${alt} — recorte ${sliceIndex + 1} de ${segments}`}
+              style={{
+                backgroundImage: `url(${src})`,
+                backgroundPosition: `center ${y}%`,
+                backgroundSize: "100% auto",
+              }}
+            />
+          );
+        })}
+      </div>
+
+      <div className="pointer-events-none absolute left-4 top-[calc(env(safe-area-inset-top)+3.4rem)] z-40 rounded-full border border-white/15 bg-black/55 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white/80 backdrop-blur-md md:top-14">
+        Arraste para o lado · {active + 1}/{segments}
+      </div>
+
+      <button
+        type="button"
+        aria-label="Recorte anterior da página"
+        onClick={(event) => {
+          event.stopPropagation();
+          scrollToSlice(active - 1);
+        }}
+        className="absolute left-3 top-1/2 z-40 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white shadow-xl backdrop-blur-md transition hover:bg-white/15 md:flex"
+      >
+        <ChevronLeft className="h-5 w-5" />
+      </button>
+      <button
+        type="button"
+        aria-label="Próximo recorte da página"
+        onClick={(event) => {
+          event.stopPropagation();
+          scrollToSlice(active + 1);
+        }}
+        className="absolute right-3 top-1/2 z-40 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-black/45 text-white shadow-xl backdrop-blur-md transition hover:bg-white/15 md:flex"
+      >
+        <ChevronRight className="h-5 w-5" />
+      </button>
+
+      <div className="absolute inset-x-0 bottom-[calc(env(safe-area-inset-bottom)+1rem)] z-40 flex justify-center gap-1.5 md:bottom-4">
+        {Array.from({ length: segments }).map((_, sliceIndex) => (
+          <button
+            key={sliceIndex}
+            type="button"
+            aria-label={`Ir para recorte ${sliceIndex + 1}`}
+            onClick={(event) => {
+              event.stopPropagation();
+              scrollToSlice(sliceIndex);
+            }}
+            className={`h-1.5 rounded-full transition-all ${active === sliceIndex ? "w-6 bg-white" : "w-1.5 bg-white/35"}`}
+          />
+        ))}
+      </div>
+    </div>
   );
 }
 
