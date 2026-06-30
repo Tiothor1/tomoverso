@@ -73,7 +73,7 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
                 <ul className="mb-6 flex-1 space-y-2">
                   {features.map((f: string, i: number) => (<li key={i} className="flex items-start gap-2 text-sm"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" /><span>{f}</span></li>))}
                 </ul>
-                <form action="/api/payments/checkout" method="POST" className="checkout-form">
+                <form action="/api/payments/checkout" method="POST">
                   <input type="hidden" name="plan_id" value={plan.id} />
                   <button type="submit" className={`w-full rounded-xl py-3 text-sm font-bold transition-colors ${plan.id === "pro-yearly" ? "bg-amber-500 text-amber-950 hover:bg-amber-400" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}>
                     {user ? "Assinar agora" : "Faça login para assinar"}
@@ -91,22 +91,6 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
         <Link href="/dashboard/subscription" className="mt-4 inline-block rounded-xl border border-border/60 px-6 py-2 text-sm font-medium hover:bg-accent">Ir para o painel</Link>
       </section>
     </main>
-    <script dangerouslySetInnerHTML={{ __html: `
-document.querySelectorAll('.checkout-form').forEach(function(f){
-  f.addEventListener('submit',async function(ev){
-    ev.preventDefault();
-    var b=this.querySelector('button');b.disabled=true;b.textContent='Aguarde...';
-    try {
-      var r=await fetch('/api/payments/checkout',{method:'POST',body:new FormData(this)});
-      var j=await r.json();
-      if(j.ok && j.checkoutUrl){window.location.href=j.checkoutUrl;return;}
-      if(j.redirect){window.location.href=j.redirect;return;}
-      if(j.error==='login'){window.location.href=j.redirect;return;}
-      window.location.href='/store/plans?error='+(j.error||'checkout_failed');
-    }catch(e){window.location.href='/store/plans?error=network_error';}
-  });
-});
-    `}} />
     </>
   );
 }
