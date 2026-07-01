@@ -817,6 +817,7 @@ function createDb() {
   `);
 
   migrateUserSubscriptionsPendingStatus(db);
+  applyBundledCentralNovelCovers(db);
 
   const settingsRow = db.prepare("SELECT id FROM site_settings WHERE id = 'default'").get() as { id: string } | undefined;
   if (!settingsRow) {
@@ -894,6 +895,61 @@ function migrateUserSubscriptionsPendingStatus(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_user_subscriptions_status ON user_subscriptions(status);
     PRAGMA foreign_keys=ON;
   `);
+}
+
+function applyBundledCentralNovelCovers(db: Database.Database) {
+  const covers: Array<[string, string, string]> = [
+    ["cn-a-returners-magic-should-be-special", "/uploads/novels/centralnovel/cn-a-returners-magic-should-be-special-cover.webp", "https://centralnovel.com/wp-content/uploads/2022/07/A-Returners-Magic-Should-Be-Special-CAPA-CENTRAL.png"],
+    ["cn-a-will-eternal-20230516", "/uploads/novels/centralnovel/cn-a-will-eternal-20230516-cover.webp", "https://centralnovel.com/wp-content/uploads/2021/07/A-Will-Eternal-capa-central.png"],
+    ["cn-against-the-gods-20230516", "/uploads/novels/centralnovel/cn-against-the-gods-20230516-cover.webp", "https://centralnovel.com/wp-content/uploads/2021/06/Against-the-Gods-capa-central.png"],
+    ["cn-ancient-godly-monarch-20230928", "/uploads/novels/centralnovel/cn-ancient-godly-monarch-20230928-cover.webp", "https://centralnovel.com/wp-content/uploads/2021/11/Ancient-Godly-Monarch-CAPA-CENTRAL.png"],
+    ["cn-battle-through-the-heavens-20230516", "/uploads/novels/centralnovel/cn-battle-through-the-heavens-20230516-cover.webp", "https://centralnovel.com/wp-content/uploads/2021/07/Battle-Through-the-Heavens-capa-central.png"],
+    ["cn-birth-of-the-demonic-sword-20230928", "/uploads/novels/centralnovel/cn-birth-of-the-demonic-sword-20230928-cover.webp", "https://centralnovel.com/wp-content/uploads/2021/07/Birth-of-the-Demonic-Sword-capa-central.png"],
+    ["cn-bringing-the-farm-to-live-in-another-world-20230928", "/uploads/novels/centralnovel/cn-bringing-the-farm-to-live-in-another-world-20230928-cover.webp", "https://centralnovel.com/wp-content/uploads/2021/11/Bringing-The-Farm-To-Live-In-Another-World-capa-central.png"],
+    ["cn-classroom-of-the-elite", "/uploads/novels/centralnovel/cn-classroom-of-the-elite-cover.webp", "https://centralnovel.com/wp-content/uploads/2026/04/Classroom-of-the-Elite-capa-central.png"],
+    ["cn-coiling-dragon-20230516", "/uploads/novels/centralnovel/cn-coiling-dragon-20230516-cover.webp", "https://centralnovel.com/wp-content/uploads/2021/07/Coiling-Dragon-capa-central.png"],
+    ["cn-commanding-wind-and-cloud-20230928", "/uploads/novels/centralnovel/cn-commanding-wind-and-cloud-20230928-cover.webp", "https://centralnovel.com/wp-content/uploads/2021/11/Commanding-Wind-and-Cloud-capa-central.png"],
+    ["cn-cult-of-the-sacred-runes", "/uploads/novels/centralnovel/cn-cult-of-the-sacred-runes-cover.webp", "https://centralnovel.com/wp-content/uploads/2022/10/Cult-of-the-Sacred-Runes-CAPA-CENTRAL.png"],
+    ["cn-demon-king", "/uploads/novels/centralnovel/cn-demon-king-cover.webp", "https://centralnovel.com/wp-content/uploads/2024/08/Demon-King-CAPA-CENTRAL.png"],
+    ["cn-dual-cultivation-20230516", "/uploads/novels/centralnovel/cn-dual-cultivation-20230516-cover.webp", "https://centralnovel.com/wp-content/uploads/2022/06/Dual-Cultivation-capa-central.png"],
+    ["cn-king-of-gods-20240505", "/uploads/novels/centralnovel/cn-king-of-gods-20240505-cover.webp", "https://centralnovel.com/wp-content/uploads/2021/06/King-of-Gods-capa-central.png"],
+    ["cn-lord-of-mysteries-20240505", "/uploads/novels/centralnovel/cn-lord-of-mysteries-20240505-cover.webp", "https://centralnovel.com/wp-content/uploads/2023/04/Lord-of-Mysteries-capa-central.png"],
+    ["cn-martial-world-20230928", "/uploads/novels/centralnovel/cn-martial-world-20230928-cover.webp", "https://centralnovel.com/wp-content/uploads/2021/06/Martial-World-capa-central.png"],
+    ["cn-overgeared-20230516", "/uploads/novels/centralnovel/cn-overgeared-20230516-cover.webp", "https://centralnovel.com/wp-content/uploads/2021/06/Overgeared-CAPA-CENTRAL.png"],
+    ["cn-release-that-witch-20230516", "/uploads/novels/centralnovel/cn-release-that-witch-20230516-cover.webp", "https://centralnovel.com/wp-content/uploads/2021/06/Release-that-Witch-capa-central.png"],
+    ["cn-shadow-slave-20230928", "/uploads/novels/centralnovel/cn-shadow-slave-20230928-cover.webp", "https://centralnovel.com/wp-content/uploads/2023/03/Shadow-Slave-capa-central.png"],
+    ["cn-supreme-magus-20230928", "/uploads/novels/centralnovel/cn-supreme-magus-20230928-cover.webp", "https://centralnovel.com/wp-content/uploads/2021/07/Supreme-Magus-capa-central.png"],
+    ["cn-yahari-ore-no-seishun-love-comedy-wa-machigatteiru", "/uploads/novels/centralnovel/cn-yahari-ore-no-seishun-love-comedy-wa-machigatteiru-cover.webp", "https://centralnovel.com/wp-content/uploads/2026/06/Yahari-Ore-no-Seishun-Love-Comedy-wa-Machigatteiru-capa-central.png"],
+    ["cn-yuusha-party-wo-oidasareta-kiyoubinbou", "/uploads/novels/centralnovel/cn-yuusha-party-wo-oidasareta-kiyoubinbou-cover.webp", "https://centralnovel.com/wp-content/uploads/2026/06/Yuusha-Party-wo-Oidasareta-Kiyoubinbou-capa-central.png"],
+  ];
+
+  const update = db.prepare(`
+    UPDATE novels
+    SET cover_url = ?, cover_local_path = ?, cover_source_url = ?, updated_at = datetime('now')
+    WHERE slug = ?
+      AND (cover_local_path IS NULL OR trim(cover_local_path) = '' OR cover_local_path LIKE '%.svg' OR cover_local_path LIKE '%placeholder%')
+      AND (cover_url IS NULL OR trim(cover_url) = '' OR cover_url LIKE '%.svg' OR cover_url LIKE '%placeholder%')
+  `);
+
+  const tx = db.transaction(() => {
+    for (const [slug, localPath, sourceUrl] of covers) {
+      update.run(localPath, localPath, sourceUrl, slug);
+    }
+    const junk = db.prepare("SELECT id FROM novels WHERE slug = 'cn-list-mode'").get() as { id: string } | undefined;
+    if (junk) {
+      db.prepare(`
+        INSERT OR IGNORE INTO catalog_controls (id, item_type, item_id, is_hidden, updated_at)
+        VALUES ('hide-cn-list-mode', 'novel', ?, 1, datetime('now'))
+      `).run(junk.id);
+      db.prepare(`
+        UPDATE catalog_controls
+        SET is_hidden = 1, updated_at = datetime('now')
+        WHERE item_type = 'novel' AND item_id = ?
+      `).run(junk.id);
+    }
+  });
+
+  tx();
 }
 
 function seedDatabase(db: Database.Database) {
