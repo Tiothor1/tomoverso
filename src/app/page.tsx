@@ -111,7 +111,7 @@ export default function HomePage() {
               placeholder="Pesquisar mangá, novel, capítulo..."
               className="h-14 w-full rounded-xl border border-border/40 bg-background/55 pl-12 pr-28 text-base shadow-inner outline-none transition focus:border-primary/55 focus:ring-4 focus:ring-primary/15 md:pr-36"
             />
-            <Button type="submit" size="lg" className="neon-button absolute right-3 top-1/2 h-10 -translate-y-1/2 rounded-xl px-5">Buscar</Button>
+            <button type="submit" className="neon-button absolute right-3 top-1/2 h-10 -translate-y-1/2 cursor-pointer rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90">Buscar</button>
           </form>
           <div className="flex flex-wrap justify-center gap-3 pt-2">
             <Button size="lg" asChild className="neon-button"><Link href={config.primary_cta_href}>{config.primary_cta_label} <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
