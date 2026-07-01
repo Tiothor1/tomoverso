@@ -46,7 +46,7 @@ export default function RootLayout({
       <head>
         <meta name="google-adsense-account" content="ca-pub-2780687772948357" />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-R28LZTKXV6"></script>
-        <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-R28LZTKXV6');</script>
+        <script dangerouslySetInnerHTML={{__html:`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-R28LZTKXV6');`}} />
         <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2780687772948357"
