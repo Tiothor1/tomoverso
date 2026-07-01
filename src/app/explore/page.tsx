@@ -113,8 +113,8 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
   const page = Math.max(1, parseInt(sp.page || "1", 10) || 1);
   const offset = (page - 1) * PAGE_SIZE;
 
-  // Default: mostrar só obras com capítulos (readable = true)
-  const readableDefault = sp.readable !== "0"; // default true: só com capítulos
+  // Default: leitura real para novels; Visual Novels são catálogo VNDB (sem capítulos).
+  const readableDefault = sp.type === "visual-novel" ? sp.readable === "1" : sp.readable !== "0";
 
   const { where, params } = buildQuery({
     type: sp.type,
@@ -147,7 +147,7 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
   })) as any[];
 
   // Contagens por tipo (para badges de filtro) — só uma vez, sem filtro
-  const allTypeRows = db.prepare(`SELECT type, COUNT(*) as c FROM novels WHERE ${publicReadableNovelSql("novels")} GROUP BY type`).all() as Array<{ type: string; c: number }>;
+  const allTypeRows = db.prepare(`SELECT type, COUNT(*) as c FROM novels WHERE ${publicVisibleNovelSql("novels")} GROUP BY type`).all() as Array<{ type: string; c: number }>;
   const typeCounts: Record<string, number> = { all: 0, "light-novel": 0, "web-novel": 0, "visual-novel": 0, "short": 0 };
   for (const r of allTypeRows) {
     typeCounts[r.type] = r.c;
@@ -158,9 +158,10 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
   const readableCount = (db.prepare(`SELECT COUNT(*) as c FROM novels n WHERE ${publicReadableNovelSql("n")}`).get() as { c: number }).c;
 
   // Gêneros — só os top 20 (em vez de TODOS) pra não inchar a página
+  const genreBaseWhere = readableDefault ? publicReadableNovelSql("novels") : publicVisibleNovelSql("novels");
   const allGenresRaw = db.prepare(`
     SELECT genres FROM novels
-    WHERE ${publicReadableNovelSql("novels")}
+    WHERE ${genreBaseWhere}
     LIMIT 300
   `).all() as Array<{ genres: string }>;
   const genreFreq = new Map<string, number>();

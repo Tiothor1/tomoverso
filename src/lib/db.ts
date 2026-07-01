@@ -2,6 +2,7 @@ import Database from "better-sqlite3";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "fs";
 import path from "path";
 import { gunzipSync } from "zlib";
+import { bundledVndbVisualNovels } from "@/lib/data/bundled-vndb-visual-novels";
 
 function getDbDir(): string {
   // Em Vercel, o filesystem é read-only fora de /tmp
@@ -818,6 +819,7 @@ function createDb() {
 
   migrateUserSubscriptionsPendingStatus(db);
   applyBundledCentralNovelCovers(db);
+  applyBundledVndbVisualNovels(db);
 
   const settingsRow = db.prepare("SELECT id FROM site_settings WHERE id = 'default'").get() as { id: string } | undefined;
   if (!settingsRow) {
@@ -946,6 +948,70 @@ function applyBundledCentralNovelCovers(db: Database.Database) {
         SET is_hidden = 1, updated_at = datetime('now')
         WHERE item_type = 'novel' AND item_id = ?
       `).run(junk.id);
+    }
+  });
+
+  tx();
+}
+
+function applyBundledVndbVisualNovels(db: Database.Database) {
+  if (bundledVndbVisualNovels.length === 0) return;
+
+  const admin = db.prepare("SELECT id FROM users WHERE role = 'admin' ORDER BY created_at ASC LIMIT 1").get() as { id: string } | undefined;
+  if (!admin) return;
+
+  let source = db.prepare("SELECT id FROM sources WHERE name = 'vndb'").get() as { id: string } | undefined;
+  if (!source) {
+    db.prepare(`
+      INSERT INTO sources (id, name, display_name, type, base_url, rate_limit_per_sec, enabled, config)
+      VALUES ('source-vndb', 'vndb', 'Visual Novel Database', 'api', 'https://api.vndb.org/kana', 5, 1, '{"source":"https://api.vndb.org/kana"}')
+    `).run();
+    source = { id: 'source-vndb' };
+  }
+
+  const insertNovel = db.prepare(`
+    INSERT OR IGNORE INTO novels (
+      id, slug, title, alternative_titles, synopsis,
+      cover_url, cover_source_url, cover_local_path,
+      author_id, source, source_id, source_url,
+      type, status, genres, tags,
+      external_score, is_featured, is_approved,
+      last_synced_at, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'vndb', ?, ?, 'visual-novel', ?, ?, ?, ?, 0, 1, datetime('now'), ?, datetime('now'))
+  `);
+  const updateNovel = db.prepare(`
+    UPDATE novels
+    SET cover_url = ?, cover_local_path = ?, cover_source_url = ?, updated_at = datetime('now')
+    WHERE source = 'vndb' AND source_id = ?
+      AND (cover_local_path IS NULL OR trim(cover_local_path) = '' OR cover_local_path NOT LIKE '/uploads/novels/vndb/%')
+  `);
+  const insertLink = db.prepare(`
+    INSERT OR IGNORE INTO source_links (id, novel_id, source_id, external_id, external_url, match_confidence, last_synced_at)
+    VALUES (?, ?, ?, ?, ?, 1.0, datetime('now'))
+  `);
+
+  const tx = db.transaction(() => {
+    for (const vn of bundledVndbVisualNovels) {
+      insertNovel.run(
+        vn.id,
+        vn.slug,
+        vn.title,
+        JSON.stringify(vn.alternativeTitles),
+        vn.synopsis.slice(0, 5000),
+        vn.coverLocalPath,
+        vn.coverSourceUrl,
+        vn.coverLocalPath,
+        admin.id,
+        vn.sourceId,
+        vn.sourceUrl,
+        vn.status,
+        JSON.stringify(vn.genres),
+        JSON.stringify(vn.tags),
+        vn.externalScore,
+        vn.createdAt
+      );
+      updateNovel.run(vn.coverLocalPath, vn.coverLocalPath, vn.coverSourceUrl, vn.sourceId);
+      insertLink.run(`vndb-${vn.sourceId}`, vn.id, source!.id, vn.sourceId, vn.sourceUrl);
     }
   });
 
