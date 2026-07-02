@@ -239,11 +239,13 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
               Light Novel ({typeCounts["light-novel"]})
             </Badge>
           </Link>
-          <Link href={sp.genre ? `/explore?genre=${encodeURIComponent(sp.genre)}&type=web-novel` : "/explore?type=web-novel"}>
-            <Badge variant={sp.type === "web-novel" ? "default" : "outline"} className="cursor-pointer hover:bg-blue-500/10">
-              Web Novel ({typeCounts["web-novel"]})
-            </Badge>
-          </Link>
+          {typeCounts["web-novel"] > 0 && (
+            <Link href={sp.genre ? `/explore?genre=${encodeURIComponent(sp.genre)}&type=web-novel` : "/explore?type=web-novel"}>
+              <Badge variant={sp.type === "web-novel" ? "default" : "outline"} className="cursor-pointer hover:bg-blue-500/10">
+                Web Novel ({typeCounts["web-novel"]})
+              </Badge>
+            </Link>
+          )}
           <Link href={sp.genre ? `/explore?genre=${encodeURIComponent(sp.genre)}&type=visual-novel` : "/explore?type=visual-novel"}>
             <Badge variant={sp.type === "visual-novel" ? "default" : "outline"} className="cursor-pointer hover:bg-purple-500/10">
               Visual Novel ({typeCounts["visual-novel"]})
