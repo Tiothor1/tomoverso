@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { Heart, BookOpen, Users, Sparkles, ArrowRight, Code2, MessageCircle, Send } from "lucide-react";
+import { BookOpen, Heart, Sparkles, ArrowRight, Mail, Users } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
   title: "Sobre — Tomo Verso Editora",
-  description: "A história por trás do Tomo Verso Editora e nossa missão.",
+  description: "Conheça a Tomo Verso Editora, uma editora digital dedicada a transformar histórias em experiências marcantes.",
 };
 
 export default function AboutPage() {
@@ -14,37 +14,35 @@ export default function AboutPage() {
     <div className="container mx-auto max-w-4xl px-4 py-12 space-y-16">
       {/* Hero */}
       <div className="text-center space-y-4">
-        <Badge variant="secondary" className="mb-2">Nossa história</Badge>
+        <Badge variant="secondary" className="mb-2">Quem somos</Badge>
         <h1 className="font-heading text-4xl md:text-5xl font-bold tracking-tight">
-          Por que o Tomo Verso Editora existe
+          Tomo Verso Editora
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-          Um lugar pra Light Novels brasileiras deixarem de ser só um sonho
-          no caderno e virarem histórias que todo mundo lê.
+          Uma editora digital brasileira dedicada a conectar leitores e autores através de
+          histórias que marcam.
         </p>
       </div>
 
-      {/* Manifesto */}
+      {/* Missão */}
       <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
         <CardContent className="pt-8 pb-8 space-y-4">
           <Heart className="h-10 w-10 text-primary" />
-          <h2 className="font-heading text-2xl md:text-3xl font-bold">O manifesto</h2>
+          <h2 className="font-heading text-2xl md:text-3xl font-bold">Nossa missão</h2>
           <div className="space-y-3 text-muted-foreground leading-relaxed">
             <p>
-              Você alguma vez já escreveu uma história inteira no caderno da escola
-              e nunca mostrou pra ninguém? Já teve uma ideia de fantasia que parecia
-              incrível na sua cabeça, mas que morreu porque não tinha onde postar?
+              A Tomo Verso Editora nasceu com um propósito claro: transformar histórias em
+              experiências marcantes. Somos uma editora digital que acredita no poder da
+              imaginação, na força de narrativas originais e no talento dos autores brasileiros.
             </p>
             <p>
-              O <strong className="text-foreground">Tomo Verso Editora</strong> nasceu disso.
-              Da vontade de criar um espaço onde a história que você escreveu às 3
-              da manhã, ou o personagem que você inventou na aula de matemática,
-              possa encontrar quem vai amar eles.
+              Nosso catálogo reúne novels, light novels, mangás, manhwas e livros em um só
+              universo — porque histórias boas não cabem em um rótulo só.
             </p>
             <p>
-              Aqui não importa se você nunca publicou nada. Não importa se sua
-              escrita tem defeito. Importa que você tem uma história pra contar.
-              O resto a gente resolve junto.
+              Mais do que publicar, queremos ser o ponto de encontro entre quem escreve e
+              quem lê. Um espaço onde autores encontram público, leitores encontram histórias
+              que combinam com eles, e a comunidade cresce junto.
             </p>
           </div>
         </CardContent>
@@ -55,18 +53,18 @@ export default function AboutPage() {
         {[
           {
             icon: BookOpen,
-            title: "Pra leitores vorazes",
-            desc: "Feed personalizado, discovery, gêneros nichados. Você vai achar aquela LN que vai te tomar o sono.",
+            title: "Catálogo diverso",
+            desc: "Light novels, mangás, manhwas, livros e originais brasileiros. Curadoria que valoriza qualidade e originalidade acima de tudo.",
           },
           {
             icon: Users,
-            title: "Pra autores iniciantes",
-            desc: "Editor simples, painel fácil, sem enfeite. Você foca em escrever, a gente cuida do resto.",
+            title: "Autores em primeiro lugar",
+            desc: "Ferramentas pra publicar, métricas pra acompanhar, e um público real lendo. Sem burocracia, sem barreiras.",
           },
           {
             icon: Sparkles,
-            title: "Pra comunidade BR",
-            desc: "Comentários, reviews, follows, notificações. Leitor e autor conversam, trocam, crescem juntos.",
+            title: "Comunidade viva",
+            desc: "Feed, comentários e interação direta entre leitores e autores. Cada história cria sua própria tribo.",
           },
         ].map((p) => (
           <Card key={p.title}>
@@ -81,57 +79,25 @@ export default function AboutPage() {
         ))}
       </div>
 
-      {/* Roadmap */}
+      {/* O que já temos */}
       <div>
         <h2 className="font-heading text-2xl md:text-3xl font-bold mb-6">
-          A estrada pela frente
+          O que oferecemos
         </h2>
-        <div className="space-y-3">
+        <div className="grid sm:grid-cols-2 gap-3">
           {[
-            { fase: "1", status: "feito", titulo: "Site no ar", desc: "Landing, catálogo, leitura, painel de autor básico." },
-            { fase: "2", status: "agora", titulo: "Autenticação + Supabase", desc: "Login, cadastro, persistência real. Painel completo do autor." },
-            { fase: "3", status: "futuro", titulo: "Comunidade e métricas", desc: "Comentarios, follows, ratings, analytics detalhado pra autores." },
-            { fase: "4", status: "futuro", titulo: "Monetização pra autores", desc: "Capítulos premium, doações via PIX, split de receita." },
-            { fase: "5", status: "sonho", titulo: "App mobile", desc: "iOS e Android com leitor offline, notificações push, e feed nativo." },
-          ].map((r) => (
-            <div
-              key={r.fase}
-              className={`flex items-start gap-4 p-4 rounded-lg border ${
-                r.status === "agora"
-                  ? "border-primary/50 bg-primary/5"
-                  : r.status === "feito"
-                  ? "border-emerald-500/30 bg-emerald-500/5"
-                  : "border-border/40 bg-muted/20"
-              }`}
-            >
-              <div
-                className={`font-heading font-bold text-2xl w-10 text-center ${
-                  r.status === "agora"
-                    ? "text-primary"
-                    : r.status === "feito"
-                    ? "text-emerald-500"
-                    : "text-muted-foreground/40"
-                }`}
-              >
-                {r.fase}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-semibold">{r.titulo}</h3>
-                  {r.status === "agora" && (
-                    <Badge variant="default" className="text-[10px]">Em construção</Badge>
-                  )}
-                  {r.status === "feito" && (
-                    <Badge variant="secondary" className="text-[10px] bg-emerald-500/20 text-emerald-400">
-                      ✓ Feito
-                    </Badge>
-                  )}
-                  {r.status === "sonho" && (
-                    <Badge variant="outline" className="text-[10px]">Sonho</Badge>
-                  )}
-                </div>
-                <p className="text-sm text-muted-foreground mt-0.5">{r.desc}</p>
-              </div>
+            "Catálogo com centenas de obras entre novels e mangás",
+            "Leitor de páginas com tema escuro e claro",
+            "Painel do autor pra publicar capítulos",
+            "Busca inteligente por obra, autor, gênero ou tag",
+            "Feed personalizado de descoberta",
+            "Sistema de assinatura sem anúncios",
+            "Publicação de obras originais BR",
+            "Suporte a múltiplos idiomas na interface",
+          ].map((item) => (
+            <div key={item} className="flex items-center gap-2 p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
+              <span className="text-emerald-400 font-bold shrink-0">✓</span>
+              <span className="text-sm">{item}</span>
             </div>
           ))}
         </div>
@@ -140,24 +106,15 @@ export default function AboutPage() {
       {/* Contato */}
       <Card>
         <CardContent className="pt-8 pb-8 text-center space-y-4">
-          <h2 className="font-heading text-2xl font-bold">Bora conversar?</h2>
+          <h2 className="font-heading text-2xl font-bold">Quer falar com a gente?</h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            Sugestões, bugs, ideias, parceria, ou só um oi. Pode mandar.
+            Sugestões, parcerias, dúvidas ou só um oi. Tamo por aqui.
           </p>
           <div className="flex justify-center gap-3">
-            <Button variant="outline" size="icon" asChild>
-              <a href="https://github.com" target="_blank" rel="noopener noreferrer">
-                <Code2 className="h-4 w-4" />
-              </a>
-            </Button>
-            <Button variant="outline" size="icon" asChild>
-              <a href="https://discord.gg" target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="h-4 w-4" />
-              </a>
-            </Button>
-            <Button variant="outline" size="icon" asChild>
-              <a href="https://t.me" target="_blank" rel="noopener noreferrer">
-                <Send className="h-4 w-4" />
+            <Button variant="outline" asChild>
+              <a href="mailto:tomoversoeditora@gmail.com">
+                <Mail className="mr-2 h-4 w-4" />
+                tomoversoeditora@gmail.com
               </a>
             </Button>
           </div>
@@ -167,7 +124,7 @@ export default function AboutPage() {
       <div className="text-center">
         <Button size="lg" asChild>
           <Link href="/explore">
-            Explorar novels <ArrowRight className="h-4 w-4 ml-2" />
+            Explorar catálogo <ArrowRight className="h-4 w-4 ml-2" />
           </Link>
         </Button>
       </div>
