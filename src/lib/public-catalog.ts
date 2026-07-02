@@ -14,6 +14,7 @@ export function readableMangaExistsSql(alias = "m") {
 
 export function publicSafeNovelSql(alias = "n") {
   return `COALESCE(${alias}.source, '') NOT IN ('ao3', 'kakuyomu')
+    AND ${alias}.type <> 'web-novel'
     AND ${alias}.slug NOT LIKE 'ao3-%'
     AND ${alias}.title NOT LIKE 'AO3 Work %'`;
 }

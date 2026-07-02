@@ -1,6 +1,7 @@
-import WebNovelAliasPage, { webNovelAliasMetadata } from "@/components/catalog/web-novel-alias-page";
+import { redirect } from "next/navigation";
 
-export const metadata = webNovelAliasMetadata;
 export const dynamic = "force-dynamic";
 
-export default WebNovelAliasPage;
+export default function RemovedCategoryPage() {
+  redirect("/explore");
+}

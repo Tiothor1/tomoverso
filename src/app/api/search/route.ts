@@ -6,11 +6,11 @@ import { readableTitle } from "@/lib/display-title";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type Filter = "all" | "light-novel" | "web-novel" | "manga" | "books" | "chapters" | "authors" | "genres" | "pages";
+type Filter = "all" | "light-novel" | "manga" | "books" | "chapters" | "authors" | "genres" | "pages";
 
 type SearchItem = {
   id: string;
-  type: "light-novel" | "web-novel" | "manga" | "chapter" | "author" | "genre" | "page";
+  type: "light-novel" | "manga" | "chapter" | "author" | "genre" | "page";
   title: string;
   subtitle?: string;
   description?: string;
@@ -30,7 +30,7 @@ type SearchResponse = {
 
 const pages: SearchItem[] = [
   { id: "home", type: "page", title: "Início", subtitle: "Página inicial", description: "Destaques, lançamentos e busca do Tomoverso.", href: "/" },
-  { id: "explore", type: "page", title: "Light Novels", subtitle: "Catálogo", description: "Explore Light Novels e WebNovels disponíveis.", href: "/explore" },
+  { id: "explore", type: "page", title: "Light Novels", subtitle: "Catálogo", description: "Explore Light Novels disponíveis.", href: "/explore" },
   { id: "manga", type: "page", title: "Mangás", subtitle: "Catálogo", description: "Mangás com leitor por páginas e tela cheia.", href: "/manga" },
   { id: "library", type: "page", title: "Estante", subtitle: "Leitura", description: "Acompanhe seus favoritos e progresso de leitura.", href: "/library" },
   { id: "dashboard", type: "page", title: "Painel do autor", subtitle: "Publicação", description: "Crie novels, capítulos e acompanhe métricas.", href: "/dashboard" },
@@ -54,7 +54,7 @@ function cleanQuery(value: string | null): string {
 }
 
 function validFilter(value: string | null): Filter {
-  const filters: Filter[] = ["all", "light-novel", "web-novel", "manga", "books", "chapters", "authors", "genres", "pages"];
+  const filters: Filter[] = ["all", "light-novel", "manga", "books", "chapters", "authors", "genres", "pages"];
   return filters.includes(value as Filter) ? (value as Filter) : "all";
 }
 
@@ -134,9 +134,9 @@ export async function GET(req: NextRequest) {
 
     response.groups.push(group("light-novel", "Destaques", topNovels.map((n) => ({
       id: n.id,
-      type: n.type === "web-novel" ? "web-novel" : "light-novel",
+      type: "light-novel",
       title: novelDisplayTitle(n),
-      subtitle: `${n.type === "web-novel" ? "WebNovel" : "Light Novel"}${n.author_name ? ` · ${n.author_name}` : ""}`,
+      subtitle: `Light Novel${n.author_name ? ` · ${n.author_name}` : ""}`,
       description: excerpt(n.synopsis, query || n.title, 180),
       href: `/novels/${n.slug}`,
       cover: n.cover_local_path || n.cover_url,
@@ -194,9 +194,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(response);
   }
 
-  if (filter === "all" || filter === "light-novel" || filter === "web-novel") {
-    const typeFilter = filter === "light-novel" || filter === "web-novel" ? "AND n.type = ?" : "";
-    const typeParams = typeFilter ? [filter] : [];
+  if (filter === "all" || filter === "light-novel") {
+    const typeFilter = filter === "light-novel" ? "AND n.type = 'light-novel'" : "";
     const novels = db.prepare(`
       SELECT n.id, n.slug, n.title, n.alternative_titles, n.synopsis, n.type, n.genres, n.tags,
              n.cover_url, n.cover_local_path, n.views,
@@ -221,9 +220,9 @@ export async function GET(req: NextRequest) {
       ) ${typeFilter}
       ORDER BY score DESC, n.views DESC, n.created_at DESC
       LIMIT ?
-    `).all(exact, starts, like, like, like, like, like, like, like, like, like, like, like, like, ...typeParams, limit) as any[];
+    `).all(exact, starts, like, like, like, like, like, like, like, like, like, like, like, like, limit) as any[];
 
-    const lightNovels = novels.filter((n) => n.type !== "web-novel").map((n) => ({
+    const lightNovels = novels.map((n) => ({
       id: n.id,
       type: "light-novel" as const,
       title: novelDisplayTitle(n),
@@ -234,19 +233,7 @@ export async function GET(req: NextRequest) {
       meta: [...safeJsonArray(n.genres).slice(0, 3), `${n.chapter_count || 0} caps`],
       score: n.score,
     }));
-    const webNovels = novels.filter((n) => n.type === "web-novel").map((n) => ({
-      id: n.id,
-      type: "web-novel" as const,
-      title: novelDisplayTitle(n),
-      subtitle: n.author_name ? `WebNovel · ${n.author_name}` : "WebNovel",
-      description: excerpt(n.synopsis, query),
-      href: `/novels/${n.slug}`,
-      cover: n.cover_local_path || n.cover_url,
-      meta: [...safeJsonArray(n.genres).slice(0, 3), `${n.chapter_count || 0} caps`],
-      score: n.score,
-    }));
-    if (filter !== "web-novel") response.groups.push(group("light-novel", "Light Novels", lightNovels));
-    if (filter !== "light-novel") response.groups.push(group("web-novel", "WebNovels", webNovels));
+    response.groups.push(group("light-novel", "Light Novels", lightNovels));
   }
 
   if ((filter === "all" || filter === "manga") && tableExists(db, "mangas")) {
@@ -342,7 +329,7 @@ export async function GET(req: NextRequest) {
       subtitle: `${readableTitle({ title: c.novel_title, alternative_titles: c.novel_alternative_titles, type: c.novel_type, slug: c.novel_slug })} · Capítulo ${c.chapter_number}`,
       description: excerpt(c.content, query),
       href: `/novels/${c.novel_slug}/${c.chapter_number}`,
-      meta: [c.novel_type === "web-novel" ? "WebNovel" : "Light Novel", `${c.word_count || 0} palavras`],
+      meta: ["Light Novel", `${c.word_count || 0} palavras`],
       score: c.score,
     }));
 

@@ -118,7 +118,6 @@ export function NewNovelForm() {
                 <Label htmlFor="type">Tipo</Label>
                 <select id="type" name="type" defaultValue="light-novel" className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm">
                   <option value="light-novel">Light Novel</option>
-                  <option value="web-novel">Web Novel</option>
                   <option value="short">Novel Curta</option>
                 </select>
               </div>

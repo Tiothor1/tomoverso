@@ -7,7 +7,6 @@ import {
   ArrowRight,
   BookOpen,
   FileText,
-  Globe2,
   Hash,
   Loader2,
   PenLine,
@@ -24,7 +23,6 @@ import { Input } from "@/components/ui/input";
 const filters = [
   { id: "all", label: "Tudo" },
   { id: "light-novel", label: "Light Novels" },
-  { id: "web-novel", label: "WebNovels" },
   { id: "manga", label: "Mangás" },
   { id: "chapters", label: "Capítulos" },
   { id: "authors", label: "Autores" },
@@ -36,7 +34,7 @@ type FilterId = (typeof filters)[number]["id"];
 
 type SearchItem = {
   id: string;
-  type: "light-novel" | "web-novel" | "manga" | "chapter" | "author" | "genre" | "page";
+  type: "light-novel" | "manga" | "chapter" | "author" | "genre" | "page";
   title: string;
   subtitle?: string;
   description?: string;
@@ -69,7 +67,6 @@ const defaultData: SearchResponse = {
 
 const typeConfig: Record<SearchItem["type"], { label: string; icon: typeof BookOpen; tone: string }> = {
   "light-novel": { label: "Light Novel", icon: BookOpen, tone: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" },
-  "web-novel": { label: "WebNovel", icon: Globe2, tone: "bg-sky-500/10 text-sky-400 border-sky-500/20" },
   manga: { label: "Mangá", icon: Sparkles, tone: "bg-violet-500/10 text-violet-400 border-violet-500/20" },
   chapter: { label: "Capítulo", icon: FileText, tone: "bg-amber-500/10 text-amber-400 border-amber-500/20" },
   author: { label: "Autor", icon: User, tone: "bg-rose-500/10 text-rose-400 border-rose-500/20" },

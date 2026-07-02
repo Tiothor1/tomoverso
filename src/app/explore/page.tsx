@@ -109,15 +109,16 @@ export default function ExplorePage({ searchParams }: { searchParams: Promise<Se
 
 async function ExploreContent({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const sp = await searchParams;
+  const activeType = sp.type && ["light-novel", "visual-novel", "short"].includes(sp.type) ? sp.type : undefined;
   const db = getDb();
   const page = Math.max(1, parseInt(sp.page || "1", 10) || 1);
   const offset = (page - 1) * PAGE_SIZE;
 
   // Default: leitura real para novels; Visual Novels são catálogo VNDB (sem capítulos).
-  const readableDefault = sp.type === "visual-novel" ? sp.readable === "1" : sp.readable !== "0";
+  const readableDefault = activeType === "visual-novel" ? sp.readable === "1" : sp.readable !== "0";
 
   const { where, params } = buildQuery({
-    type: sp.type,
+    type: activeType,
     genre: sp.genre,
     readable: readableDefault,
   });
@@ -148,7 +149,7 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
 
   // Contagens por tipo (para badges de filtro) — só uma vez, sem filtro
   const allTypeRows = db.prepare(`SELECT type, COUNT(*) as c FROM novels WHERE ${publicVisibleNovelSql("novels")} GROUP BY type`).all() as Array<{ type: string; c: number }>;
-  const typeCounts: Record<string, number> = { all: 0, "light-novel": 0, "web-novel": 0, "visual-novel": 0, "short": 0 };
+  const typeCounts: Record<string, number> = { all: 0, "light-novel": 0, "visual-novel": 0, "short": 0 };
   for (const r of allTypeRows) {
     typeCounts[r.type] = r.c;
     typeCounts.all += r.c;
@@ -181,15 +182,14 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
   // Type label
   const typeLabel: Record<string, string> = {
     "light-novel": "Light Novels",
-    "web-novel": "Web Novels",
     "visual-novel": "Visual Novels",
     "short": "Curtas",
   };
 
   const h1 = sp.genre
     ? sp.genre
-    : sp.type
-    ? typeLabel[sp.type] ?? "Explorar"
+    : activeType
+    ? typeLabel[activeType] ?? "Explorar"
     : "Explorar";
 
   return (
@@ -235,25 +235,18 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
             </Badge>
           </Link>
           <Link href={sp.genre ? `/explore?genre=${encodeURIComponent(sp.genre)}&type=light-novel` : "/explore?type=light-novel"}>
-            <Badge variant={sp.type === "light-novel" ? "default" : "outline"} className="cursor-pointer hover:bg-emerald-500/10">
+            <Badge variant={activeType === "light-novel" ? "default" : "outline"} className="cursor-pointer hover:bg-emerald-500/10">
               Light Novel ({typeCounts["light-novel"]})
             </Badge>
           </Link>
-          {typeCounts["web-novel"] > 0 && (
-            <Link href={sp.genre ? `/explore?genre=${encodeURIComponent(sp.genre)}&type=web-novel` : "/explore?type=web-novel"}>
-              <Badge variant={sp.type === "web-novel" ? "default" : "outline"} className="cursor-pointer hover:bg-blue-500/10">
-                Web Novel ({typeCounts["web-novel"]})
-              </Badge>
-            </Link>
-          )}
           <Link href={sp.genre ? `/explore?genre=${encodeURIComponent(sp.genre)}&type=visual-novel` : "/explore?type=visual-novel"}>
-            <Badge variant={sp.type === "visual-novel" ? "default" : "outline"} className="cursor-pointer hover:bg-purple-500/10">
+            <Badge variant={activeType === "visual-novel" ? "default" : "outline"} className="cursor-pointer hover:bg-purple-500/10">
               Visual Novel ({typeCounts["visual-novel"]})
             </Badge>
           </Link>
           {typeCounts.short > 0 && (
             <Link href={sp.genre ? `/explore?genre=${encodeURIComponent(sp.genre)}&type=short` : "/explore?type=short"}>
-              <Badge variant={sp.type === "short" ? "default" : "outline"} className="cursor-pointer hover:bg-amber-500/10">
+              <Badge variant={activeType === "short" ? "default" : "outline"} className="cursor-pointer hover:bg-amber-500/10">
                 Curta ({typeCounts.short})
               </Badge>
             </Link>

@@ -10,7 +10,7 @@ const novelSchema = z.object({
   title: z.string().min(2, "Título muito curto").max(120),
   alternative_titles: z.string().optional(),
   synopsis: z.string().min(100, "Sinopse muito curta (mínimo 100 caracteres)").max(2000),
-  type: z.enum(["light-novel", "web-novel", "short"]),
+  type: z.enum(["light-novel", "short"]),
   status: z.enum(["ongoing", "hiatus", "completed"]),
   genres: z.string().optional(), // comma-separated
 });
