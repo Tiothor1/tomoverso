@@ -18,6 +18,9 @@
     "import:mangaonline:bulk": "tsx scripts/import-mangaonline-bulk.ts",
     "import:centralnovel": "tsx scripts/import-centralnovel.ts",
     "import:kakuyomu": "tsx scripts/import-kakuyomu.ts",
+    "sync:weekly": "tsx --tsconfig tsconfig.json scripts/weekly-content-sync.ts",
+    "sync:weekly:run": "bash scripts/run-weekly-content-sync.sh",
+    "seed:prepare": "node scripts/prepare-seed-for-deploy.js",
     "manga:check": "tsx scripts/check-manga.ts"
   },
   "dependencies": {
