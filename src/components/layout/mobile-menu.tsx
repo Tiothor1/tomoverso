@@ -14,6 +14,7 @@ import {
   Shield,
   Sparkles,
   Store,
+  Trophy,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ const mainLinks = [
   { href: "/livros", icon: BookText, label: "Livros" },
   { href: "/library", icon: Library, label: "Estante" },
   { href: "/how-to", icon: PenLine, label: "Como criar" },
+  { href: "/concurso", icon: Trophy, label: "Concursos" },
 ];
 
 export function MobileMenu({

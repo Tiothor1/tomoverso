@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Activity, BookOpen, Boxes, Globe, Package2, PlugZap, Users } from "lucide-react";
+import { Activity, BadgeCheck, BookOpen, Boxes, Globe, Package2, PlugZap, Users } from "lucide-react";
 import { AdminShell } from "@/components/admin/admin-shell";
 import { AdminStatCard } from "@/components/admin/admin-stat-card";
 import { Badge } from "@/components/ui/badge";
@@ -71,6 +71,7 @@ export default async function AdminOverviewPage() {
               <div className="grid gap-2 sm:grid-cols-2">
                 <Button variant="outline" asChild className="rounded-2xl"><Link href="/admin/integrations"><Globe className="mr-2 h-4 w-4" /> Integrações</Link></Button>
                 <Button variant="outline" asChild className="rounded-2xl"><Link href="/admin/imports"><Activity className="mr-2 h-4 w-4" /> Importações</Link></Button>
+                <Button variant="outline" asChild className="rounded-2xl"><Link href="/admin/catalog/curation"><BadgeCheck className="mr-2 h-4 w-4" /> Curadoria</Link></Button>
               </div>
             </CardContent>
           </Card>

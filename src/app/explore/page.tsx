@@ -65,14 +65,18 @@ function parseNovel(r: NovelRow) {
 interface SearchParams {
   genre?: string;
   type?: string;
+  original?: string;
   page?: string;
   /** Quando "1", mostra só novels com pelo menos 1 capítulo */
   readable?: string;
 }
 
-function buildQuery(filters: { type?: string; genre?: string; readable?: boolean }): { where: string; params: any[] } {
+function buildQuery(filters: { type?: string; genre?: string; readable?: boolean; original?: boolean }): { where: string; params: any[] } {
   const conditions: string[] = [publicVisibleNovelSql("n")];
   const params: any[] = [];
+  if (filters.original) {
+    conditions.push("EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type='novel' AND cc.item_id = n.id AND COALESCE(cc.is_original,0)=1)");
+  }
   if (filters.type) {
     conditions.push("type = ?");
     params.push(filters.type);
@@ -97,6 +101,7 @@ function buildHref(filters: SearchParams, page: number): string {
   const params = new URLSearchParams();
   if (filters.type) params.set("type", filters.type);
   if (filters.genre) params.set("genre", filters.genre);
+  if (filters.original) params.set("original", "1");
   if (filters.readable) params.set("readable", "1");
   if (page > 1) params.set("page", String(page));
   const qs = params.toString();
@@ -116,11 +121,13 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
 
   // Default: leitura real para novels; Visual Novels são catálogo VNDB (sem capítulos).
   const readableDefault = activeType === "visual-novel" ? sp.readable === "1" : sp.readable !== "0";
+  const originalOnly = sp.original === "1";
 
   const { where, params } = buildQuery({
     type: activeType,
     genre: sp.genre,
     readable: readableDefault,
+    original: originalOnly,
   });
   const countRow = db.prepare(`SELECT COUNT(*) as c FROM novels n ${where}`).get(...params) as { c: number };
   const totalFiltered = countRow.c;
@@ -159,7 +166,13 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
   const readableCount = (db.prepare(`SELECT COUNT(*) as c FROM novels n WHERE ${publicReadableNovelSql("n")}`).get() as { c: number }).c;
 
   // Gêneros — só os top 20 (em vez de TODOS) pra não inchar a página
-  const genreBaseWhere = readableDefault ? publicReadableNovelSql("novels") : publicVisibleNovelSql("novels");
+  let genreBaseWhere: string;
+  if (originalOnly) {
+    const baseGenreWhere = readableDefault ? publicReadableNovelSql("novels") : publicVisibleNovelSql("novels");
+    genreBaseWhere = `(${baseGenreWhere}) AND EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type='novel' AND cc.item_id = novels.id AND COALESCE(cc.is_original,0)=1)`;
+  } else {
+    genreBaseWhere = readableDefault ? publicReadableNovelSql("novels") : publicVisibleNovelSql("novels");
+  }
   const allGenresRaw = db.prepare(`
     SELECT genres FROM novels
     WHERE ${genreBaseWhere}

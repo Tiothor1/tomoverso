@@ -13,7 +13,9 @@ import {
   Moon,
   Palette,
   PenLine,
+  Sparkles,
   Sun,
+  Trophy,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -106,6 +108,12 @@ export function NavbarMoreMenu({ showStore, storeHref, subBadge }: NavbarMoreMen
             </Link>
           </DropdownMenuItem>
         ) : null}
+        <DropdownMenuItem asChild>
+          <Link href="/concurso" className="cursor-pointer gap-2">
+            <Trophy className="h-4 w-4 text-amber-400" />
+            Concursos
+          </Link>
+        </DropdownMenuItem>
 
         <DropdownMenuSeparator />
         <DropdownMenuLabel className="flex items-center gap-2">
