@@ -19,15 +19,6 @@ const nextConfig: NextConfig = {
   },
   // Cache páginas estáticas por mais tempo no CDN
   staticPageGenerationTimeout: 120,
-  // URLs antigas/curtas de categoria
-  async redirects() {
-    return [
-      { source: "/webnovel", destination: "/explore?type=web-novel", permanent: false },
-      { source: "/webnovels", destination: "/explore?type=web-novel", permanent: false },
-      { source: "/web-novel", destination: "/explore?type=web-novel", permanent: false },
-      { source: "/web-novels", destination: "/explore?type=web-novel", permanent: false },
-    ];
-  },
   // headers globais pra melhorar cache do navegador
   async headers() {
     return [
