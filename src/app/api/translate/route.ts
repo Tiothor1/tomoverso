@@ -6,7 +6,7 @@ export const runtime = "nodejs";
 type TargetLang = "pt" | "en" | "es" | "fr" | "de" | "it" | "ja" | "ko" | "zh-CN";
 
 const SUPPORTED = new Set<TargetLang>(["pt", "en", "es", "fr", "de", "it", "ja", "ko", "zh-CN"]);
-const MAX_TEXTS = 180;
+const MAX_TEXTS = 500;
 const MAX_CHARS_PER_TEXT = 900;
 const USER_AGENT = "Tomoverso-Translate/1.0 (+https://tomoverso.vercel.app)";
 
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, target, translations: Object.fromEntries(texts.map((text) => [text, text])) });
     }
 
-    const translated = await mapWithConcurrency(texts, 8, async (text) => {
+    const translated = await mapWithConcurrency(texts, 16, async (text) => {
       try {
         return await translateOne(text, target);
       } catch {

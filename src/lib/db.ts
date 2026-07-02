@@ -815,11 +815,68 @@ function createDb() {
     );
     CREATE INDEX IF NOT EXISTS idx_books_slug ON books(slug);
     CREATE INDEX IF NOT EXISTS idx_books_source ON books(source);
+
+    -- Contests (concursos literários)
+    CREATE TABLE IF NOT EXISTS contests (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      slug TEXT UNIQUE NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      prize TEXT NOT NULL DEFAULT '',
+      rules TEXT NOT NULL DEFAULT '',
+      work_type TEXT NOT NULL DEFAULT 'novel' CHECK (work_type IN ('novel', 'manga')),
+      banner_url TEXT,
+      starts_at TEXT NOT NULL,
+      ends_at TEXT NOT NULL,
+      is_active INTEGER NOT NULL DEFAULT 1,
+      max_submissions_per_user INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_contests_active ON contests(is_active, starts_at, ends_at);
+
+    CREATE TABLE IF NOT EXISTS contest_submissions (
+      id TEXT PRIMARY KEY,
+      contest_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      work_type TEXT NOT NULL CHECK (work_type IN ('novel', 'manga')),
+      work_id TEXT NOT NULL,
+      notes TEXT DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+      reviewed_by TEXT,
+      reviewed_at TEXT,
+      rejection_reason TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE (contest_id, user_id, work_type, work_id),
+      FOREIGN KEY (contest_id) REFERENCES contests(id) ON DELETE CASCADE,
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+      FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_contest_submissions_contest ON contest_submissions(contest_id);
+    CREATE INDEX IF NOT EXISTS idx_contest_submissions_user ON contest_submissions(user_id, contest_id);
   `);
 
   migrateUserSubscriptionsPendingStatus(db);
   applyBundledCentralNovelCovers(db);
   applyBundledVndbVisualNovels(db);
+
+  // Migration v2: is_original e curation_label
+  const v2 = db.prepare("SELECT applied_at FROM migrations WHERE name = 'v2_content_curation'").get() as any;
+  if (!v2) {
+    try {
+      db.exec("ALTER TABLE catalog_controls ADD COLUMN is_original INTEGER NOT NULL DEFAULT 0");
+    } catch {}
+    try {
+      db.exec("ALTER TABLE catalog_controls ADD COLUMN curation_label TEXT");
+    } catch {}
+    try {
+      db.exec("ALTER TABLE novels ADD COLUMN is_original INTEGER NOT NULL DEFAULT 0");
+    } catch {}
+    try {
+      db.exec("ALTER TABLE mangas ADD COLUMN is_original INTEGER NOT NULL DEFAULT 0");
+    } catch {}
+    db.prepare("INSERT OR IGNORE INTO migrations (name) VALUES ('v2_content_curation')").run();
+  }
 
   const settingsRow = db.prepare("SELECT id FROM site_settings WHERE id = 'default'").get() as { id: string } | undefined;
   if (!settingsRow) {
