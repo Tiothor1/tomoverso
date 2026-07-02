@@ -20,7 +20,7 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
     <main className="container mx-auto max-w-7xl px-4 py-10">
       <section className="mx-auto mb-10 max-w-2xl text-center">
         <Crown className="mx-auto mb-3 h-10 w-10 text-amber-400" />
-        <h1 className="font-heading text-4xl font-black tracking-tight">Assine o Tomoverso</h1>
+        <h1 className="font-heading text-4xl font-black tracking-tight">Assine o Tomo Verso Editora</h1>
         <p className="mt-3 text-muted-foreground">
           {sub
             ? `Você já é assinante do plano ${sub.plan_name}. Gerencie sua assinatura abaixo.`

@@ -110,7 +110,7 @@ export function MobileMenu({
                         Menu
                       </h2>
                       <p className="truncate text-xs text-muted-foreground">
-                        {isLoggedIn && username ? `Olá, ${username}` : "Tudo do Tomoverso aqui"}
+                        {isLoggedIn && username ? `Olá, ${username}` : "Tudo do Tomo Verso Editora aqui"}
                       </p>
                     </div>
                   </div>

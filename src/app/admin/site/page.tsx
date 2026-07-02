@@ -10,7 +10,7 @@ export default async function AdminSitePage() {
   return (
     <AdminShell
       eyebrow="site principal"
-      title="Configuração pública do Tomoverso"
+      title="Configuração pública do Tomo Verso Editora"
       description="Tudo aqui impacta a home, navbar, footer, aviso operacional e teaser da loja."
     >
       <SiteConfigForm settings={settings} />

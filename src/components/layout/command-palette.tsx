@@ -65,7 +65,7 @@ export function CommandPalette() {
       { id: "manga", title: "Catálogo de mangás", icon: BookOpen, action: () => router.push("/manga"), group: "Página" },
       { id: "search", title: "Buscar", icon: Search, action: () => router.push("/search"), group: "Página" },
       { id: "how-to", title: "Como criar uma LN", icon: BookOpen, action: () => router.push("/how-to"), group: "Página" },
-      { id: "sobre", title: "Sobre o Tomoverso", icon: Heart, action: () => router.push("/sobre"), group: "Página" },
+      { id: "sobre", title: "Sobre o Tomo Verso Editora", icon: Heart, action: () => router.push("/sobre"), group: "Página" },
       { id: "dashboard", title: "Painel do autor", icon: PenLine, action: () => router.push("/dashboard"), group: "Página" },
       { id: "library", title: "Minha estante", icon: BookOpen, action: () => router.push("/library"), group: "Página" },
       { id: "new-novel", title: "Criar nova novel", icon: PenLine, action: () => router.push("/dashboard/novels/new"), group: "Ação" },
@@ -288,7 +288,7 @@ export function CommandPalette() {
               </span>
             </div>
             <div className="flex items-center gap-1">
-              <span>Tomoverso</span>
+              <span>Tomo Verso Editora</span>
               <Sparkles className="h-3 w-3 text-primary" />
             </div>
           </div>

@@ -28,7 +28,7 @@ export async function Navbar() {
       ) : null}
       <header className="site-navbar sticky top-0 z-50 w-full border-b border-border/70 bg-background/88 shadow-sm backdrop-blur-xl">
         <div className="container mx-auto flex h-16 max-w-7xl items-center gap-2 px-4">
-          <Link href="/" className="group flex min-w-0 flex-shrink-0 items-center gap-2" aria-label="Tomoverso início">
+          <Link href="/" className="group flex min-w-0 flex-shrink-0 items-center gap-2" aria-label="Tomo Verso Editora início">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
               <BookOpen className="h-5 w-5" />
             </span>

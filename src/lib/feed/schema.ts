@@ -161,7 +161,7 @@ export function seedStarterFeedPosts(db: SqliteDb): void {
       user.id,
       "recommendation",
       `Comece por ${novel.title}`,
-      "Uma indicação rápida do Tomoverso pra testar o feed: abre, lê um capítulo e salva se combinar com seu gosto.",
+      "Uma indicação rápida do Tomo Verso Editora pra testar o feed: abre, lê um capítulo e salva se combinar com seu gosto.",
       "novel",
       novel.id
     );

@@ -113,7 +113,7 @@ export async function createPixPayment(params: {
   if (!token) return null;
 
   const label = params.interval === "year" ? "anual" : "mensal";
-  const title = `Tomoverso ${params.planName} — ${label}`;
+  const title = `Tomo Verso Editora ${params.planName} — ${label}`;
 
   const body = {
     transaction_amount: params.priceCents / 100,
@@ -172,7 +172,7 @@ export async function createCheckoutPreference(params: {
 
   const isOneTime = params.isOneTime === true;
   const label = isOneTime ? "compra única" : (params.interval === "year" ? "anual" : "mensal");
-  const title = isOneTime ? params.planName : `Tomoverso ${params.planName} — ${label}`;
+  const title = isOneTime ? params.planName : `Tomo Verso Editora ${params.planName} — ${label}`;
   const backUrl = isOneTime ? "success" : "dashboard/subscription";
 
   const body = {
@@ -188,7 +188,7 @@ export async function createCheckoutPreference(params: {
     items: [{
       id: isOneTime ? params.planId : params.planId,
       title,
-      description: isOneTime ? `Compra única: ${params.planName}` : `Assinatura ${label} do Tomoverso`,
+      description: isOneTime ? `Compra única: ${params.planName}` : `Assinatura ${label} do Tomo Verso Editora`,
       quantity: 1,
       unit_price: params.priceCents / 100,
       currency_id: "BRL",

@@ -29,7 +29,7 @@ export function AdminSidebar() {
           </div>
           <div>
             <p className="font-heading text-lg font-bold leading-none">Admin</p>
-            <p className="text-xs text-muted-foreground">Controle central do Tomoverso</p>
+            <p className="text-xs text-muted-foreground">Controle central do Tomo Verso Editora</p>
           </div>
         </div>
         <nav className="space-y-1.5">

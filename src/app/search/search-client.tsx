@@ -183,7 +183,7 @@ export default function SearchClient() {
                 Pesquise como no Google.
               </h1>
               <p className="mx-auto max-w-2xl text-base text-muted-foreground md:text-lg">
-                Digite nome, capítulo, autor, gênero, tag ou trecho. O Tomoverso organiza tudo por tipo.
+                Digite nome, capítulo, autor, gênero, tag ou trecho. O Tomo Verso Editora organiza tudo por tipo.
               </p>
             </div>
 

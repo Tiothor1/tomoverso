@@ -344,14 +344,14 @@ export function FeedScroller({ initialFeed, workOptions, isLoggedIn }: Props) {
   }
 
   return (
-    <section className="fixed inset-0 z-[60] overflow-hidden bg-[#030006] text-white" aria-label="Feed Tomoverso em tela cheia">
+    <section className="fixed inset-0 z-[60] overflow-hidden bg-[#030006] text-white" aria-label="Feed Tomo Verso Editora em tela cheia">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(217,70,239,0.22),transparent_32%),radial-gradient(circle_at_10%_80%,rgba(124,58,237,0.20),transparent_30%),#030006]" />
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-[90] flex justify-center px-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
         <div className="pointer-events-auto flex w-full max-w-[42rem] items-center justify-between gap-2 rounded-full border border-white/10 bg-black/35 p-1.5 shadow-2xl backdrop-blur-2xl">
           <Button asChild size="sm" variant="ghost" className="rounded-full text-white hover:bg-white/10 hover:text-white">
             <Link href="/">
-              <Home className="mr-1.5 h-4 w-4" /> Tomoverso
+              <Home className="mr-1.5 h-4 w-4" /> Tomo Verso Editora
             </Link>
           </Button>
           <div className="hidden min-w-0 flex-1 items-center justify-center text-center text-[11px] font-black uppercase tracking-[0.22em] text-white/50 sm:flex">

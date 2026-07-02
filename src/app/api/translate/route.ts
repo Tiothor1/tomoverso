@@ -12,9 +12,8 @@ const USER_AGENT = "Tomoverso-Translate/1.0 (+https://tomoverso.vercel.app)";
 
 function protectBrand(text: string): string {
   return text
-    .replace(/\bTomoverse\b/gi, "Tomoverso")
-    .replace(/\bTomoversum\b/gi, "Tomoverso")
-    .replace(/\bTomoverso\b/g, "Tomoverso");
+    .replace(/\bTomoverse\b/gi, "Tomo Verso Editora")
+    .replace(/\bTomoversum\b/gi, "Tomo Verso Editora");
 }
 
 function normalizeTarget(value: unknown): TargetLang {

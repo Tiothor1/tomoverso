@@ -36,7 +36,7 @@ export default async function SellerPage() {
     <main className="container mx-auto max-w-5xl px-4 py-8 space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.22em] text-primary">Marketplace Tomoverso</p>
+          <p className="text-sm uppercase tracking-[0.22em] text-primary">Marketplace Tomo Verso Editora</p>
           <h1 className="font-heading text-3xl font-black tracking-tight md:text-4xl">Área do autor vendedor</h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">
             Solicite aprovação para vender obras digitais. No MVP, o saldo é interno e o saque é manual via PIX.
@@ -50,7 +50,7 @@ export default async function SellerPage() {
       <section className="grid gap-4 md:grid-cols-3">
         <Card className="rounded-3xl border-border/50">
           <CardContent className="p-5">
-            <p className="text-sm text-muted-foreground">Comissão Tomoverso</p>
+            <p className="text-sm text-muted-foreground">Comissão Tomo Verso Editora</p>
             <p className="mt-1 font-heading text-3xl font-black">10%</p>
             <p className="mt-2 text-xs text-muted-foreground">Taxa Mercado Pago descontada do autor.</p>
           </CardContent>

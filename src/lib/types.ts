@@ -1,4 +1,4 @@
-// Tipos do Tomoverso (frontend)
+// Tipos do Tomo Verso Editora (frontend)
 
 export type NovelStatus = "ongoing" | "completed" | "hiatus" | "dropped";
 export type NovelType = "light-novel" | "web-novel" | "short" | "visual-novel";

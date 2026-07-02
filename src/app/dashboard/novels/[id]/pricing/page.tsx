@@ -90,7 +90,7 @@ export default async function NovelPricingPage({ params }: { params: Promise<{ i
             {currentPrice > 0 && (
               <div className="rounded-xl border border-border/50 p-4 space-y-2 text-sm bg-muted/30">
                 <div className="flex justify-between"><span>Preço de venda</span><span className="font-medium">{formatBRLCents(currentPrice)}</span></div>
-                <div className="flex justify-between text-muted-foreground"><span>Comissão Tomoverso (10%)</span><span className="text-amber-400">-{formatBRLCents(Math.floor(currentPrice * 0.1))}</span></div>
+                <div className="flex justify-between text-muted-foreground"><span>Comissão Tomo Verso Editora (10%)</span><span className="text-amber-400">-{formatBRLCents(Math.floor(currentPrice * 0.1))}</span></div>
                 <div className="flex justify-between text-muted-foreground"><span>Taxa Mercado Pago</span><span className="text-amber-400">~{formatBRLCents(Math.floor(currentPrice * 0.04))}</span></div>
                 <div className="border-t border-border/40 pt-2 flex justify-between font-medium"><span>Você recebe</span><span className="text-emerald-400">{formatBRLCents(Math.floor(currentPrice * 0.86))}</span></div>
               </div>

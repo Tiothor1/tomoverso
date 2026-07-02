@@ -568,7 +568,7 @@ function createDb() {
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
     INSERT OR IGNORE INTO platform_fee_rules (id, label, fee_basis_points, min_withdrawal_cents, settlement_delay_days, is_active)
-    VALUES ('default', 'Tomoverso Marketplace MVP', 1000, 5000, 7, 1);
+    VALUES ('default', 'Tomo Verso Editora Marketplace MVP', 1000, 5000, 7, 1);
 
     CREATE TABLE IF NOT EXISTS paid_works (
       id TEXT PRIMARY KEY,
@@ -888,13 +888,13 @@ function createDb() {
         discord_url, telegram_url, maintenance_mode, maintenance_message,
         storefront_enabled, storefront_title, storefront_description, storefront_href
       ) VALUES (
-        'default', 'Tomoverso', 'onde histórias ganham vida.', 'Catálogo BR com leitura real', 'Tomoverso', 'onde histórias ganham vida.',
+        'default', 'Tomo Verso Editora', 'onde histórias ganham vida.', 'Catálogo BR com leitura real', 'Tomo Verso Editora', 'onde histórias ganham vida.',
         'Catálogo brasileiro com leitor por páginas, busca rápida e conteúdo que realmente dá pra ler.',
         'Ler mangás', '/manga', 'Explorar novels', '/explore', 'Publicar', '/auth/signup',
         'Onde Light Novels brasileiras ganham vida. Pra autores iniciantes e leitores apaixonados.',
         'contato@tomoverso.com', NULL, NULL, NULL, 0,
         'Estamos fazendo ajustes no painel e na loja. Algumas áreas podem mudar ao longo do dia.',
-        1, 'Loja Tomoverso',
+        1, 'Loja Tomo Verso Editora',
         'Prepare o catálogo para vender livros, mangás, bundles e edições digitais a partir do mesmo painel.',
         '/store'
       )

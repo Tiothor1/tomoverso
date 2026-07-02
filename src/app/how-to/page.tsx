@@ -9,7 +9,7 @@ import { getCurrentUser } from "@/lib/auth";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Como criar uma Light Novel — Tomoverso",
+  title: "Como criar uma Light Novel — Tomo Verso Editora",
   description: "Tutorial completo pra você criar e publicar sua primeira LN.",
 };
 
@@ -72,7 +72,7 @@ const steps = [
   {
     n: "06",
     title: "Publique o primeiro capítulo",
-    desc: "Crie sua conta no Tomoverso, cadastre sua novel, e poste o capítulo 1. Não espere ficar perfeito — publique e melhore com feedback.",
+    desc: "Crie sua conta no Tomo Verso Editora, cadastre sua novel, e poste o capítulo 1. Não espere ficar perfeito — publique e melhore com feedback.",
     icon: BookOpen,
     tips: [
       "Capítulo 1 deve terminar com pergunta ou promessa",

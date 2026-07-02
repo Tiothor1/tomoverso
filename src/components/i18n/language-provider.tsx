@@ -71,7 +71,7 @@ function shouldSkipElement(element: Element | null): boolean {
 
 function shouldTranslateText(text: string): boolean {
   const trimmed = text.trim();
-  if (trimmed === "Tomoverso") return false;
+  if (trimmed === "Tomo Verso Editora") return false;
   if (trimmed.length < 2 || trimmed.length > MAX_TEXT_LENGTH) return false;
   if (!/[\p{L}]/u.test(trimmed)) return false;
   if (/^[\d\s\p{P}\p{S}]+$/u.test(trimmed)) return false;
@@ -85,7 +85,9 @@ function textKey(value: string): string {
 }
 
 function protectBrand(text: string): string {
-  return text.replace(/\bTomoverse\b/gi, "Tomoverso").replace(/\bTomoversum\b/gi, "Tomoverso");
+  return text
+    .replace(/\bTomoverse\b/gi, "Tomo Verso Editora")
+    .replace(/\bTomoversum\b/gi, "Tomo Verso Editora");
 }
 
 function loadCache(language: LanguageCode): Record<string, string> {

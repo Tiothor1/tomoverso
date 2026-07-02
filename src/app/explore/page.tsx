@@ -11,7 +11,7 @@ import { publicReadableNovelSql, publicVisibleNovelSql, readableNovelChapterSql 
 import { readableTitle } from "@/lib/display-title";
 
 export const metadata = {
-  title: "Explorar — Tomoverso",
+  title: "Explorar — Tomo Verso Editora",
 };
 
 const PAGE_SIZE = 24; // novels por página
@@ -214,7 +214,7 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
             <span className="text-2xl">✍️</span>
             <div>
               <p className="font-heading font-semibold text-base md:text-lg">
-                O Tomoverso é uma plataforma de <em>publicação</em> brasileira.
+                O Tomo Verso Editora é uma plataforma de <em>publicação</em> brasileira.
               </p>
               <p className="text-muted-foreground mt-1 text-sm">
                 As {typeCounts.all} obras do catálogo têm <strong>metadados importados</strong> (capa, sinopse, tags). O conteúdo pra ler vem de autores que publicam aqui pelo painel ou de fontes como NovelMania. <Link href="/explore?readable=1" className="text-primary underline font-semibold">Ver o que dá pra ler agora</Link>.

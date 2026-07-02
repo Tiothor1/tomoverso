@@ -56,7 +56,7 @@ export default async function AdminSecretoPage() {
             </div>
             <div>
               <span className="font-mono text-sm text-red-300 uppercase tracking-[0.15em]">Painel de Controle</span>
-              <p className="text-[10px] text-red-500/50">Tomoverso — Administração</p>
+              <p className="text-[10px] text-red-500/50">Tomo Verso Editora — Administração</p>
             </div>
             <Badge variant="outline" className="text-[10px] border-red-800/40 text-red-500 ml-2">RESTRITO</Badge>
           </div>

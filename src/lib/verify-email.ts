@@ -27,11 +27,11 @@ export async function sendVerificationCode(email: string): Promise<boolean> {
 
   const sent = await sendEmail({
     to: email,
-    subject: "Código de verificação — Tomoverso",
+    subject: "Código de verificação — Tomo Verso Editora",
     html: `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
         <h2 style="margin-top:0">Verifique seu email</h2>
-        <p>Use o código abaixo para confirmar seu email no Tomoverso:</p>
+        <p>Use o código abaixo para confirmar seu email no Tomo Verso Editora:</p>
         <div style="background:#f5f0e8;border-radius:12px;padding:24px;text-align:center;font-size:32px;letter-spacing:8px;font-weight:bold;margin:16px 0">
           ${code}
         </div>
@@ -43,7 +43,7 @@ export async function sendVerificationCode(email: string): Promise<boolean> {
         </p>
       </div>
     `,
-    text: `Seu código de verificação do Tomoverso é: ${code}. Válido por ${CODE_EXPIRY_MINUTES} minutos.`,
+    text: `Seu código de verificação do Tomo Verso Editora é: ${code}. Válido por ${CODE_EXPIRY_MINUTES} minutos.`,
   });
 
   return sent;

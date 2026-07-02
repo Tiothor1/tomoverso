@@ -16,7 +16,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ chap
   `).get(user.id) as { status: string } | undefined;
 
   if (!sub) {
-    return new NextResponse("Assine o Tomoverso Pro para baixar capítulos", { status: 403 });
+    return new NextResponse("Assine o Tomo Verso Editora Pro para baixar capítulos", { status: 403 });
   }
 
   // Busca capítulo
@@ -36,7 +36,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ chap
     .replace(/\n{4,}/g, "\n\n")
     .trim();
 
-  const text = `${chapter.novel_title}\n\nCapítulo ${chapter.chapter_number}: ${chapter.title}\n\n${clean}\n\n---\nBaixado de Tomoverso (tomoverso.vercel.app)`;
+  const text = `${chapter.novel_title}\n\nCapítulo ${chapter.chapter_number}: ${chapter.title}\n\n${clean}\n\n---\nBaixado de Tomo Verso Editora (tomoverso.vercel.app)`;
 
   return new NextResponse(text, {
     headers: {

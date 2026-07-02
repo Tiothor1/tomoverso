@@ -17,7 +17,7 @@ export default async function AdminOverviewPage() {
   return (
     <AdminShell
       eyebrow="controle central"
-      title="Painel administrativo do Tomoverso"
+      title="Painel administrativo do Tomo Verso Editora"
       description="Um único lugar pra controlar o site público, o catálogo, usuários, operações de importação e a preparação da loja."
       actions={
         <>

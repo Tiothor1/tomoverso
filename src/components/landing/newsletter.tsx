@@ -32,7 +32,7 @@ export function Newsletter() {
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 text-sm font-medium text-primary">
               <Sparkles className="h-4 w-4" />
-              Newsletter Tomoverso
+              Newsletter Tomo Verso Editora
             </div>
             <h2 className="font-heading text-2xl md:text-3xl font-bold">
               Toda quinta, 5 novels na sua caixa

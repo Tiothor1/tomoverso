@@ -3,7 +3,7 @@ import { SettingsForm } from "./settings-form";
 import { getCurrentUser } from "@/lib/auth";
 
 export const metadata = {
-  title: "Configurações — Tomoverso",
+  title: "Configurações — Tomo Verso Editora",
 };
 
 export default async function SettingsPage() {

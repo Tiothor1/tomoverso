@@ -66,7 +66,7 @@ interface ErrorRow {
 }
 
 export const metadata = {
-  title: "Painel de Importações — Tomoverso",
+  title: "Painel de Importações — Tomo Verso Editora",
 };
 
 function formatDuration(ms: number | null): string {

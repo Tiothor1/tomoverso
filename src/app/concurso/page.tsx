@@ -8,7 +8,7 @@ import { getDb } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Concursos | Tomoverso",
+  title: "Concursos | Tomo Verso Editora",
   description: "Participe dos concursos literários do Tomoverso. Publique sua história original e concorra a prêmios.",
 };
 
@@ -45,7 +45,7 @@ export default function ContestsPage() {
             Concursos
           </div>
           <h1 className="font-heading text-4xl font-black tracking-tight md:text-5xl">
-            Concursos do <span className="gradient-text">Tomoverso</span>
+            Concursos do <span className="gradient-text">Tomo Verso Editora</span>
           </h1>
           <p className="mx-auto mt-4 max-w-2xl text-muted-foreground">
             Publique sua história original e concorra a prêmios. Os melhores textos ganham destaque no site e prêmios em dinheiro.

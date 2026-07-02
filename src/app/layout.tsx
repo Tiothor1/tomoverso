@@ -27,10 +27,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tomoverso — Onde Light Novels brasileiras ganham vida",
+  title: "Tomo Verso Editora — Onde histórias ganham vida",
   description:
-    "Plataforma brasileira de Light Novels. Leia, escreva e descubra histórias originais em português.",
-  keywords: ["light novel", "ln", "web novel", "brasil", "leitura", "escrita"],
+    "A Tomo Verso Editora é uma editora digital dedicada a transformar histórias em experiências marcantes. Nosso objetivo é conectar leitores e autores através de obras envolventes, criativas e acessíveis, reunindo novels, light novels, mangás, manhwas, livros e narrativas originais em um só universo.",
+  keywords: ["light novel", "ln", "mangá", "editora", "tomoverso editora", "brasil", "leitura", "escrita"],
+  icons: {
+    icon: [{ url: "/favicon.ico", type: "image/x-icon" }, { url: "/favicon.png", type: "image/png" }],
+  },
+  openGraph: {
+    title: "Tomo Verso Editora",
+    description: "Editora digital de histórias — novels, mangás, light novels e mais.",
+    images: [{ url: "https://tomoverso.vercel.app/logo-tomoverso-editora.png", width: 1254, height: 1254 }],
+    siteName: "Tomo Verso Editora",
+  },
 };
 
 export default function RootLayout({
@@ -45,6 +54,12 @@ export default function RootLayout({
       className={`${jakarta.variable} ${lora.variable} ${geistMono.variable}`}
     >
       <head>
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" href="/favicon.png" />
+        <meta property="og:image" content="https://tomoverso.vercel.app/logo-tomoverso-editora.png" />
+        <meta property="og:image:width" content="1254" />
+        <meta property="og:image:height" content="1254" />
+        <meta property="og:site_name" content="Tomo Verso Editora" />
         <meta name="google-adsense-account" content="ca-pub-2780687772948357" />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-R28LZTKXV6"></script>
         <script dangerouslySetInnerHTML={{__html:`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-R28LZTKXV6');`}} />

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
 
 export const metadata = {
-  title: "Acesso admin — Tomoverso",
+  title: "Acesso admin — Tomo Verso Editora",
 };
 
 export default async function AdminPromotePage() {

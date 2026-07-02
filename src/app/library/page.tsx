@@ -13,7 +13,7 @@ import { publicReadableNovelSql, readableNovelChapterSql } from "@/lib/public-ca
 import { revalidatePath } from "next/cache";
 
 export const metadata = {
-  title: "Minha estante — Tomoverso",
+  title: "Minha estante — Tomo Verso Editora",
 };
 
 export default async function LibraryPage() {

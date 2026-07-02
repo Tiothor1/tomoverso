@@ -116,7 +116,7 @@ export default async function SubscriptionPage() {
         <section className="mb-10 rounded-2xl border border-dashed border-border/60 bg-card/50 p-10 text-center">
           <CreditCard className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
           <h2 className="text-xl font-bold">Você não tem uma assinatura ativa</h2>
-          <p className="mt-2 text-muted-foreground">Assine o Tomoverso e tenha acesso a benefícios exclusivos.</p>
+          <p className="mt-2 text-muted-foreground">Assine o Tomo Verso Editora e tenha acesso a benefícios exclusivos.</p>
           <Link
             href="/store/plans"
             className="mt-4 inline-block rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground"
@@ -187,7 +187,7 @@ export default async function SubscriptionPage() {
         <FileText className="mb-2 h-6 w-6 text-muted-foreground" />
         <h2 className="text-lg font-bold">Sobre anúncios</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          O Tomoverso exibe anúncios para usuários não-assinantes como forma de manter a plataforma gratuita.
+          O Tomo Verso Editora exibe anúncios para usuários não-assinantes como forma de manter a plataforma gratuita.
           Ao assinar o Pro, você remove todos os anúncios do site.
         </p>
       </section>

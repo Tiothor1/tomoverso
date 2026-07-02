@@ -9,7 +9,7 @@ export async function updateSiteConfigAction(formData: FormData) {
   const db = getDb();
 
   const data = {
-    site_name: String(formData.get("site_name") || "Tomoverso").trim(),
+    site_name: String(formData.get("site_name") || "Tomo Verso Editora").trim(),
     site_tagline: String(formData.get("site_tagline") || "").trim(),
     hero_badge: String(formData.get("hero_badge") || "").trim(),
     hero_title: String(formData.get("hero_title") || "").trim(),

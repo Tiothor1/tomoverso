@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 
 export const metadata = {
-  title: "Novo capítulo — Tomoverso",
+  title: "Novo capítulo — Tomo Verso Editora",
 };
 
 export default async function NewChapterPage({ params }: { params: Promise<{ id: string }> }) {

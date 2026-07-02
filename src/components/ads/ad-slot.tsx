@@ -73,7 +73,7 @@ export function SubscribePrompt() {
 
   return (
     <div className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/5 to-card p-6 text-center">
-      <p className="text-lg font-bold">💎 Apoie o Tomoverso</p>
+      <p className="text-lg font-bold">💎 Apoie o Tomo Verso Editora</p>
       <p className="mt-1 text-sm text-muted-foreground">
         Remova anúncios, tenha acesso antecipado e badge exclusivo.
       </p>

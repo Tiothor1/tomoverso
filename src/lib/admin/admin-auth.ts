@@ -24,8 +24,8 @@ export function ensureAdminAuthTable() {
 
 export function generate2FASecret(userId: string) {
   const secret = speakeasy.generateSecret({
-    name: `Tomoverso Admin (${userId})`,
-    issuer: "Tomoverso Admin",
+    name: `Tomo Verso Editora Admin (${userId})`,
+    issuer: "Tomo Verso Editora Admin",
   });
   return { base32: secret.base32, otpauth_url: secret.otpauth_url };
 }

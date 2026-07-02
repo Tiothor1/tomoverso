@@ -7,7 +7,7 @@ import { getFeedPage, getFeedWorkOptions } from "@/lib/feed/service";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Feed | Tomoverso",
+  title: "Feed | Tomo Verso Editora",
   description: "Feed inteligente estilo Shorts/Reels para descobrir novels, mangás, manhwas e posts da comunidade.",
 };
 
@@ -20,7 +20,7 @@ function FeedUnavailable() {
         </div>
         <h1 className="font-heading text-3xl font-black sm:text-5xl">Não foi possível carregar o feed agora.</h1>
         <p className="mt-4 text-sm leading-relaxed text-white/65 sm:text-base">
-          O Tomoverso continua no ar. Tenta recarregar ou explora as obras enquanto o feed volta.
+          O Tomo Verso Editora continua no ar. Tenta recarregar ou explora as obras enquanto o feed volta.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
           <Link href="/feed" className="rounded-full bg-white px-5 py-3 text-sm font-black text-black hover:bg-fuchsia-100">

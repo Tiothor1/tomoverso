@@ -25,7 +25,7 @@ export function OriginalBadge({ size = "sm", className, showTooltip = true }: Or
         sizeClasses[size],
         className
       )}
-      title={showTooltip ? "Obra original publicada diretamente no Tomoverso" : undefined}
+      title={showTooltip ? "Obra original publicada diretamente no Tomo Verso Editora" : undefined}
     >
       <BadgeCheck className={cn(size === "sm" ? "h-2.5 w-2.5" : size === "md" ? "h-3 w-3" : "h-4 w-4")} />
       Original
@@ -84,7 +84,7 @@ export function ReportCopyrightButton({ workType, workId }: { workType: "novel" 
     <button
       type="button"
       onClick={() => {
-        const subject = encodeURIComponent(`[Tomoverso] Denúncia de plágio - ${workType}:${workId}`);
+        const subject = encodeURIComponent(`[Tomo Verso Editora] Denúncia de plágio - ${workType}:${workId}`);
         window.open(`mailto:${window.location.hostname.includes("localhost") ? "suporte@tomoverso.com.br" : "suporte@tomoverso.com.br"}?subject=${subject}`, "_blank");
       }}
       className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/50 hover:text-red-400 transition-colors"

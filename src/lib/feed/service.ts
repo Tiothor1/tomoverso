@@ -136,7 +136,7 @@ function makeUserBadge(row: { id: string; username?: string | null; display_name
   const followed = currentUserId
     ? !!db.prepare("SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ? LIMIT 1").get(currentUserId, row.id)
     : false;
-  const displayName = row.display_name || row.username || "Leitor Tomoverso";
+  const displayName = row.display_name || row.username || "Leitor Tomo Verso Editora";
   return {
     id: row.id,
     username: row.username || "tomoverso",
@@ -166,7 +166,7 @@ function novelWork(row: NovelRow): FeedWorkRef {
     href: `/novels/${row.slug}`,
     readHref: firstHref,
     coverUrl: row.cover_url || row.cover_source_url || null,
-    synopsis: compactSynopsis(row.synopsis, "Uma leitura do catálogo Tomoverso pronta para descobrir."),
+    synopsis: compactSynopsis(row.synopsis, "Uma leitura do catálogo Tomo Verso Editora pronta para descobrir."),
     authorName: row.author_name || row.display_name || null,
     authorId: row.author_id || null,
     genres: safeJsonArray(row.genres).slice(0, 4),

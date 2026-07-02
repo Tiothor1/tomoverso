@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import SearchClient from "./search-client";
 
 export const metadata = {
-  title: "Buscar — Tomoverso",
+  title: "Buscar — Tomo Verso Editora",
   description: "Encontre novels, autores e tags.",
 };
 

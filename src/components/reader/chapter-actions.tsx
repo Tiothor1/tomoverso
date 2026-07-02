@@ -72,8 +72,8 @@ export function ChapterActions({
     const url = `${window.location.origin}/novels/${novelSlug}/${chapterNumber}`;
     if (navigator.share) {
       navigator.share({
-        title: "Tomoverso",
-        text: "Lendo essa LN incrível no Tomoverso",
+        title: "Tomo Verso Editora",
+        text: "Lendo essa LN incrível no Tomo Verso Editora",
         url,
       }).catch(() => copyToClipboard(url));
     } else {

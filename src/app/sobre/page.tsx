@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Sobre — Tomoverso",
-  description: "A história por trás do Tomoverso e nossa missão.",
+  title: "Sobre — Tomo Verso Editora",
+  description: "A história por trás do Tomo Verso Editora e nossa missão.",
 };
 
 export default function AboutPage() {
@@ -16,7 +16,7 @@ export default function AboutPage() {
       <div className="text-center space-y-4">
         <Badge variant="secondary" className="mb-2">Nossa história</Badge>
         <h1 className="font-heading text-4xl md:text-5xl font-bold tracking-tight">
-          Por que o Tomoverso existe
+          Por que o Tomo Verso Editora existe
         </h1>
         <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
           Um lugar pra Light Novels brasileiras deixarem de ser só um sonho
@@ -36,7 +36,7 @@ export default function AboutPage() {
               incrível na sua cabeça, mas que morreu porque não tinha onde postar?
             </p>
             <p>
-              O <strong className="text-foreground">Tomoverso</strong> nasceu disso.
+              O <strong className="text-foreground">Tomo Verso Editora</strong> nasceu disso.
               Da vontade de criar um espaço onde a história que você escreveu às 3
               da manhã, ou o personagem que você inventou na aula de matemática,
               possa encontrar quem vai amar eles.

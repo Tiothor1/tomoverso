@@ -17,7 +17,7 @@ export async function sendEmail(params: {
   text?: string;
 }): Promise<boolean> {
   const { to, subject, html, text } = params;
-  const from = process.env.EMAIL_FROM || "Tomoverso <naoresponda@tomoverso.com>";
+  const from = process.env.EMAIL_FROM || "Tomo Verso Editora <naoresponda@tomoverso.com>";
 
   // Tenta Resend primeiro
   const resendKey = process.env.RESEND_API_KEY;

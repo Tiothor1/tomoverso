@@ -68,7 +68,7 @@ const steps = [
   {
     n: "06",
     title: "Publique o primeiro capítulo",
-    desc: "Crie sua conta no Tomoverso, cadastre sua novel, e poste o capítulo 1. Não espere ficar perfeito — publique e melhore com feedback.",
+    desc: "Crie sua conta no Tomo Verso Editora, cadastre sua novel, e poste o capítulo 1. Não espere ficar perfeito — publique e melhore com feedback.",
     icon: BookOpen,
     color: "from-rose-500/20 to-red-500/20",
     tips: [

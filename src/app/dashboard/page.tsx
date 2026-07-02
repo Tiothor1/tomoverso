@@ -11,7 +11,7 @@ import { getDb } from "@/lib/db";
 import { logoutAction } from "@/lib/actions/auth-actions";
 
 export const metadata = {
-  title: "Painel do Autor — Tomoverso",
+  title: "Painel do Autor — Tomo Verso Editora",
 };
 
 interface AuthorNovel {

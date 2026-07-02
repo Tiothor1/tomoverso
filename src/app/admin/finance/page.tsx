@@ -53,7 +53,7 @@ export default async function AdminFinancePage() {
         </Card>
         <Card className="border-emerald-500/20">
           <CardContent className="pt-6">
-            <p className="text-xs text-muted-foreground">Comissão Tomoverso (10%)</p>
+            <p className="text-xs text-muted-foreground">Comissão Tomo Verso Editora (10%)</p>
             <p className="text-2xl font-heading font-bold mt-1 text-emerald-400">{formatBRLCents(Math.floor(platformFees))}</p>
           </CardContent>
         </Card>

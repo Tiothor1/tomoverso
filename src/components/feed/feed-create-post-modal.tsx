@@ -59,7 +59,7 @@ export function FeedCreatePostModal({ open, isLoggedIn, workOptions, onClose, on
             <p className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-fuchsia-300">
               <PenLine className="h-4 w-4" /> criar postagem
             </p>
-            <h2 className="mt-2 font-heading text-2xl font-black">Publica no Tomoverso</h2>
+            <h2 className="mt-2 font-heading text-2xl font-black">Publica no Tomo Verso Editora</h2>
             <p className="mt-1 text-sm text-white/55">Post curto, review, teaser ou chamada para a sua própria novel/mangá/manhwa.</p>
           </div>
           <Button type="button" variant="ghost" size="icon" onClick={onClose} className="text-white hover:bg-white/10 hover:text-white">

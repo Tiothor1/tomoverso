@@ -226,7 +226,7 @@ export default function HomePage() {
           {/* Banner "Publique sua obra original" */}
           <div className="mt-6 rounded-2xl border border-emerald-500/20 bg-gradient-to-r from-emerald-500/5 via-primary/5 to-cyan-500/5 p-5 text-center md:p-6">
             <p className="font-heading text-lg font-bold">
-              Tem uma história original? Publique no Tomoverso e ganhe visibilidade.
+              Tem uma história original? Publique no Tomo Verso Editora e ganhe visibilidade.
             </p>
             <div className="mt-3 flex justify-center gap-3">
               <Button asChild className="rounded-full"><Link href={config.publish_cta_href}><PenLine className="mr-1.5 h-4 w-4" /> {config.publish_cta_label}</Link></Button>

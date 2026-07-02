@@ -24,7 +24,7 @@ export function SignupForm() {
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
             <BookOpen className="neon-icon-pop h-7 w-7 text-primary" />
-            <span className="gradient-text font-heading text-2xl font-black">Tomoverso</span>
+            <span className="gradient-text font-heading text-2xl font-black">Tomo Verso Editora</span>
           </Link>
           <h1 className="font-heading text-3xl font-black">Cria sua conta</h1>
           <p className="text-muted-foreground text-sm">

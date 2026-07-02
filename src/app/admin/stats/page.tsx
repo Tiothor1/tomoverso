@@ -54,7 +54,7 @@ interface SyncRunRow {
 }
 
 export const metadata = {
-  title: "Estatísticas — Tomoverso Admin",
+  title: "Estatísticas — Tomo Verso Editora Admin",
 };
 
 function formatDuration(ms: number | null): string {
