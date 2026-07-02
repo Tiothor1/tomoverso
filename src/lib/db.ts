@@ -826,14 +826,14 @@ function createDb() {
       rules TEXT NOT NULL DEFAULT '',
       work_type TEXT NOT NULL DEFAULT 'novel' CHECK (work_type IN ('novel', 'manga')),
       banner_url TEXT,
-      starts_at TEXT NOT NULL,
-      ends_at TEXT NOT NULL,
+      start_date TEXT NOT NULL,
+      end_date TEXT NOT NULL,
       is_active INTEGER NOT NULL DEFAULT 1,
       max_submissions_per_user INTEGER NOT NULL DEFAULT 1,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
-    CREATE INDEX IF NOT EXISTS idx_contests_active ON contests(is_active, starts_at, ends_at);
+    CREATE INDEX IF NOT EXISTS idx_contests_active ON contests(is_active, start_date, end_date);
 
     CREATE TABLE IF NOT EXISTS contest_submissions (
       id TEXT PRIMARY KEY,
