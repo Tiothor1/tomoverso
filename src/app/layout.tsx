@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Lora, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { LanguageProvider } from "@/components/i18n/language-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { ContinueReadingBanner } from "@/components/reader/continue-reading-banner";
 import { Navbar } from "@/components/layout/navbar";
@@ -53,17 +54,19 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         <script dangerouslySetInnerHTML={{
-          __html: `(function(){try{var s=JSON.parse(localStorage.getItem('tomoverso-ui-theme')||'{}');var themes=['dark','light','system'];var colors=['purple','blue','rose','cyan','emerald','red','amber'];var pref=themes.indexOf(s.theme)>=0?s.theme:'dark';var color=colors.indexOf(s.color)>=0?s.color:(s.color==='sepia'?'amber':(s.color==='ocean'?'cyan':'purple'));var resolved=pref==='system'?(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):pref;document.documentElement.classList.remove('light','dark');document.documentElement.classList.add(resolved);document.documentElement.setAttribute('data-theme',pref);document.documentElement.setAttribute('data-color',color);}catch(e){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-theme','dark');document.documentElement.setAttribute('data-color','purple');}})()`
+          __html: `(function(){try{var s=JSON.parse(localStorage.getItem('tomoverso-ui-theme')||'{}');var themes=['dark','light','system'];var colors=['purple','blue','rose','cyan','emerald','red','amber'];var pref=themes.indexOf(s.theme)>=0?s.theme:'dark';var color=colors.indexOf(s.color)>=0?s.color:(s.color==='sepia'?'amber':(s.color==='ocean'?'cyan':'purple'));var resolved=pref==='system'?(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'):pref;document.documentElement.classList.remove('light','dark');document.documentElement.classList.add(resolved);document.documentElement.setAttribute('data-theme',pref);document.documentElement.setAttribute('data-color',color);var cookie=(document.cookie.match(/(?:^|; )novel_lang=([^;]+)/)||[])[1];var lang=localStorage.getItem('tomoverso-locale')||decodeURIComponent(cookie||'pt');var allowed=['pt','en','es','fr','de','it','ja','ko','zh-CN'];var html={pt:'pt-BR',en:'en',es:'es',fr:'fr',de:'de',it:'it',ja:'ja',ko:'ko','zh-CN':'zh-CN'};if(allowed.indexOf(lang)<0)lang='pt';document.documentElement.lang=html[lang]||'pt-BR';document.documentElement.setAttribute('data-locale',lang);document.documentElement.setAttribute('data-translation-status',lang==='pt'?'ready':'translating');}catch(e){document.documentElement.classList.add('dark');document.documentElement.setAttribute('data-theme','dark');document.documentElement.setAttribute('data-color','purple');document.documentElement.setAttribute('data-locale','pt');document.documentElement.setAttribute('data-translation-status','ready');}})()`
         }} />
       </head>
       <body className="antialiased min-h-screen flex flex-col">
-        <ThemeProvider defaultTheme="dark" defaultColor="purple">
-          <Navbar />
-          <ContinueReadingBanner />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <Toaster position="top-center" richColors />
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider defaultTheme="dark" defaultColor="purple">
+            <Navbar />
+            <ContinueReadingBanner />
+            <main className="flex-1">{children}</main>
+            <Footer />
+            <Toaster position="top-center" richColors />
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   );
