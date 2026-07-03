@@ -17,7 +17,7 @@ console.log(JSON.stringify({ mangas_sem_autor: mangas.length }, null, 2));
 
 // Tenta extrair autor de cada um
 async function fetchAuthor(slug) {
-  const url = `https://mangaonline.biz/manga/${slug}/`;
+  const url = `https://mangaonline.blue/manga/${slug}/`;
   try {
     const res = await fetch(url, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; Tomoverso/1.0; +https://tomoverso.com)" },
@@ -26,17 +26,17 @@ async function fetchAuthor(slug) {
     if (!res.ok) return null;
     const html = await res.text();
 
-    // Procura por "Autor:" nas infos
-    const authorMatch = html.match(/Autor(?:es)?[:\s]*<[^>]*>([^<]+)</i);
-    const artistMatch = html.match(/Artista[:\s]*<[^>]*>([^<]+)</i);
-
+    // Tenta extrair autor do JSON-LD (schema.org)
     let author = null;
-    let artist = null;
+    const ldMatch = html.match(/<script[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/i);
+    if (ldMatch) {
+      try {
+        const ld = JSON.parse(ldMatch[1]);
+        if (ld.author?.name) author = ld.author.name;
+      } catch {}
+    }
 
-    if (authorMatch) author = authorMatch[1].trim();
-    if (artistMatch) artist = artistMatch[1].trim();
-
-    return { author, artist };
+    return { author, artist: null };
   } catch {
     return null;
   }

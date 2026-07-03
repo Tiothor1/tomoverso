@@ -65,16 +65,61 @@ export async function POST(req: NextRequest) {
 
     const db = getDb();
     const extRef = String(payment.external_reference || "");
-    const [refUserId, refPlanId] = extRef.split(":");
-    const userId = payment.metadata?.user_id || refUserId;
-    const planId = payment.metadata?.plan_id || refPlanId;
     const mpStatus = payment.status || "pending";
     const mpStatusDetail = payment.status_detail || "";
     const payerEmail = payment.payer?.email || "";
     const paymentMethod = payment.payment_type_id || payment.payment_method_id || "";
     const amount = Math.round(Number(payment.transaction_amount || 0) * 100);
     const txStatus = mpStatus === "approved" ? "approved" : mpStatus === "rejected" ? "rejected" : "pending";
+    const userId = payment.metadata?.user_id || "";
 
+    // ── ONE-TIME WORK PURCHASE ──────────────────────────
+    if (extRef.startsWith("work:")) {
+      const [, paidWorkId, workUserId] = extRef.split(":");
+      const workUserId2 = userId || workUserId;
+
+      if (mpStatus === "approved" && workUserId2 && paidWorkId) {
+        const work = db.prepare("SELECT * FROM paid_works WHERE id = ?").get(paidWorkId) as any;
+        if (work) {
+          // Cria purchase
+          const purchaseId = crypto.randomUUID();
+          db.prepare(`
+            INSERT INTO purchases (id, buyer_id, order_id, paid_work_id, content_type, content_id, price_cents, status)
+            VALUES (?, ?, NULL, ?, ?, ?, ?, 'active')
+          `).run(purchaseId, workUserId2, paidWorkId, work.content_type, work.content_id, work.price_cents);
+
+          // Atualiza pedido
+          const order = db.prepare("SELECT id FROM marketplace_orders WHERE buyer_id = ? AND status = 'pending' ORDER BY created_at DESC LIMIT 1").get(workUserId2) as any;
+          if (order) {
+            db.prepare("UPDATE marketplace_orders SET status = 'paid', updated_at = datetime('now') WHERE id = ?").run(order.id);
+            db.prepare("UPDATE marketplace_payments SET status = 'approved', provider_payment_id = ? WHERE order_id = ?").run(String(paymentId), order.id);
+          }
+
+          // Adiciona ao saldo do vendedor
+          const wallet = db.prepare("SELECT * FROM wallet_balances WHERE seller_id = ?").get(work.seller_id) as any;
+          if (wallet) {
+            db.prepare("UPDATE wallet_balances SET pending_cents = pending_cents + ? WHERE seller_id = ?").run(work.author_net_cents || Math.floor(work.price_cents * 0.86), work.seller_id);
+          } else {
+            db.prepare("INSERT INTO wallet_balances (seller_id, pending_cents, available_cents) VALUES (?, ?, 0)").run(work.seller_id, work.author_net_cents || Math.floor(work.price_cents * 0.86));
+          }
+
+          db.prepare("INSERT INTO wallet_transactions (id, seller_id, type, amount_cents, description) VALUES (?, ?, 'sale_pending', ?, ?)")
+            .run(crypto.randomUUID(), work.seller_id, work.author_net_cents || Math.floor(work.price_cents * 0.86), `Venda: ${work.title} (aguardando 7 dias para liberação)`);
+        }
+      }
+
+      await db.prepare(`
+        INSERT INTO payment_transactions (id, user_id, plan_name, amount_cents, currency, payment_method, mp_payment_id, mp_status, mp_status_detail, status)
+        VALUES (?, ?, ?, ?, 'BRL', ?, ?, ?, ?, ?)
+      `).run(crypto.randomUUID(), workUserId2 || null, `Compra obra`, amount, paymentMethod, String(paymentId), mpStatus, mpStatusDetail, txStatus);
+
+      return NextResponse.json({ received: true });
+    }
+
+    // ── SUBSCRIPTION ────────────────────────────────────
+    const [refUserId, refPlanId] = extRef.split(":");
+    const userId2 = payment.metadata?.user_id || refUserId;
+    const planId = payment.metadata?.plan_id || refPlanId;
     const plan = db.prepare("SELECT * FROM subscription_plans WHERE id = ?").get(planId) as any;
 
     db.prepare(`

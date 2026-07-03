@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { ContinueReadingBanner } from "@/components/reader/continue-reading-banner";
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
+import { CookieConsent } from "@/components/layout/cookie-consent";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -56,6 +57,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <link rel="icon" type="image/png" href="/favicon.png" />
+        <link rel="manifest" href="/manifest.json" />
         <meta property="og:image" content="https://tomoverso.vercel.app/logo-tomoverso-editora.png" />
         <meta property="og:image:width" content="1254" />
         <meta property="og:image:height" content="1254" />
@@ -79,8 +81,9 @@ export default function RootLayout({
             <ContinueReadingBanner />
             <main className="flex-1">{children}</main>
             <Footer />
+            <CookieConsent />
             <Toaster position="top-center" richColors />
-          </ThemeProvider>
+            </ThemeProvider>
         </LanguageProvider>
       </body>
     </html>

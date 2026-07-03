@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Heart, Bookmark, Share2, MessageCircle, Eye, Clock } from "lucide-react";
+import { Heart, Bookmark, Share2, MessageCircle, Eye, Clock, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -81,6 +81,17 @@ export function ChapterActions({
     }
   }
 
+  function shareWhatsApp() {
+    const url = `${window.location.origin}/novels/${novelSlug}/${chapterNumber}`;
+    const text = encodeURIComponent(`Lendo essa LN incrível no Tomo Verso Editora: ${url}`);
+    window.open(`https://wa.me/?text=${text}`, "_blank", "noopener,noreferrer");
+  }
+
+  function copyLink() {
+    const url = `${window.location.origin}/novels/${novelSlug}/${chapterNumber}`;
+    copyToClipboard(url);
+  }
+
   function copyToClipboard(url: string) {
     navigator.clipboard.writeText(url);
     toast.success("Link copiado!");
@@ -111,6 +122,16 @@ export function ChapterActions({
       <Button variant="ghost" size="sm" onClick={share}>
         <Share2 className="h-4 w-4 mr-1.5" />
         Compartilhar
+      </Button>
+
+      <Button variant="ghost" size="sm" onClick={shareWhatsApp}>
+        <span className="h-4 w-4 mr-1.5 flex items-center justify-center font-bold text-green-500">WA</span>
+        WhatsApp
+      </Button>
+
+      <Button variant="ghost" size="sm" onClick={copyLink}>
+        <LinkIcon className="h-4 w-4 mr-1.5" />
+        Copiar link
       </Button>
 
       <span className="flex items-center gap-1.5 text-xs">

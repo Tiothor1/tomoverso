@@ -210,12 +210,57 @@ export default async function LibraryPage() {
         </TabsContent>
 
         <TabsContent value="historico" className="mt-6">
-          <Card className="glass-panel">
-            <CardContent className="py-12 text-center text-muted-foreground">
-              <Clock className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
-              Histórico em breve
-            </CardContent>
-          </Card>
+          {(() => {
+            const history = db.prepare(`
+              SELECT n.id, n.slug, n.title, MAX(rp.last_read_at) as last_read_at
+              FROM reading_progress rp
+              JOIN novels n ON n.id = rp.novel_id
+              WHERE rp.user_id = ? AND ${publicReadableNovelSql("n")}
+              GROUP BY n.id
+              ORDER BY last_read_at DESC
+              LIMIT 50
+            `).all(user.id) as any[];
+
+            if (history.length === 0) {
+              return (
+                <Card className="glass-panel">
+                  <CardContent className="py-12 text-center text-muted-foreground">
+                    <Clock className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
+                    <h3 className="font-heading text-lg font-semibold">Nenhum histórico ainda</h3>
+                    <p className="text-sm text-muted-foreground mt-1">Comece a ler e seu histórico aparecerá aqui.</p>
+                  </CardContent>
+                </Card>
+              );
+            }
+
+            return (
+              <div className="space-y-2">
+                {history.map((h: any) => (
+                  <Link key={h.id} href={`/novels/${h.slug}`} className="block">
+                    <Card className="neon-card">
+                      <CardContent className="py-3">
+                        <div className="flex items-center gap-3">
+                          <Clock className="h-4 w-4 text-primary" />
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-sm font-medium truncate">{h.title}</h3>
+                            <p className="text-xs text-muted-foreground">
+                              Última leitura: {new Date(h.last_read_at + "Z").toLocaleDateString("pt-BR", {
+                                day: "numeric",
+                                month: "short",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            );
+          })()}
         </TabsContent>
       </Tabs>
     </div>
