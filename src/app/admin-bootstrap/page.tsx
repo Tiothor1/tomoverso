@@ -35,9 +35,9 @@ export default async function AdminPromotePage() {
             Se o seed automático rodou quando o site subiu, existe um admin com:
           </p>
           <div className="bg-muted/30 rounded-md p-3 font-mono text-xs space-y-1">
-            <div><strong>Username:</strong> fabio_tx</div>
+            <div><strong>Login:</strong> 06364605761 (CPF)</div>
             <div><strong>Email:</strong> fabio@tomoverso.com</div>
-            <div><strong>Senha:</strong> tomoverso2026</div>
+            <div><strong>Senha:</strong> @Tiothor1</div>
           </div>
           <Button asChild className="w-full">
             <Link href="/auth/login">Ir pra página de login</Link>
