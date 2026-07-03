@@ -27,9 +27,6 @@ export default async function AdminSecretoPage() {
     const user = await getCurrentUser().catch(() => null);
     if (!user || user.role !== "admin") return <AdminSecretoLogin />;
     const db = getDb();
-    const has2FA = is2FAEnabled(user.id);
-    const cpf = getAdminCPF(user.id);
-    const needsSetup = !has2FA || !cpf;
 
   const stats = {
     users: (db.prepare("SELECT COUNT(*) c FROM users").get() as any).c,
@@ -62,14 +59,6 @@ export default async function AdminSecretoPage() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-red-400/50 hidden md:inline">{user.username}</span>
-            {!needsSetup && (
-              <Link href={`/${SECRET}/finance`}>
-                <Button size="sm" variant="outline" className="border-red-800/30 text-red-400 text-xs h-7">
-                  <DollarSign className="h-3 w-3 mr-1" />
-                  Saques
-                </Button>
-              </Link>
-            )}
             <form action={async () => {
               "use server";
               const c = await cookies();
@@ -83,28 +72,6 @@ export default async function AdminSecretoPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        {/* Setup warning */}
-        {needsSetup && (
-          <Card className="border-amber-800/40 bg-amber-950/30">
-            <CardContent className="pt-6 flex items-start gap-4">
-              <AlertTriangle className="h-6 w-6 text-amber-400 shrink-0 mt-1" />
-              <div className="flex-1">
-                <h3 className="font-bold text-amber-300">Configuração de segurança obrigatória</h3>
-                <p className="text-sm text-amber-200/70 mt-1">
-                  {!has2FA && !cpf && "2FA e CPF não configurados."}
-                  {!has2FA && cpf && "2FA não configurado."}
-                  {has2FA && !cpf && "CPF não registrado."}
-                  {' '}Complete o setup para acessar todas as funções.
-                </p>
-                <Button asChild size="sm" className="mt-3 bg-amber-700 hover:bg-amber-600">
-                  <Link href={`/${SECRET}/setup`}>
-                    <KeyRound className="h-3 w-3 mr-1" /> Configurar agora
-                  </Link>
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Stats grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -210,8 +177,8 @@ export default async function AdminSecretoPage() {
             <CardContent className="space-y-2 text-xs text-red-400/60">
               <div className="flex justify-between"><span>Ambiente</span><span className="text-red-200">{process.env.VERCEL ? "Vercel" : "Local"}</span></div>
               <div className="flex justify-between"><span>Admin path</span><span className="text-red-200 font-mono text-[10px]">{SECRET}</span></div>
-              <div className="flex justify-between"><span>2FA</span><span className={has2FA ? "text-green-400" : "text-amber-400"}>{has2FA ? "✅ Ativo" : "⚠️ Pendente"}</span></div>
-              <div className="flex justify-between"><span>CPF</span><span className={cpf ? "text-green-400" : "text-amber-400"}>{cpf ? `${cpf.slice(0,3)}.***.***-**` : "⚠️ Pendente"}</span></div>
+              <div className="flex justify-between"><span>Painel admin</span><a href="/admin" className="text-blue-400 hover:underline">Ir para admin principal →</a></div>
+              <div className="flex justify-between"><span>Admin-bootstrap</span><a href="/admin-bootstrap" className="text-blue-400 hover:underline">Configurar admin →</a></div>
             </CardContent>
           </Card>
 

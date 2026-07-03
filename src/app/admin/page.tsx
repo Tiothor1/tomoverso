@@ -6,10 +6,23 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAdminOverview, getRecentAdminActivity, getVercelIntegration } from "@/lib/admin/queries";
+import { getCurrentUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminOverviewPage() {
+  const user = await getCurrentUser();
+  if (!user || user.role !== "admin") {
+    return (
+      <AdminShell
+        eyebrow="acesso negado"
+        title="Sem permissão"
+        description="Você precisa ser administrador para acessar esta área."
+      >
+        <p className="text-sm text-muted-foreground">Faça login com uma conta de administrador.</p>
+      </AdminShell>
+    );
+  }
   const overview = getAdminOverview();
   const activity = getRecentAdminActivity();
   const vercel = getVercelIntegration();
