@@ -353,6 +353,19 @@ function createDb() {
     CREATE INDEX IF NOT EXISTS idx_activity_user ON activity_log(user_id);
     CREATE INDEX IF NOT EXISTS idx_activity_created ON activity_log(created_at);
 
+    CREATE TABLE IF NOT EXISTS notifications (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      title TEXT NOT NULL,
+      body TEXT NOT NULL DEFAULT '',
+      link TEXT,
+      is_read INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, is_read, created_at);
+
     CREATE TABLE IF NOT EXISTS site_settings (
       id TEXT PRIMARY KEY,
       site_name TEXT NOT NULL,
@@ -854,6 +867,20 @@ function createDb() {
     );
     CREATE INDEX IF NOT EXISTS idx_contest_submissions_contest ON contest_submissions(contest_id);
     CREATE INDEX IF NOT EXISTS idx_contest_submissions_user ON contest_submissions(user_id, contest_id);
+
+    -- Notifications
+    CREATE TABLE IF NOT EXISTS notifications (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      type TEXT NOT NULL,
+      title TEXT NOT NULL,
+      body TEXT NOT NULL DEFAULT '',
+      link TEXT,
+      is_read INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, is_read, created_at);
   `);
 
   migrateUserSubscriptionsPendingStatus(db);

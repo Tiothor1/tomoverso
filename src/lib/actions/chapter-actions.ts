@@ -62,6 +62,35 @@ export async function createChapterAction(formData: FormData) {
     return { ok: false, error: e.message };
   }
 
+  // Notify followers about the new chapter
+  const novelInfo = db.prepare("SELECT title, slug FROM novels WHERE id = ?").get(parsed.data.novel_id) as { title: string; slug: string } | undefined;
+  if (novelInfo) {
+    const novelTitle = novelInfo.title;
+    const novelSlug = novelInfo.slug;
+    const chapterNumber = parsed.data.chapter_number;
+    const chapterTitle = parsed.data.title;
+    const followers = db.prepare("SELECT follower_id FROM follows WHERE following_id = ?").all(user.id) as { follower_id: string }[];
+
+    const insertNotification = db.prepare(`
+      INSERT INTO notifications (id, user_id, type, title, body, link)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+
+    const notifyTx = db.transaction(() => {
+      for (const follower of followers) {
+        insertNotification.run(
+          generateId(),
+          follower.follower_id,
+          'new_chapter',
+          'Novo capítulo',
+          `"${novelTitle}" — Capítulo ${chapterNumber}: ${chapterTitle}`,
+          `/novels/${novelSlug}/${chapterNumber}`
+        );
+      }
+    });
+    notifyTx();
+  }
+
   db.prepare("INSERT INTO activity_log (id, user_id, action, target_type, target_id) VALUES (?, ?, ?, ?, ?)")
     .run(generateId(), user.id, "create_chapter", "chapter", id);
 

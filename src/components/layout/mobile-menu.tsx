@@ -4,6 +4,7 @@ import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
+  Bell,
   BookOpen,
   BookText,
   Crown,
@@ -39,6 +40,7 @@ const mainLinks = [
   { href: "/library", icon: Library, label: "Estante" },
   { href: "/how-to", icon: PenLine, label: "Como criar" },
   { href: "/concurso", icon: Trophy, label: "Concursos" },
+  { href: "/notifications", icon: Bell, label: "Notificações" },
 ];
 
 export function MobileMenu({

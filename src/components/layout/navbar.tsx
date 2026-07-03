@@ -7,6 +7,7 @@ import { MobileMenu } from "@/components/layout/mobile-menu";
 import { NavbarMoreMenu } from "@/components/layout/site-preferences-menu";
 import { UserMenu } from "@/components/auth/user-menu";
 import { SubscriberCookieSync } from "@/components/auth/subscriber-cookie-sync";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { getCurrentUser } from "@/lib/auth";
 import { getSiteConfig } from "@/lib/site-config";
 import { getDb } from "@/lib/db";
@@ -77,6 +78,8 @@ export async function Navbar() {
               storeHref={config.storefront_href || "/store"}
               subBadge={sub?.badge_label || null}
             />
+
+            {user && <NotificationBell />}
 
             {user ? (
               <UserMenu
