@@ -1,84 +1,102 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { ArrowLeft, Upload, FileText, Check, AlertTriangle } from "lucide-react";
-import { getCurrentUser } from "@/lib/auth";
+import { AlertTriangle, CheckCircle2, FileText, Search, UploadCloud } from "lucide-react";
 import { getDb } from "@/lib/db";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { getAdminSecretPath, getSecretAdminOrRedirect } from "@/lib/admin/admin-v2-auth";
+import { formatInteger, safeAll, safeCount, tableExists } from "@/lib/admin/admin-v2-data";
+import { AdminHubShell } from "@/components/admin-v2/admin-hub-shell";
+import { AdminStatusBadge } from "@/components/admin-v2/admin-hub-badge";
+import { AdminEmptyState, AdminErrorState } from "@/components/admin-v2/admin-hub-empty";
+import { AdminHubSection, AdminPanel } from "@/components/admin-v2/admin-hub-section";
+import { AdminUploadZone } from "@/components/admin-v2/admin-upload-zone";
 
 export const dynamic = "force-dynamic";
-const SP = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
+
+type ImportRow = { id: string; status?: string; file_type?: string; file_name?: string; original_name?: string; file_size?: number; detected_title?: string; detected_chapters?: number; error?: string; created_at?: string };
+
+function fileSize(bytes?: number) {
+  if (!bytes) return "—";
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 export default async function AdminUploadPage() {
-  const cookieStore = await cookies();
-  if (cookieStore.get("admin_validated")?.value !== "1") redirect(`/${SP}`);
-  const user = await getCurrentUser().catch(() => null);
-  if (!user || user.role !== "admin") redirect(`/${SP}`);
+  const secretPath = getAdminSecretPath();
+  const user = await getSecretAdminOrRedirect(secretPath);
 
   try {
-
     const db = getDb();
-    const recentImports = db.prepare("SELECT * FROM import_queue ORDER BY created_at DESC LIMIT 10").all() as any[];
+    const hasQueue = tableExists(db, "import_queue");
+    const recentImports = safeAll<ImportRow>(db, `
+      SELECT id, status, file_type, file_name, original_name, file_size, detected_title, detected_chapters, error, created_at
+      FROM import_queue
+      ORDER BY created_at DESC
+      LIMIT 12
+    `);
+    const pending = safeCount(db, "SELECT COUNT(*) AS c FROM import_queue WHERE status IN ('pending','processing')");
+    const completed = safeCount(db, "SELECT COUNT(*) AS c FROM import_queue WHERE status='completed'");
+    const errors = safeCount(db, "SELECT COUNT(*) AS c FROM import_queue WHERE status='error'");
 
     return (
-      <div className="min-h-screen bg-gray-950">
-        <header className="border-b border-red-900/30 bg-gray-950/90 px-4 py-3">
-          <div className="flex items-center gap-3 max-w-5xl mx-auto">
-            <Link href={`/${SP}`} className="text-red-400 hover:text-red-300"><ArrowLeft className="h-5 w-5" /></Link>
-            <Upload className="h-5 w-5 text-red-400" />
-            <span className="font-mono text-sm text-red-300">IMPORTAR CONTEÚDO</span>
-          </div>
-        </header>
-        <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-          <Card className="border-red-900/20 bg-gray-900/50">
-            <CardHeader>
-              <CardTitle className="text-red-200 text-base">Upload de arquivo</CardTitle>
-              <p className="text-xs text-red-400/60">Formatos aceitos: PDF, TXT, EPUB, DOCX, MD</p>
-            </CardHeader>
-            <CardContent>
-              <form action="/api/admin/uploads" method="POST" encType="multipart/form-data" className="space-y-4" id="upload-form">
-                <div className="border-2 border-dashed border-red-900/30 rounded-xl p-8 text-center hover:border-red-700/50 transition-colors">
-                  <FileText className="h-10 w-10 text-red-500/40 mx-auto mb-3" />
-                  <p className="text-sm text-red-300 mb-1">Arraste o arquivo aqui ou clique para selecionar</p>
-                  <p className="text-xs text-red-400/40">Máximo: 50MB</p>
-                  <input type="file" name="file" required accept=".pdf,.txt,.epub,.docx,.md" className="mt-4 text-sm text-red-300 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-red-900 file:text-red-100 file:text-sm file:cursor-pointer hover:file:bg-red-800" />
-                </div>
-                <Button type="submit" className="w-full bg-red-900 hover:bg-red-800 text-red-100" id="submit-btn">
-                  <Upload className="h-4 w-4 mr-2" /> Enviar para análise
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+      <AdminHubShell secretPath={secretPath} active="upload" title="Upload e importações" subtitle="Entrada rápida para PDF, TXT, EPUB, DOCX e MD com fila de análise." user={user}>
+        {!hasQueue ? (
+          <AdminPanel className="border-amber-400/20 bg-amber-950/20">
+            <div className="flex gap-3 text-amber-100"><AlertTriangle className="h-5 w-5" /><p>Dados indisponíveis neste ambiente: tabela <code>import_queue</code> não encontrada.</p></div>
+          </AdminPanel>
+        ) : null}
 
-          {recentImports.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-red-300">Importações recentes</h3>
-              {recentImports.map((item: any) => (
-                <div key={item.id} className="rounded-xl border border-red-900/20 bg-gray-900/50 p-4 flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <FileText className="h-5 w-5 shrink-0 text-red-400" />
-                    <div className="min-w-0">
-                      <p className="text-sm text-red-200 truncate">{item.detected_title || item.original_name || item.file_name}</p>
-                      <p className="text-xs text-red-400/60">{item.file_type?.toUpperCase()} · {(item.file_size / 1024).toFixed(0)}KB{item.detected_chapters > 0 && ` · ${item.detected_chapters} capítulos`}</p>
-                    </div>
-                  </div>
-                  <Badge variant="outline" className={`text-[10px] shrink-0 ${item.status === 'completed' ? 'border-green-800/30 text-green-400' : item.status === 'error' ? 'border-red-800/30 text-red-400' : 'border-amber-800/30 text-amber-400'}`}>
-                    {item.status === 'completed' ? 'Pronto' : item.status === 'error' ? 'Erro' : 'Análise'}
-                  </Badge>
+        <div className="grid gap-4 md:grid-cols-3">
+          <AdminPanel><p className="text-xs uppercase tracking-[0.22em] text-slate-500">Fila ativa</p><p className="mt-2 text-3xl font-semibold text-amber-100">{formatInteger(pending)}</p><p className="mt-1 text-sm text-slate-400">pendentes/processando</p></AdminPanel>
+          <AdminPanel><p className="text-xs uppercase tracking-[0.22em] text-slate-500">Concluídos</p><p className="mt-2 text-3xl font-semibold text-emerald-100">{formatInteger(completed)}</p><p className="mt-1 text-sm text-slate-400">imports aprovados</p></AdminPanel>
+          <AdminPanel><p className="text-xs uppercase tracking-[0.22em] text-slate-500">Erros</p><p className="mt-2 text-3xl font-semibold text-rose-100">{formatInteger(errors)}</p><p className="mt-1 text-sm text-slate-400">precisam revisão</p></AdminPanel>
+        </div>
+
+        <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+          <AdminHubSection eyebrow="Upload" title="Enviar novo arquivo" description="O upload usa a API existente /api/admin/uploads. Após enviar, o item entra na análise.">
+            <AdminPanel>
+              <AdminUploadZone redirectTo={`/${secretPath}/analise`} />
+              <div className="mt-5 grid gap-2 sm:grid-cols-2">
+                {["PDF", "TXT", "EPUB", "DOCX", "MD"].map((type) => (
+                  <div key={type} className="rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-400"><FileText className="mr-1 inline h-3.5 w-3.5 text-cyan-300" /> {type} aceito</div>
+                ))}
+              </div>
+            </AdminPanel>
+          </AdminHubSection>
+
+          <AdminHubSection eyebrow="Histórico" title="Importações recentes" description="Últimos arquivos enviados, com status visual e caminho para análise.">
+            <AdminPanel>
+              {recentImports.length === 0 ? (
+                <AdminEmptyState icon={UploadCloud} title="Nenhuma importação ainda" description="Envie o primeiro arquivo para alimentar a fila de análise." className="border-0 bg-transparent" />
+              ) : (
+                <div className="space-y-3">
+                  {recentImports.map((item) => (
+                    <Link key={item.id} href={`/${secretPath}/analise`} className="block rounded-2xl border border-white/10 bg-white/[0.03] p-4 transition hover:bg-white/[0.06]">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-slate-100">{item.detected_title || item.original_name || item.file_name || item.id}</p>
+                          <p className="mt-1 text-xs text-slate-500">{item.file_type?.toUpperCase() || "arquivo"} · {fileSize(item.file_size)} · {item.detected_chapters || 0} capítulos detectados</p>
+                          {item.error ? <p className="mt-2 truncate text-xs text-rose-300">{item.error}</p> : null}
+                        </div>
+                        <AdminStatusBadge tone={item.status === "completed" ? "emerald" : item.status === "error" ? "rose" : item.status === "processing" ? "blue" : "amber"}>{item.status || "pendente"}</AdminStatusBadge>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              ))}
-            </div>
-          )}
-        </main>
-        <script dangerouslySetInnerHTML={{
-          __html: `document.getElementById('upload-form')?.addEventListener('submit',function(){var b=document.getElementById('submit-btn');b.disabled=true;b.innerHTML='<span class=\"flex items-center gap-2\"><svg class=\"animate-spin h-4 w-4\" viewBox=\"0 0 24 24\"><circle class=\"opacity-25\" cx=\"12\" cy=\"12\" r=\"10\" stroke=\"currentColor\" stroke-width=\"4\" fill=\"none\"/><path class=\"opacity-75\" fill=\"currentColor\" d=\"M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z\"/></svg> Enviando...</span>';});`
-        }} />
-      </div>
+              )}
+            </AdminPanel>
+          </AdminHubSection>
+        </div>
+
+        <AdminHubSection eyebrow="Fluxo" title="Como isso conecta com o site" description="Upload não publica automaticamente. Ele prepara dados para revisão, aprovação e eventual criação/curadoria pública.">
+          <div className="grid gap-4 md:grid-cols-3">
+            <AdminPanel><UploadCloud className="h-5 w-5 text-cyan-300" /><h3 className="mt-3 font-semibold text-slate-100">1. Enviar arquivo</h3><p className="mt-2 text-sm text-slate-400">O arquivo é salvo e registrado na fila.</p></AdminPanel>
+            <AdminPanel><Search className="h-5 w-5 text-violet-300" /><h3 className="mt-3 font-semibold text-slate-100">2. Analisar</h3><p className="mt-2 text-sm text-slate-400">Título, capítulos e conteúdo ficam disponíveis para revisão.</p></AdminPanel>
+            <AdminPanel><CheckCircle2 className="h-5 w-5 text-emerald-300" /><h3 className="mt-3 font-semibold text-slate-100">3. Aprovar/publicar</h3><p className="mt-2 text-sm text-slate-400">A aprovação conecta o conteúdo ao catálogo/curadoria quando o pipeline estiver completo.</p></AdminPanel>
+          </div>
+        </AdminHubSection>
+      </AdminHubShell>
     );
-  } catch (e) {
-    console.error("Upload admin error:", e);
-    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-red-400 text-sm">Erro ao carregar upload. <a href={`/${SP}`} className="underline ml-2">Voltar</a></div>;
+  } catch (error) {
+    console.error("Upload admin V2 error:", error);
+    return <div className="min-h-screen bg-[#070812] p-6 text-slate-100"><AdminErrorState error={error} backHref={`/${secretPath}`} /></div>;
   }
 }

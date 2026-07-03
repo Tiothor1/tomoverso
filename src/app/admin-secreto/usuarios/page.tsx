@@ -1,141 +1,194 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { cookies } from "next/headers";
-import { ArrowLeft, Users, Shield, Mail, Ban, Trash2, Search, Calendar, ExternalLink, Edit3 } from "lucide-react";
-import { getCurrentUser } from "@/lib/auth";
+import { Ban, Calendar, ExternalLink, Mail, Search, Shield, Trash2, UserCheck, Users } from "lucide-react";
 import { getDb } from "@/lib/db";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { deleteUserV2Action, toggleUserBanV2Action, updateUserEmailV2Action } from "@/lib/admin/admin-v2-actions";
+import { getAdminSecretPath, getSecretAdminOrRedirect } from "@/lib/admin/admin-v2-auth";
+import { formatInteger, normalizeStatusLabel, readSearchParams, safeAll, safeCount, statusTone } from "@/lib/admin/admin-v2-data";
+import { AdminHubShell } from "@/components/admin-v2/admin-hub-shell";
+import { AdminStatusBadge } from "@/components/admin-v2/admin-hub-badge";
+import { AdminEmptyState, AdminErrorState } from "@/components/admin-v2/admin-hub-empty";
+import { AdminHubSection, AdminPanel } from "@/components/admin-v2/admin-hub-section";
+import { ConfirmSubmitButton } from "@/components/admin-v2/confirm-submit-button";
 
 export const dynamic = "force-dynamic";
-const SP = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
 
-async function deleteUserAction(formData: FormData) {
-  "use server";
-  const admin = await getCurrentUser();
-  if (!admin || admin.role !== "admin") return;
-  const userId = formData.get("user_id") as string;
-  if (!userId || userId === admin.id) return;
-  const db = getDb();
-  db.prepare("DELETE FROM sessions WHERE user_id = ?").run(userId);
-  db.prepare("DELETE FROM users WHERE id = ?").run(userId);
+type UserRow = {
+  id: string;
+  email: string;
+  username?: string | null;
+  display_name?: string | null;
+  avatar_url?: string | null;
+  role?: string | null;
+  created_at?: string | null;
+  last_login_at?: string | null;
+  is_suspended?: number | null;
+  suspension_reason?: string | null;
+  comments_count?: number;
+  sessions_count?: number;
+};
+
+function initials(user: UserRow) {
+  return (user.display_name || user.username || user.email || "?").slice(0, 1).toUpperCase();
 }
 
-async function banUserAction(formData: FormData) {
-  "use server";
-  const admin = await getCurrentUser();
-  if (!admin || admin.role !== "admin") return;
-  const userId = formData.get("user_id") as string;
-  if (!userId || userId === admin.id) return;
-  const db = getDb();
-  const user = db.prepare("SELECT role FROM users WHERE id = ?").get(userId) as any;
-  if (!user) return;
-  const newRole = user.role === "banned" ? "user" : "banned";
-  db.prepare("UPDATE users SET role = ? WHERE id = ?").run(newRole, userId);
+function userStatus(user: UserRow) {
+  if (user.role === "banned" || user.is_suspended) return "banned";
+  return user.role || "user";
 }
 
-async function updateEmailAction(formData: FormData) {
-  "use server";
-  const admin = await getCurrentUser();
-  if (!admin || admin.role !== "admin") return;
-  const userId = formData.get("user_id") as string;
-  const newEmail = (formData.get("email") as string)?.trim();
-  if (!userId || !newEmail || !newEmail.includes("@")) return;
-  const db = getDb();
-  db.prepare("UPDATE users SET email = ? WHERE id = ?").run(newEmail, userId);
-}
-
-export default async function AdminUsuariosPage(props: { searchParams?: Promise<{ q?: string }> | { q?: string } }) {
-  const cookieStore = await cookies();
-  if (cookieStore.get("admin_validated")?.value !== "1") redirect(`/${SP}`);
-  const user = await getCurrentUser().catch(() => null);
-  if (!user || user.role !== "admin") redirect(`/${SP}`);
+export default async function AdminUsuariosPage(props: { searchParams?: Promise<{ q?: string; role?: string; status?: string }> | { q?: string; role?: string; status?: string } }) {
+  const secretPath = getAdminSecretPath();
+  const adminUser = await getSecretAdminOrRedirect(secretPath);
 
   try {
+    const db = getDb();
+    const sp = await readSearchParams(props.searchParams);
+    const q = (sp.q || "").trim();
+    const role = (sp.role || "").trim();
+    const status = (sp.status || "").trim();
 
-  const db = getDb();
-  const sp = props.searchParams instanceof Promise ? await props.searchParams : await Promise.resolve(props.searchParams || {});
-  const q = (sp as any)?.q || "";
-  const like = `%${q}%`;
-  const users = q
-    ? db.prepare("SELECT * FROM users WHERE (username LIKE ? OR email LIKE ? OR display_name LIKE ?) AND email NOT LIKE '%@external.author' ORDER BY created_at DESC LIMIT 100").all(like, like, like)
-    : db.prepare("SELECT * FROM users WHERE email NOT LIKE '%@external.author' ORDER BY created_at DESC LIMIT 100").all();
+    const conditions = ["u.email NOT LIKE '%@external.author'"];
+    const params: unknown[] = [];
+    if (q) {
+      conditions.push("(u.username LIKE ? OR u.email LIKE ? OR u.display_name LIKE ?)");
+      params.push(`%${q}%`, `%${q}%`, `%${q}%`);
+    }
+    if (role) {
+      conditions.push("u.role = ?");
+      params.push(role);
+    }
+    if (status === "banned") conditions.push("(u.role = 'banned' OR COALESCE(ac.is_suspended, 0) = 1)");
+    if (status === "active") conditions.push("u.role != 'banned' AND COALESCE(ac.is_suspended, 0) = 0");
 
-  return (
-    <div className="min-h-screen bg-gray-950">
-      <header className="sticky top-0 z-50 border-b border-red-900/30 bg-gray-950/95 px-4 py-3">
-        <div className="flex items-center gap-3 max-w-7xl mx-auto">
-          <Link href={`/${SP}`} className="text-red-400 hover:text-red-300"><ArrowLeft className="h-5 w-5" /></Link>
-          <Users className="h-5 w-5 text-red-400" />
-          <span className="font-mono text-sm text-red-300">USUÁRIOS</span>
-          <Badge variant="outline" className="text-[10px] border-red-800/30 text-red-400 ml-auto">{users.length} cadastrados</Badge>
+    const users = safeAll<UserRow>(db, `
+      SELECT u.id, u.email, u.username, u.display_name, u.avatar_url, u.role, u.created_at, u.last_login_at,
+             COALESCE(ac.is_suspended, 0) as is_suspended, ac.suspension_reason,
+             (SELECT COUNT(*) FROM comments c WHERE c.user_id = u.id) as comments_count,
+             (SELECT COUNT(*) FROM sessions s WHERE s.user_id = u.id AND s.expires_at > datetime('now')) as sessions_count
+      FROM users u
+      LEFT JOIN user_access_controls ac ON ac.user_id = u.id
+      WHERE ${conditions.join(" AND ")}
+      ORDER BY CASE WHEN u.role='admin' THEN 0 WHEN u.role='banned' THEN 1 ELSE 2 END, u.created_at DESC
+      LIMIT 140
+    `, ...params);
+
+    const totalAdmins = safeCount(db, "SELECT COUNT(*) AS c FROM users WHERE role='admin'");
+    const totalBanned = safeCount(db, "SELECT COUNT(*) AS c FROM users WHERE role='banned'");
+    const activeSessions = users.reduce((acc, user) => acc + Number(user.sessions_count || 0), 0);
+
+    return (
+      <AdminHubShell secretPath={secretPath} active="usuarios" title="Usuários" subtitle="Controle de comunidade, perfis, e-mails, sessões e bloqueios." user={adminUser}>
+        <div className="grid gap-4 md:grid-cols-4">
+          <AdminPanel><p className="text-xs uppercase tracking-[0.22em] text-slate-500">Listados</p><p className="mt-2 text-3xl font-semibold text-slate-50">{formatInteger(users.length)}</p><p className="mt-1 text-sm text-slate-400">sem autores externos</p></AdminPanel>
+          <AdminPanel><p className="text-xs uppercase tracking-[0.22em] text-slate-500">Admins</p><p className="mt-2 text-3xl font-semibold text-violet-100">{formatInteger(totalAdmins)}</p><p className="mt-1 text-sm text-slate-400">contas protegidas</p></AdminPanel>
+          <AdminPanel><p className="text-xs uppercase tracking-[0.22em] text-slate-500">Banidos</p><p className="mt-2 text-3xl font-semibold text-rose-100">{formatInteger(totalBanned)}</p><p className="mt-1 text-sm text-slate-400">sem sessões ativas</p></AdminPanel>
+          <AdminPanel><p className="text-xs uppercase tracking-[0.22em] text-slate-500">Sessões</p><p className="mt-2 text-3xl font-semibold text-cyan-100">{formatInteger(activeSessions)}</p><p className="mt-1 text-sm text-slate-400">nesta listagem</p></AdminPanel>
         </div>
-      </header>
-      <main className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-        <form method="GET" className="flex gap-2">
-          <Input name="q" defaultValue={q} placeholder="Buscar por username, email ou nome..." className="bg-gray-900 border-red-900/40 text-red-100 flex-1" />
-          <Button type="submit" className="bg-red-900 hover:bg-red-800 text-red-100"><Search className="h-4 w-4 mr-1" />Buscar</Button>
-          {q && <Button asChild variant="outline" className="border-red-800/30 text-red-400"><Link href={`/${SP}/usuarios`}>Limpar</Link></Button>}
-        </form>
-        <div className="space-y-2">
-          {(users as any[]).map((u) => (
-            <div key={u.id} className={`rounded-xl border ${u.role === 'banned' ? 'border-red-950/50 bg-red-950/10 opacity-60' : 'border-red-900/20 bg-gray-900/50'} p-4`}>
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${u.role === 'admin' ? 'bg-red-950 text-red-400' : u.role === 'banned' ? 'bg-red-950/30 text-red-500' : 'bg-gray-800 text-gray-400'}`}>
-                    {u.display_name?.charAt(0)?.toUpperCase() || '?'}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-sm font-medium text-red-200">{u.display_name}</p>
-                      {u.role === 'admin' && <Badge variant="outline" className="text-[10px] border-red-800/30 text-red-400">ADMIN</Badge>}
-                      {u.role === 'banned' && <Badge variant="outline" className="text-[10px] border-red-800/30 text-red-500">BANIDO</Badge>}
-                      <span className="text-xs text-red-400/40">@{u.username}</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs text-red-400/60 mt-0.5">
-                      <form action={updateEmailAction} className="flex items-center gap-1">
-                        <Mail className="h-3 w-3 shrink-0" />
-                        <input type="hidden" name="user_id" value={u.id} />
-                        <input type="email" name="email" defaultValue={u.email} className="bg-transparent border-b border-red-900/30 text-red-300 text-xs px-1 py-0 w-48 focus:outline-none focus:border-red-400" />
-                        <button type="submit" className="text-red-500/40 hover:text-red-400 p-0.5" title="Salvar email"><Edit3 className="h-3 w-3" /></button>
-                      </form>
-                      <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{u.created_at?.slice(0, 10)}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <form action={banUserAction}>
-                    <input type="hidden" name="user_id" value={u.id} />
-                    <Button type="submit" size="sm" variant="ghost" className={`h-8 w-8 p-0 ${u.role === 'banned' ? 'text-green-500/60 hover:text-green-400' : 'text-red-500/40 hover:text-red-400'}`} title={u.role === 'banned' ? 'Desbanir' : 'Banir'}>
-                      <Ban className="h-3.5 w-3.5" />
-                    </Button>
-                  </form>
-                  {u.role !== 'admin' && (
-                    <form action={deleteUserAction}>
-                      <input type="hidden" name="user_id" value={u.id} />
-                      <Button type="submit" size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-500/30 hover:text-red-400" title="Excluir usuário" onClick={async (e) => { if (!confirm('Tem certeza? Isso exclui permanentemente o usuário.')) e.preventDefault() }}>
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    </form>
-                  )}
-                  <Link href={`/authors/${u.username}`} target="_blank" className="text-red-500/30 hover:text-red-400 p-1.5"><ExternalLink className="h-3.5 w-3.5" /></Link>
-                </div>
+
+        <AdminHubSection eyebrow="Filtro" title="Buscar usuários" description="Autores externos importados são ocultados automaticamente da lista principal.">
+          <AdminPanel>
+            <form method="GET" className="grid gap-3 lg:grid-cols-[1fr_170px_170px_auto]">
+              <label className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                <input name="q" defaultValue={q} placeholder="Username, e-mail ou nome..." className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.04] pl-10 pr-3 text-sm text-slate-100 outline-none focus:border-cyan-300/40" />
+              </label>
+              <select name="role" defaultValue={role} className="h-11 rounded-2xl border border-white/10 bg-slate-950 px-3 text-sm text-slate-100 outline-none focus:border-cyan-300/40">
+                <option value="">Todas roles</option>
+                <option value="admin">Admin</option>
+                <option value="user">Usuário</option>
+                <option value="author">Autor</option>
+                <option value="banned">Banido</option>
+              </select>
+              <select name="status" defaultValue={status} className="h-11 rounded-2xl border border-white/10 bg-slate-950 px-3 text-sm text-slate-100 outline-none focus:border-cyan-300/40">
+                <option value="">Todo status</option>
+                <option value="active">Ativos</option>
+                <option value="banned">Banidos/suspensos</option>
+              </select>
+              <div className="flex gap-2">
+                <button type="submit" className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-sm font-semibold text-cyan-100 hover:bg-cyan-300/15">Buscar</button>
+                {(q || role || status) && <Link href={`/${secretPath}/usuarios`} className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-200 hover:bg-white/[0.07]">Limpar</Link>}
               </div>
-            </div>
-          ))}
-          {users.length === 0 && (
-            <div className="text-center py-12">
-              <Users className="h-10 w-10 text-red-500/20 mx-auto mb-3" />
-              <p className="text-red-400/60">Nenhum usuário encontrado.</p>
-            </div>
+            </form>
+          </AdminPanel>
+        </AdminHubSection>
+
+        <AdminHubSection eyebrow="Comunidade" title="Lista de usuários" description="Edição de e-mail inline, badges de role/status e confirmação antes de banir/excluir.">
+          {users.length === 0 ? (
+            <AdminEmptyState icon={Users} title="Nenhum usuário encontrado" description="Ajuste os filtros ou aguarde novos cadastros no site." />
+          ) : (
+            <AdminPanel className="overflow-hidden p-0">
+              <div className="hidden overflow-x-auto xl:block">
+                <table className="w-full min-w-[1040px] text-left text-sm">
+                  <thead className="border-b border-white/10 bg-white/[0.03] text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                    <tr><th className="px-5 py-4">Usuário</th><th className="px-5 py-4">E-mail</th><th className="px-5 py-4">Role/status</th><th className="px-5 py-4">Atividade</th><th className="px-5 py-4">Criado</th><th className="px-5 py-4 text-right">Ações</th></tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/10">
+                    {users.map((user) => {
+                      const statusValue = userStatus(user);
+                      const isProtected = user.role === "admin" || user.id === adminUser.id;
+                      return (
+                        <tr key={user.id} className="transition hover:bg-white/[0.03]">
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className={`flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border text-sm font-bold ${user.role === "admin" ? "border-violet-300/20 bg-violet-300/10 text-violet-100" : statusValue === "banned" ? "border-rose-300/20 bg-rose-500/10 text-rose-100" : "border-cyan-300/20 bg-cyan-300/10 text-cyan-100"}`}>
+                                {user.avatar_url ? <img src={user.avatar_url} alt="" className="h-full w-full object-cover" /> : initials(user)}
+                              </div>
+                              <div className="min-w-0"><p className="truncate font-medium text-slate-100">{user.display_name || user.username || "Sem nome"}</p><p className="mt-1 truncate text-xs text-slate-500">@{user.username || "sem-username"}</p></div>
+                            </div>
+                          </td>
+                          <td className="px-5 py-4">
+                            <form action={updateUserEmailV2Action} className="flex items-center gap-2">
+                              <input type="hidden" name="user_id" value={user.id} />
+                              <Mail className="h-3.5 w-3.5 text-slate-500" />
+                              <input name="email" type="email" defaultValue={user.email} disabled={user.email?.endsWith("@external.author")} className="w-64 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-200 outline-none focus:border-cyan-300/40 disabled:opacity-40" />
+                              <button type="submit" className="rounded-xl border border-cyan-300/20 bg-cyan-300/10 px-3 py-2 text-xs text-cyan-100 hover:bg-cyan-300/15">Salvar</button>
+                            </form>
+                          </td>
+                          <td className="px-5 py-4"><div className="flex flex-wrap gap-2"><AdminStatusBadge tone={statusTone(user.role)}>{normalizeStatusLabel(user.role)}</AdminStatusBadge>{statusValue === "banned" ? <AdminStatusBadge tone="rose">bloqueado</AdminStatusBadge> : <AdminStatusBadge tone="emerald">ativo</AdminStatusBadge>}</div></td>
+                          <td className="px-5 py-4 text-slate-300">{formatInteger(Number(user.comments_count || 0))} comentários · {formatInteger(Number(user.sessions_count || 0))} sessões</td>
+                          <td className="px-5 py-4 text-slate-400"><Calendar className="mr-1 inline h-3.5 w-3.5" /> {user.created_at?.slice(0, 10) || "—"}</td>
+                          <td className="px-5 py-4">
+                            <div className="flex justify-end gap-2">
+                              {user.username ? <Link href={`/authors/${user.username}`} target="_blank" className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-200 hover:bg-white/[0.07]"><ExternalLink className="h-3.5 w-3.5" /> Perfil</Link> : null}
+                              {!isProtected && <form action={toggleUserBanV2Action}><input type="hidden" name="user_id" value={user.id} /><ConfirmSubmitButton variant={statusValue === "banned" ? "success" : "warning"} message={statusValue === "banned" ? `Desbanir ${user.display_name || user.email}?` : `Banir ${user.display_name || user.email} e encerrar sessões?`}><Ban className="h-3.5 w-3.5" /> {statusValue === "banned" ? "Desbanir" : "Banir"}</ConfirmSubmitButton></form>}
+                              {!isProtected && <form action={deleteUserV2Action}><input type="hidden" name="user_id" value={user.id} /><ConfirmSubmitButton variant="danger" message={`Excluir permanentemente o usuário ${user.display_name || user.email}?`}><Trash2 className="h-3.5 w-3.5" /> Excluir</ConfirmSubmitButton></form>}
+                              {isProtected && <AdminStatusBadge tone="violet"><Shield className="mr-1 h-3 w-3" /> protegido</AdminStatusBadge>}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="grid gap-3 p-3 xl:hidden">
+                {users.map((user) => {
+                  const statusValue = userStatus(user);
+                  const isProtected = user.role === "admin" || user.id === adminUser.id;
+                  return (
+                    <div key={user.id} className="rounded-3xl border border-white/10 bg-white/[0.03] p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-cyan-300/20 bg-cyan-300/10 font-bold text-cyan-100">{initials(user)}</div>
+                        <div className="min-w-0 flex-1"><h3 className="truncate font-semibold text-slate-100">{user.display_name || user.username || user.email}</h3><p className="truncate text-xs text-slate-500">{user.email}</p><div className="mt-2 flex flex-wrap gap-2"><AdminStatusBadge tone={statusTone(user.role)}>{normalizeStatusLabel(user.role)}</AdminStatusBadge>{statusValue === "banned" && <AdminStatusBadge tone="rose">bloqueado</AdminStatusBadge>}</div></div>
+                      </div>
+                      <form action={updateUserEmailV2Action} className="mt-4 flex gap-2"><input type="hidden" name="user_id" value={user.id} /><input name="email" type="email" defaultValue={user.email} className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-200 outline-none" /><button type="submit" className="rounded-xl border border-cyan-300/20 bg-cyan-300/10 px-3 py-2 text-xs text-cyan-100">Salvar</button></form>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {user.username ? <Link href={`/authors/${user.username}`} target="_blank" className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-200">Perfil</Link> : null}
+                        {!isProtected && <form action={toggleUserBanV2Action}><input type="hidden" name="user_id" value={user.id} /><ConfirmSubmitButton variant={statusValue === "banned" ? "success" : "warning"} message={statusValue === "banned" ? `Desbanir ${user.display_name || user.email}?` : `Banir ${user.display_name || user.email}?`}><Ban className="h-3.5 w-3.5" /> {statusValue === "banned" ? "Desbanir" : "Banir"}</ConfirmSubmitButton></form>}
+                        {!isProtected && <form action={deleteUserV2Action}><input type="hidden" name="user_id" value={user.id} /><ConfirmSubmitButton variant="danger" message={`Excluir permanentemente o usuário ${user.display_name || user.email}?`}><Trash2 className="h-3.5 w-3.5" /> Excluir</ConfirmSubmitButton></form>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </AdminPanel>
           )}
-        </div>
-      </main>
-    </div>
-  );
-  } catch (e) {
-    console.error("Users admin error:", e);
-    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-red-400 text-sm">Erro ao carregar usuários. <a href={`/${SP}`} className="underline ml-2">Voltar</a></div>;
+        </AdminHubSection>
+      </AdminHubShell>
+    );
+  } catch (error) {
+    console.error("Admin users V2 error:", error);
+    return <div className="min-h-screen bg-[#070812] p-6 text-slate-100"><AdminErrorState error={error} backHref={`/${secretPath}`} /></div>;
   }
 }
