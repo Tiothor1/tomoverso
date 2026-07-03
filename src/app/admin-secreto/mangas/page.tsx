@@ -23,11 +23,12 @@ async function deleteMangaAction(formData: FormData) {
 }
 
 export default async function AdminMangasPage(props: { searchParams?: Promise<{ q?: string }> | { q?: string } }) {
-  try {
   const cookieStore = await cookies();
   if (cookieStore.get("admin_validated")?.value !== "1") redirect(`/${SP}`);
   const user = await getCurrentUser().catch(() => null);
   if (!user || user.role !== "admin") redirect(`/${SP}`);
+
+  try {
 
   const db = getDb();
   let q = "";

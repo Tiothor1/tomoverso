@@ -32,11 +32,12 @@ async function markCompletedAction(formData: FormData) {
 }
 
 export default async function AdminAnalisePage() {
-  try {
   const cookieStore = await cookies();
   if (cookieStore.get("admin_validated")?.value !== "1") redirect(`/${SP}`);
   const user = await getCurrentUser().catch(() => null);
   if (!user || user.role !== "admin") redirect(`/${SP}`);
+
+  try {
 
   const db = getDb();
   const items = db.prepare("SELECT * FROM import_queue ORDER BY created_at DESC LIMIT 50").all() as any[];

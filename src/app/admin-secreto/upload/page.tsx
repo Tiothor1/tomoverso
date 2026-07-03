@@ -12,11 +12,12 @@ export const dynamic = "force-dynamic";
 const SP = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
 
 export default async function AdminUploadPage() {
+  const cookieStore = await cookies();
+  if (cookieStore.get("admin_validated")?.value !== "1") redirect(`/${SP}`);
+  const user = await getCurrentUser().catch(() => null);
+  if (!user || user.role !== "admin") redirect(`/${SP}`);
+
   try {
-    const cookieStore = await cookies();
-    if (cookieStore.get("admin_validated")?.value !== "1") redirect(`/${SP}`);
-    const user = await getCurrentUser().catch(() => null);
-    if (!user || user.role !== "admin") redirect(`/${SP}`);
 
     const db = getDb();
     const recentImports = db.prepare("SELECT * FROM import_queue ORDER BY created_at DESC LIMIT 10").all() as any[];

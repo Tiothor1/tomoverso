@@ -23,12 +23,12 @@ function safeSum(db: any, sql: string): number {
 }
 
 export default async function AdminSecretoFinancePage() {
-  try {
   const cookieStore = await cookies();
-  const validated = cookieStore.get("admin_validated");
-  if (!validated || validated.value !== "1") redirect(`/${SP}`);
+  if (cookieStore.get("admin_validated")?.value !== "1") redirect(`/${SP}`);
   const user = await getCurrentUser().catch(() => null);
   if (!user || user.role !== "admin") redirect(`/${SP}`);
+
+  try {
 
   const db = getDb();
 

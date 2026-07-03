@@ -46,16 +46,17 @@ async function updateEmailAction(formData: FormData) {
   db.prepare("UPDATE users SET email = ? WHERE id = ?").run(newEmail, userId);
 }
 
-export default async function AdminUsuariosPage(props: { searchParams?: Promise<{ q?: string }> }) {
-  try {
+export default async function AdminUsuariosPage(props: { searchParams?: Promise<{ q?: string }> | { q?: string } }) {
   const cookieStore = await cookies();
   if (cookieStore.get("admin_validated")?.value !== "1") redirect(`/${SP}`);
   const user = await getCurrentUser().catch(() => null);
   if (!user || user.role !== "admin") redirect(`/${SP}`);
 
+  try {
+
   const db = getDb();
-  const sp = await props.searchParams?.catch(() => undefined);
-  const q = sp?.q || "";
+  const sp = props.searchParams instanceof Promise ? await props.searchParams : await Promise.resolve(props.searchParams || {});
+  const q = (sp as any)?.q || "";
   const like = `%${q}%`;
   const users = q
     ? db.prepare("SELECT * FROM users WHERE (username LIKE ? OR email LIKE ? OR display_name LIKE ?) AND email NOT LIKE '%@external.author' ORDER BY created_at DESC LIMIT 100").all(like, like, like)
