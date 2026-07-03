@@ -24,7 +24,7 @@ async function deleteNovelAction(formData: FormData) {
   db.prepare("DELETE FROM novels WHERE id = ?").run(id);
 }
 
-export default async function AdminNovelsPage(props: { searchParams?: Promise<{ q?: string }> }) {
+export default async function AdminNovelsPage(props: { searchParams?: Promise<{ q?: string }> | { q?: string } }) {
   try {
   const cookieStore = await cookies();
   if (cookieStore.get("admin_validated")?.value !== "1") redirect(`/${SP}`);
@@ -32,8 +32,11 @@ export default async function AdminNovelsPage(props: { searchParams?: Promise<{ 
   if (!user || user.role !== "admin") redirect(`/${SP}`);
 
   const db = getDb();
-  const sp = await props.searchParams?.catch(() => undefined);
-  const q = sp?.q || "";
+  let q = "";
+  try {
+    const sp = props.searchParams instanceof Promise ? await props.searchParams : await Promise.resolve(props.searchParams || {});
+    q = (sp as any)?.q || "";
+  } catch {}
   const like = `%${q}%`;
   const novels = q
     ? db.prepare("SELECT n.*, u.display_name as author_name FROM novels n LEFT JOIN users u ON u.id = n.author_id WHERE n.title LIKE ? OR n.slug LIKE ? ORDER BY n.updated_at DESC LIMIT 100").all(like, like)

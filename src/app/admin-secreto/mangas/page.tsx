@@ -22,7 +22,7 @@ async function deleteMangaAction(formData: FormData) {
   db.prepare("DELETE FROM mangas WHERE id = ?").run(id);
 }
 
-export default async function AdminMangasPage(props: { searchParams?: Promise<{ q?: string }> }) {
+export default async function AdminMangasPage(props: { searchParams?: Promise<{ q?: string }> | { q?: string } }) {
   try {
   const cookieStore = await cookies();
   if (cookieStore.get("admin_validated")?.value !== "1") redirect(`/${SP}`);
@@ -30,8 +30,11 @@ export default async function AdminMangasPage(props: { searchParams?: Promise<{ 
   if (!user || user.role !== "admin") redirect(`/${SP}`);
 
   const db = getDb();
-  const sp = await props.searchParams?.catch(() => undefined);
-  const q = sp?.q || "";
+  let q = "";
+  try {
+    const sp = props.searchParams instanceof Promise ? await props.searchParams : await Promise.resolve(props.searchParams || {});
+    q = (sp as any)?.q || "";
+  } catch {}
   const mangas = q
     ? db.prepare("SELECT * FROM mangas WHERE title LIKE ? OR slug LIKE ? ORDER BY updated_at DESC LIMIT 100").all(`%${q}%`, `%${q}%`)
     : db.prepare("SELECT * FROM mangas ORDER BY updated_at DESC LIMIT 100").all();
