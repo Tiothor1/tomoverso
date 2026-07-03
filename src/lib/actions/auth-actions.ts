@@ -186,20 +186,11 @@ export async function signupAction(formData: FormData): Promise<ActionResult> {
   const user = db.prepare("SELECT * FROM users WHERE id = ?").get(id) as UserRecord;
   await upsertSupabaseProfile(user);
 
-  // Envia codigo de verificacao (fire-and-forget)
-  const { sendVerificationCode } = await import("@/lib/verify-email");
-  const sent = await sendVerificationCode(email).catch(() => false);
-
-  if (!sent) {
-    // Sem email configurado: auto-verifica o email
-    db.prepare("UPDATE users SET email_verified = 1 WHERE id = ?").run(id);
-    await createPersistentSession(db, user);
-    revalidatePath("/", "layout");
-    return { ok: true, redirect: "/dashboard" };
-  }
-
+  // Pula verificação de email — conta já criada, vai direto pro painel
+  db.prepare("UPDATE users SET email_verified = 1 WHERE id = ?").run(id);
+  await createPersistentSession(db, user);
   revalidatePath("/", "layout");
-  return { ok: true, redirect: `/auth/verify?email=${encodeURIComponent(email)}` };
+  return { ok: true, redirect: "/onboarding" };
 }
 
 export async function loginAction(formData: FormData): Promise<ActionResult> {
