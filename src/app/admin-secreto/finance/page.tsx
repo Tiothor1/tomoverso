@@ -12,40 +12,47 @@ import { adminConfirmWithdrawalAction } from "@/lib/actions/marketplace-actions"
 export const dynamic = "force-dynamic";
 const SP = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
 
+function safeSum(db: any, sql: string): number {
+  try {
+    const row = db.prepare(sql).get() as any;
+    const keys = Object.keys(row);
+    return Math.floor(Number(row[keys[0]]) || 0);
+  } catch {
+    return 0;
+  }
+}
+
 export default async function AdminSecretoFinancePage() {
   try {
   const cookieStore = await cookies();
   const validated = cookieStore.get("admin_validated");
-  if (!validated || validated.value !== "1") {
-    redirect(`/${SP}`);
-  }
-
+  if (!validated || validated.value !== "1") redirect(`/${SP}`);
   const user = await getCurrentUser().catch(() => null);
-  if (!user || user.role !== "admin") {
-    redirect(`/${SP}`);
-  }
+  if (!user || user.role !== "admin") redirect(`/${SP}`);
 
   const db = getDb();
-  const secretPath = SP;
 
-  const totalSales = (db.prepare("SELECT COALESCE(SUM(gross_amount_cents),0) FROM marketplace_payments WHERE status = 'approved'").get() as any)["COALESCE(SUM(gross_amount_cents),0)"];
-  const totalAuthorPayouts = (db.prepare("SELECT COALESCE(SUM(amount_cents),0) FROM withdrawal_requests WHERE status = 'paid'").get() as any)["COALESCE(SUM(amount_cents),0)"];
-  const pendingTotal = (db.prepare("SELECT COALESCE(SUM(amount_cents),0) FROM withdrawal_requests WHERE status = 'pending'").get() as any)["COALESCE(SUM(amount_cents),0)"];
+  const totalSales = safeSum(db, "SELECT COALESCE(SUM(gross_amount_cents),0) FROM marketplace_payments WHERE status = 'approved'");
+  const totalAuthorPayouts = safeSum(db, "SELECT COALESCE(SUM(amount_cents),0) FROM withdrawal_requests WHERE status = 'paid'");
+  const pendingTotal = safeSum(db, "SELECT COALESCE(SUM(amount_cents),0) FROM withdrawal_requests WHERE status = 'pending'");
 
-  const withdrawals = db.prepare(`
-    SELECT wr.*, sp.public_name, sp.pix_key_type, sp.pix_key, u.display_name, u.email
-    FROM withdrawal_requests wr
-    JOIN seller_profiles sp ON sp.id = wr.seller_id
-    JOIN users u ON u.id = sp.user_id
-    WHERE wr.status = 'pending'
-    ORDER BY wr.created_at ASC
-  `).all() as any[];
+  let withdrawals: any[] = [];
+  try {
+    withdrawals = db.prepare(`
+      SELECT wr.*, sp.public_name, sp.pix_key_type, sp.pix_key, u.display_name, u.email
+      FROM withdrawal_requests wr
+      JOIN seller_profiles sp ON sp.id = wr.seller_id
+      JOIN users u ON u.id = sp.user_id
+      WHERE wr.status = 'pending'
+      ORDER BY wr.created_at ASC
+    `).all() as any[];
+  } catch {}
 
   return (
     <div className="min-h-screen bg-gray-950">
       <header className="border-b border-red-900/30 bg-gray-950/90 px-4 py-3">
         <div className="flex items-center gap-3 max-w-7xl mx-auto">
-          <a href={`/${secretPath}`} className="text-red-400 hover:text-red-300">
+          <a href={`/${SP}`} className="text-red-400 hover:text-red-300">
             <ArrowLeft className="h-5 w-5" />
           </a>
           <DollarSign className="h-5 w-5 text-red-400" />
@@ -58,25 +65,25 @@ export default async function AdminSecretoFinancePage() {
           <Card className="border-red-900/20 bg-gray-900/50">
             <CardContent className="pt-6">
               <p className="text-xs text-red-400/60">Total vendido</p>
-              <p className="text-xl font-bold text-red-100">{formatBRLCents(Math.floor(totalSales))}</p>
+              <p className="text-xl font-bold text-red-100">{formatBRLCents(totalSales)}</p>
             </CardContent>
           </Card>
           <Card className="border-red-900/20 bg-gray-900/50">
             <CardContent className="pt-6">
               <p className="text-xs text-red-400/60">Pago a autores</p>
-              <p className="text-xl font-bold text-red-100">{formatBRLCents(Math.floor(totalAuthorPayouts))}</p>
+              <p className="text-xl font-bold text-red-100">{formatBRLCents(totalAuthorPayouts)}</p>
             </CardContent>
           </Card>
           <Card className="border-amber-900/20 bg-gray-900/50">
             <CardContent className="pt-6">
               <p className="text-xs text-amber-400/60">Pendente p/ autores</p>
-              <p className="text-xl font-bold text-amber-300">{formatBRLCents(Math.floor(pendingTotal))}</p>
+              <p className="text-xl font-bold text-amber-300">{formatBRLCents(pendingTotal)}</p>
             </CardContent>
           </Card>
           <Card className="border-green-900/20 bg-gray-900/50">
             <CardContent className="pt-6">
               <p className="text-xs text-green-400/60">Seu saldo</p>
-              <p className="text-xl font-bold text-green-400">{formatBRLCents(Math.floor(totalSales - totalAuthorPayouts))}</p>
+              <p className="text-xl font-bold text-green-400">{formatBRLCents(totalSales - totalAuthorPayouts)}</p>
             </CardContent>
           </Card>
         </div>

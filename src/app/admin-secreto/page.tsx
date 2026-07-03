@@ -176,9 +176,8 @@ export default async function AdminSecretoPage() {
             </CardHeader>
             <CardContent className="space-y-2 text-xs text-red-400/60">
               <div className="flex justify-between"><span>Ambiente</span><span className="text-red-200">{process.env.VERCEL ? "Vercel" : "Local"}</span></div>
-              <div className="flex justify-between"><span>Admin path</span><span className="text-red-200 font-mono text-[10px]">{SECRET}</span></div>
-              <div className="flex justify-between"><span>Painel admin</span><a href="/admin" className="text-blue-400 hover:underline">Ir para admin principal →</a></div>
-              <div className="flex justify-between"><span>Admin-bootstrap</span><a href="/admin-bootstrap" className="text-blue-400 hover:underline">Configurar admin →</a></div>
+              <div className="flex justify-between"><span>Seed</span><span className="text-red-200">{stats.novels} novels · {stats.mangas} mangás</span></div>
+              <div className="flex justify-between"><span>Usuários</span><span className="text-red-200">{stats.users}</span></div>
             </CardContent>
           </Card>
 
