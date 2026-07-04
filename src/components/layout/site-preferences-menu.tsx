@@ -37,6 +37,7 @@ type NavbarMoreMenuProps = {
   storeHref: string;
   publishHref: string;
   publishLabel: string;
+  hasActiveSubscription: boolean;
   subBadge?: string | null;
 };
 
@@ -46,14 +47,11 @@ const themeOptions: Array<{ id: ThemePreference; label: string; icon: ComponentT
   { id: "system", label: "Sistema", icon: Monitor },
 ];
 
-const colorOptions: Array<{ id: ColorTheme; label: string; className: string }> = [
-  { id: "purple", label: "Roxo", className: "bg-violet-500" },
-  { id: "blue", label: "Azul", className: "bg-blue-500" },
-  { id: "rose", label: "Rosa", className: "bg-pink-500" },
-  { id: "cyan", label: "Ciano", className: "bg-cyan-400" },
-  { id: "emerald", label: "Verde", className: "bg-emerald-500" },
-  { id: "red", label: "Vermelho", className: "bg-red-500" },
-  { id: "amber", label: "Dourado", className: "bg-amber-400" },
+const colorOptions: Array<{ id: ColorTheme; label: string; className: string; pro?: boolean }> = [
+  { id: "purple", label: "Padrão Tomo", className: "bg-violet-500" },
+  { id: "blue", label: "Azul editorial", className: "bg-blue-500", pro: true },
+  { id: "rose", label: "Rosa premium", className: "bg-pink-500", pro: true },
+  { id: "amber", label: "Dourado pro", className: "bg-amber-400", pro: true },
 ];
 
 const languageOptions: Array<{ id: LanguageCode; label: string; short: string; flag: string }> = [
@@ -68,9 +66,9 @@ const languageOptions: Array<{ id: LanguageCode; label: string; short: string; f
   { id: "zh-CN", label: "中文", short: "ZH", flag: "🇨🇳" },
 ];
 
-export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel, subBadge }: NavbarMoreMenuProps) {
+export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel, hasActiveSubscription, subBadge }: NavbarMoreMenuProps) {
   const { theme, resolvedTheme, colorTheme, setTheme, setColorTheme } = useTheme();
-  const { language, setLanguage, isTranslating } = useLanguage();
+  const { language, setLanguage } = useLanguage();
 
   return (
     <DropdownMenu>
@@ -182,22 +180,26 @@ export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel
         <DropdownMenuLabel className="flex items-center gap-2 pt-2">
           <Palette className="h-3.5 w-3.5" />
           Cor do site
+          <span className="ml-auto rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-bold text-amber-300">Autor+</span>
         </DropdownMenuLabel>
         <div className="grid grid-cols-2 gap-1 px-1 pb-1">
           {colorOptions.map((option) => {
             const active = colorTheme === option.id;
+            const locked = Boolean(option.pro && !hasActiveSubscription);
             return (
               <button
                 key={option.id}
                 type="button"
-                onClick={() => setColorTheme(option.id)}
+                onClick={() => locked ? undefined : setColorTheme(option.id)}
+                disabled={locked}
                 className={cn(
                   "flex min-h-9 items-center gap-2 rounded-lg border px-2 text-xs font-semibold transition-colors",
-                  active ? "border-primary/55 bg-primary/12 text-primary" : "border-border/60 bg-muted/30 hover:bg-muted"
+                  locked ? "cursor-not-allowed border-border/40 bg-muted/15 text-muted-foreground opacity-70" : active ? "border-primary/55 bg-primary/12 text-primary" : "border-border/60 bg-muted/30 hover:bg-muted"
                 )}
               >
                 <span className={cn("h-3.5 w-3.5 rounded-full ring-1 ring-black/10", option.className)} />
                 {option.label}
+                {locked ? <Crown className="ml-auto h-3.5 w-3.5 text-amber-400" /> : null}
                 {active ? <Check className="ml-auto h-3.5 w-3.5" /> : null}
               </button>
             );
@@ -208,20 +210,22 @@ export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel
           <Languages className="h-3.5 w-3.5" />
           Idioma
           <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase text-muted-foreground">
-            {isTranslating ? "Traduzindo" : language.toUpperCase()}
+            PT-BR
           </span>
         </DropdownMenuLabel>
         <div className="grid grid-cols-3 gap-1 px-1 pb-1">
           {languageOptions.map((option) => {
             const active = language === option.id;
+            const locked = option.id !== "pt";
             return (
               <button
                 key={option.id}
                 type="button"
-                onClick={() => setLanguage(option.id)}
+                onClick={() => locked ? undefined : setLanguage(option.id)}
+                disabled={locked}
                 className={cn(
                   "flex min-h-9 items-center justify-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors",
-                  active ? "border-primary/55 bg-primary/12 text-primary" : "border-border/60 bg-muted/30 hover:bg-muted"
+                  locked ? "cursor-not-allowed border-border/40 bg-muted/15 text-muted-foreground opacity-60" : active ? "border-primary/55 bg-primary/12 text-primary" : "border-border/60 bg-muted/30 hover:bg-muted"
                 )}
               >
                 <span>{option.flag}</span>
@@ -230,7 +234,7 @@ export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel
             );
           })}
           <p className="col-span-3 px-1 pt-1 text-[11px] leading-snug text-muted-foreground">
-            Traduz a página inteira e salva sua preferência neste navegador.
+            Tradução parcial foi desativada. Idiomas completos entram como recurso Autor+ quando 100% do site tiver i18n real.
           </p>
         </div>
       </DropdownMenuContent>
@@ -238,9 +242,9 @@ export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel
   );
 }
 
-export function MobilePreferencesPanel() {
+export function MobilePreferencesPanel({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const { theme, resolvedTheme, colorTheme, setTheme, setColorTheme } = useTheme();
-  const { language, setLanguage, isTranslating } = useLanguage();
+  const { language, setLanguage } = useLanguage();
 
   return (
     <section className="rounded-2xl border border-border/60 bg-muted/25 p-3">
@@ -283,14 +287,16 @@ export function MobilePreferencesPanel() {
           <div className="grid grid-cols-4 gap-1.5">
             {colorOptions.map((option) => {
               const active = colorTheme === option.id;
+              const locked = Boolean(option.pro && !hasActiveSubscription);
               return (
                 <button
                   key={option.id}
                   type="button"
-                  onClick={() => setColorTheme(option.id)}
+                  onClick={() => locked ? undefined : setColorTheme(option.id)}
+                  disabled={locked}
                   className={cn(
                     "flex h-10 items-center justify-center rounded-xl border",
-                    active ? "border-primary/70 bg-primary/10" : "border-border bg-background/50"
+                    locked ? "cursor-not-allowed border-border/40 bg-muted/20 opacity-60" : active ? "border-primary/70 bg-primary/10" : "border-border bg-background/50"
                   )}
                   aria-label={`Usar cor ${option.label}`}
                 >
@@ -299,24 +305,29 @@ export function MobilePreferencesPanel() {
               );
             })}
           </div>
+          <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
+            Padrão Tomo é grátis. Cores extras são recurso Autor+.
+          </p>
         </div>
 
         <div>
           <p className="mb-1.5 text-xs font-semibold text-muted-foreground">
-            Idioma {isTranslating ? "· traduzindo" : ""}
+            Idioma
           </p>
           <div className="grid grid-cols-3 gap-1.5">
             {languageOptions.map((option) => {
               const active = language === option.id;
+              const locked = option.id !== "pt";
               return (
                 <button
                   key={option.id}
                   type="button"
-                  onClick={() => setLanguage(option.id)}
+                  onClick={() => locked ? undefined : setLanguage(option.id)}
+                  disabled={locked}
                   aria-label={`Usar idioma ${option.label}`}
                   className={cn(
                     "flex h-10 items-center justify-center gap-1 rounded-xl border text-xs font-semibold",
-                    active ? "border-primary/55 bg-primary/12 text-primary" : "border-border bg-background/50"
+                    locked ? "cursor-not-allowed border-border/40 bg-muted/20 text-muted-foreground opacity-60" : active ? "border-primary/55 bg-primary/12 text-primary" : "border-border bg-background/50"
                   )}
                 >
                   <span>{option.flag}</span>
@@ -326,7 +337,7 @@ export function MobilePreferencesPanel() {
             })}
           </div>
           <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
-            Traduz a página inteira e salva sua preferência neste navegador.
+            Idiomas completos ficam desativados até a tradução 100% real do site entrar no Autor+.
           </p>
         </div>
       </div>

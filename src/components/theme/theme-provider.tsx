@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export type ThemePreference = "dark" | "light" | "system";
 export type ResolvedTheme = "dark" | "light";
-export type ColorTheme = "purple" | "blue" | "rose" | "cyan" | "emerald" | "red" | "amber";
+export type ColorTheme = "purple" | "blue" | "rose" | "amber";
 
 type StoredTheme = {
   theme?: unknown;
@@ -30,7 +30,7 @@ type ThemeProviderState = {
 const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undefined);
 
 const validThemes: ThemePreference[] = ["dark", "light", "system"];
-const validColors: ColorTheme[] = ["purple", "blue", "rose", "cyan", "emerald", "red", "amber"];
+const validColors: ColorTheme[] = ["purple", "blue", "rose", "amber"];
 
 function normalizeTheme(value: unknown, fallback: ThemePreference): ThemePreference {
   return validThemes.includes(value as ThemePreference) ? (value as ThemePreference) : fallback;
@@ -39,13 +39,17 @@ function normalizeTheme(value: unknown, fallback: ThemePreference): ThemePrefere
 function normalizeColor(value: unknown, fallback: ColorTheme): ColorTheme {
   if (validColors.includes(value as ColorTheme)) return value as ColorTheme;
   if (value === "sepia") return "amber";
-  if (value === "ocean") return "cyan";
   return fallback;
 }
 
 function getSystemTheme(): ResolvedTheme {
   if (typeof window === "undefined") return "dark";
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+
+function hasSubscriberCookie(): boolean {
+  if (typeof document === "undefined") return false;
+  return /(?:^|; )tomoverso-subscriber=1(?:;|$)/.test(document.cookie);
 }
 
 function readStoredPreferences(storageKey: string, defaultTheme: ThemePreference, defaultColor: ColorTheme) {
@@ -57,9 +61,10 @@ function readStoredPreferences(storageKey: string, defaultTheme: ThemePreference
     const stored = window.localStorage.getItem(storageKey);
     if (!stored) return { theme: defaultTheme, color: defaultColor };
     const parsed = JSON.parse(stored) as StoredTheme;
+    const storedColor = normalizeColor(parsed.color, defaultColor);
     return {
       theme: normalizeTheme(parsed.theme, defaultTheme),
-      color: normalizeColor(parsed.color, defaultColor),
+      color: storedColor === "purple" || hasSubscriberCookie() ? storedColor : "purple",
     };
   } catch {
     return { theme: defaultTheme, color: defaultColor };

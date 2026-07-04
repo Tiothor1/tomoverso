@@ -80,6 +80,7 @@ export async function Navbar() {
               storeHref={storeHref}
               publishHref={publishHref}
               publishLabel={publishLabel}
+              hasActiveSubscription={!!sub}
               subBadge={sub?.badge_label || null}
             />
 
@@ -109,6 +110,7 @@ export async function Navbar() {
               username={user?.username}
               publishLabel={publishLabel}
               publishHref={publishHref}
+              hasActiveSubscription={!!sub}
               subBadge={sub?.badge_label || null}
             />
           </div>

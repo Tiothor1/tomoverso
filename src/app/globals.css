@@ -338,6 +338,24 @@
   --sidebar-ring: oklch(0.73 0.11 316);
 }
 
+/* Paletas Autor+: aplicadas DEPOIS do tema escuro base para não virarem só "pontinhos". */
+[data-color="blue"].dark,
+[data-color="rose"].dark,
+[data-color="amber"].dark {
+  --primary: oklch(0.72 0.17 var(--theme-hue));
+  --primary-foreground: oklch(0.13 0.024 var(--theme-hue));
+  --secondary: oklch(0.26 0.045 var(--theme-hue));
+  --muted: oklch(0.25 0.035 var(--theme-hue));
+  --muted-foreground: oklch(0.74 0.045 var(--theme-hue));
+  --accent: oklch(0.34 0.085 var(--theme-hue));
+  --ring: oklch(0.68 0.16 var(--theme-hue));
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: oklch(0.31 0.075 var(--theme-hue));
+  --sidebar-ring: var(--ring);
+  --chart-1: var(--primary);
+}
+
 :root {
   --radius: 0.625rem;
   --chart-1: oklch(0.87 0 0);

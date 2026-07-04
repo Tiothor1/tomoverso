@@ -32,6 +32,7 @@ interface MobileMenuProps {
   username?: string;
   publishLabel: string;
   publishHref: string;
+  hasActiveSubscription: boolean;
   subBadge?: string | null;
 }
 
@@ -43,6 +44,7 @@ export function MobileMenu({
   username,
   publishLabel,
   publishHref,
+  hasActiveSubscription,
   subBadge,
 }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
@@ -155,7 +157,7 @@ export function MobileMenu({
 
                   <div className="my-4 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
-                  <MobilePreferencesPanel />
+                  <MobilePreferencesPanel hasActiveSubscription={hasActiveSubscription} />
                 </div>
               </aside>
             </div>,
