@@ -19,7 +19,9 @@ interface MangaCoverProps {
 export function MangaCover({ manga, className }: MangaCoverProps) {
   const rawCoverSrc = manga.cover_local_path
     ? manga.cover_local_path
-    : manga.cover_url;
+    : manga.cover_url?.startsWith("/uploads/")
+      ? manga.cover_url
+      : "";
   const coverSrc = rawCoverSrc ? proxyImageUrl(rawCoverSrc) : "";
 
   if (coverSrc) {
@@ -42,7 +44,6 @@ function MangaCoverFallback({ manga, className }: MangaCoverProps) {
   const hash = Array.from(manga.title).reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
   const hue1 = hash % 360;
   const hue2 = (hue1 + 60) % 360;
-  const initial = manga.title.charAt(0).toUpperCase();
 
   return (
     <div
@@ -51,9 +52,9 @@ function MangaCoverFallback({ manga, className }: MangaCoverProps) {
         background: `linear-gradient(135deg, oklch(0.45 ${0.15 + (hash % 10) / 100} ${hue1}) 0%, oklch(0.35 ${0.18 + (hash % 10) / 100} ${hue2}) 100%)`,
       }}
     >
-      <div className="flex flex-col items-center gap-2">
-        <BookOpen className="h-10 w-10 opacity-40" />
-        <span className="text-3xl">{initial}</span>
+      <div className="flex max-w-[82%] flex-col items-center gap-3 text-center">
+        <BookOpen className="h-10 w-10 opacity-45" />
+        <span className="line-clamp-4 text-lg leading-tight tracking-tight">{manga.title}</span>
       </div>
     </div>
   );
