@@ -4,6 +4,11 @@ import { publicVisibleNovelSql, publicVisibleMangaSql } from "@/lib/public-catal
 
 const BASE_URL = "https://tomoversoeditora.com";
 
+function safeDate(value: string | null | undefined): Date {
+  const d = new Date(value ?? "");
+  return Number.isNaN(d.getTime()) ? new Date() : d;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const db = getDb();
 
@@ -29,7 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const novelRoutes: MetadataRoute.Sitemap = novels.map((n) => ({
     url: `${BASE_URL}/novels/${n.slug}`,
-    lastModified: new Date(n.updated_at),
+    lastModified: safeDate(n.updated_at),
     changeFrequency: "weekly" as const,
     priority: 0.7,
   }));
@@ -38,7 +43,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const mangas: { slug: string; updated_at: string }[] = [];
   try {
     const mangaRows = db.prepare(
-      `SELECT slug, updated_at FROM mangas WHERE ${publicVisibleMangaSql("m")} ORDER BY updated_at DESC`
+      `SELECT slug, updated_at FROM mangas m WHERE ${publicVisibleMangaSql("m")} ORDER BY updated_at DESC`
     ).all() as { slug: string; updated_at: string }[];
     mangas.push(...mangaRows);
   } catch {
@@ -47,7 +52,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const mangaRoutes: MetadataRoute.Sitemap = mangas.map((m) => ({
     url: `${BASE_URL}/manga/${m.slug}`,
-    lastModified: new Date(m.updated_at),
+    lastModified: safeDate(m.updated_at),
     changeFrequency: "weekly" as const,
     priority: 0.7,
   }));
