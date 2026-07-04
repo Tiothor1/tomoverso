@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getDb } from "@/lib/db";
 import { publicVisibleMangaSql } from "@/lib/public-catalog";
 import { MangaReader } from "@/components/manga/manga-reader";
+import { proxyImageUrl } from "@/lib/manga/image-proxy";
 
 interface MangaRow {
   id: string;
@@ -94,7 +95,7 @@ export default async function MangaChapterPage({
       pages={pages.map((p) => ({
         id: p.id,
         page_number: p.page_number,
-        image_url: p.image_url,
+        image_url: proxyImageUrl(p.image_url),
         width: p.width,
         height: p.height,
       }))}

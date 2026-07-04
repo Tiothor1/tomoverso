@@ -267,16 +267,32 @@ export function MangaReader({
 }
 
 function PageImage({ page, index, total }: { page: MangaReaderPage; index: number; total: number }) {
+  const [loaded, setLoaded] = useState(false);
   return (
     <div className="w-full max-w-3xl mx-auto">
+      {!loaded && (
+        <div className="w-full min-h-[80vh] bg-white/[0.03] animate-pulse rounded-lg flex items-center justify-center">
+          <div className="flex flex-col items-center gap-2 text-white/20">
+            <svg className="h-8 w-8 animate-spin" viewBox="0 0 24 24" fill="none">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" opacity="0.25" />
+              <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+            <span className="text-xs">Carregando...</span>
+          </div>
+        </div>
+      )}
       <img
         src={page.image_url}
         alt={`Página ${page.page_number}`}
-        loading={index < 3 ? "eager" : "lazy"}
+        loading={index < 10 ? "eager" : "lazy"}
         decoding="async"
-        className="w-full h-auto block mx-auto select-none"
+        className={`w-full h-auto block mx-auto select-none ${loaded ? "opacity-100" : "opacity-0 h-0"}`}
         draggable={false}
-        onError={(e) => { e.currentTarget.style.opacity = "0.3"; }}
+        onLoad={() => setLoaded(true)}
+        onError={(e) => {
+          e.currentTarget.style.opacity = "0.3";
+          setLoaded(true);
+        }}
       />
       <div className="text-center text-xs text-white/30 py-2">
         {page.page_number} / {total}
