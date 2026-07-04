@@ -188,8 +188,7 @@ export default function HomePage() {
     <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,.13),transparent_34%),radial-gradient(circle_at_85%_8%,rgba(14,165,233,.12),transparent_28%),linear-gradient(180deg,rgba(250,247,255,.92),rgba(255,255,255,1)_42%,rgba(250,250,252,1))] dark:bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,.18),transparent_34%),radial-gradient(circle_at_85%_8%,rgba(14,165,233,.12),transparent_28%),linear-gradient(180deg,#0b0712,#0f0b17_44%,#09070d)]">
       {/* Hero */}
       <section className="relative border-b border-border/50">
-        <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(to_right,currentColor_1px,transparent_1px),linear-gradient(to_bottom,currentColor_1px,transparent_1px)] [background-size:44px_44px]" />
-        <div className="container relative mx-auto grid max-w-7xl gap-10 px-4 py-14 md:grid-cols-[1.05fr_.95fr] md:items-center md:py-20 lg:py-24">
+        <div className="container relative mx-auto max-w-7xl px-4 py-14 md:py-20 lg:py-24">
           <div className="space-y-7">
             <Badge className="rounded-full border border-violet-500/20 bg-violet-500/8 px-4 py-1.5 text-violet-700 shadow-sm dark:text-violet-200">
               <Sparkles className="mr-2 h-3.5 w-3.5" /> Editora digital brasileira para leitores e autores
@@ -231,35 +230,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="relative min-h-[520px]">
-            <div className="absolute left-4 top-6 h-80 w-56 rotate-[-8deg] rounded-[2rem] border border-white/40 bg-white/60 p-3 shadow-2xl backdrop-blur dark:border-white/10 dark:bg-white/7">
-              {heroStory ? (
-                <CoverImage src={getCover(heroStory)} alt={heroStory.title} className="rounded-[1.35rem]" />
-              ) : (
-                <TextCover title="Tomo Verso" className="rounded-[1.35rem]" />
-              )}
-            </div>
-            <div className="absolute right-4 top-20 h-80 w-56 rotate-[7deg] rounded-[2rem] border border-white/40 bg-white/60 p-3 shadow-2xl backdrop-blur dark:border-white/10 dark:bg-white/7">
-              {hotMangas[0] ? (
-                <CoverImage src={getCover(hotMangas[0])} alt={hotMangas[0].title} className="rounded-[1.35rem]" />
-              ) : (
-                <TextCover title="Mangás em alta" className="rounded-[1.35rem]" />
-              )}
-            </div>
-            <div className="absolute bottom-4 left-1/2 w-[min(92%,420px)] -translate-x-1/2 rounded-[2rem] border border-border/70 bg-background/88 p-5 shadow-[0_24px_90px_rgba(15,23,42,.16)] backdrop-blur-xl dark:bg-[#11101a]/90">
-              <p className="text-xs font-black uppercase tracking-[0.24em] text-violet-600 dark:text-violet-300">Agora no Tomo Verso</p>
-              <h2 className="mt-2 line-clamp-2 font-heading text-2xl font-black tracking-tight">
-                {heroStory ? <NovelTitle novel={heroStory as any} /> : "Catálogo vivo, pronto para leitura"}
-              </h2>
-              <p className="mt-2 line-clamp-3 text-sm leading-6 text-muted-foreground">
-                {heroStory?.synopsis || "Descubra obras importadas, originais brasileiros e espaços para publicar capítulos com cara de editora."}
-              </p>
-              <div className="mt-4 flex items-center gap-2">
-                <Button size="sm" asChild className="rounded-full"><Link href={heroStory ? `/novels/${heroStory.slug}` : "/explore"}>Ler destaque</Link></Button>
-                <Button size="sm" variant="ghost" asChild className="rounded-full"><Link href="/manga">Ver mangás</Link></Button>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
