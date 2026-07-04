@@ -11,6 +11,7 @@ import {
   Search,
   ShieldCheck,
   Sparkles,
+  Trophy,
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -188,7 +189,7 @@ export default function HomePage() {
     <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,.13),transparent_34%),radial-gradient(circle_at_85%_8%,rgba(14,165,233,.12),transparent_28%),linear-gradient(180deg,rgba(250,247,255,.92),rgba(255,255,255,1)_42%,rgba(250,250,252,1))] dark:bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,.18),transparent_34%),radial-gradient(circle_at_85%_8%,rgba(14,165,233,.12),transparent_28%),linear-gradient(180deg,#0b0712,#0f0b17_44%,#09070d)]">
       {/* Hero */}
       <section className="relative border-b border-border/50">
-        <div className="container relative mx-auto max-w-7xl px-4 py-14 md:py-20 lg:py-24">
+        <div className="container relative mx-auto grid max-w-7xl gap-10 px-4 py-14 md:py-20 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-center lg:py-24">
           <div className="space-y-7">
             <Badge className="rounded-full border border-violet-500/20 bg-violet-500/8 px-4 py-1.5 text-violet-700 shadow-sm dark:text-violet-200">
               <Sparkles className="mr-2 h-3.5 w-3.5" /> Editora digital brasileira para leitores e autores
@@ -230,6 +231,7 @@ export default function HomePage() {
             </div>
           </div>
 
+          <HeroRanking mangas={hotMangas.slice(0, 5)} novels={featuredNovels.slice(0, 2)} />
         </div>
       </section>
 
@@ -323,6 +325,74 @@ export default function HomePage() {
         </div>
       </section>
     </main>
+  );
+}
+
+function HeroRanking({ mangas, novels }: { mangas: MangaRow[]; novels: NovelRow[] }) {
+  const ranking = [
+    ...mangas.map((item) => ({
+      key: `manga-${item.id}`,
+      href: `/manga/${item.slug}`,
+      title: item.title,
+      meta: `${item.chapter_count || 0} capítulos`,
+      cover: getCover(item),
+      kind: "Mangá/Manhwa",
+    })),
+    ...novels.map((item) => ({
+      key: `novel-${item.id}`,
+      href: `/novels/${item.slug}`,
+      title: item.title,
+      meta: `${item.chapter_count || 0} capítulos`,
+      cover: getCover(item),
+      kind: "Novel",
+    })),
+  ].slice(0, 5);
+
+  if (ranking.length === 0) {
+    return (
+      <aside className="rounded-[2rem] border border-border/70 bg-background/65 p-6 shadow-[0_24px_80px_rgba(15,23,42,.10)] backdrop-blur-xl dark:bg-white/[0.035]">
+        <p className="text-xs font-black uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">Descoberta</p>
+        <h2 className="mt-2 font-heading text-2xl font-black">Abra o catálogo e encontre sua próxima leitura.</h2>
+        <Button asChild className="mt-5 rounded-full"><Link href="/explore">Ver catálogo</Link></Button>
+      </aside>
+    );
+  }
+
+  return (
+    <aside className="rounded-[2rem] border border-border/70 bg-background/72 p-5 shadow-[0_24px_80px_rgba(15,23,42,.12)] backdrop-blur-xl dark:bg-white/[0.04]">
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <div>
+          <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">
+            <Trophy className="h-3.5 w-3.5" /> Ranking
+          </p>
+          <h2 className="mt-1 font-heading text-2xl font-black tracking-tight">O que a galera está lendo</h2>
+        </div>
+        <Button asChild size="sm" variant="ghost" className="rounded-full">
+          <Link href="/explore?popular=1">Ver tudo</Link>
+        </Button>
+      </div>
+
+      <div className="space-y-2">
+        {ranking.map((item, index) => (
+          <Link key={item.key} href={item.href} className="group flex items-center gap-3 rounded-2xl border border-transparent p-2 transition hover:border-primary/20 hover:bg-primary/7">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-black text-muted-foreground group-hover:bg-primary group-hover:text-primary-foreground">
+              {index + 1}
+            </div>
+            <div className="h-16 w-12 shrink-0 overflow-hidden rounded-xl bg-muted">
+              <CoverImage src={item.cover} alt={item.title} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="line-clamp-2 text-sm font-black leading-tight group-hover:text-violet-600 dark:group-hover:text-violet-300">{item.title}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{item.kind} · {item.meta}</p>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-dashed border-primary/20 bg-primary/6 p-4 text-sm text-muted-foreground">
+        Quer algo rápido? Comece pelo ranking ou use a busca para achar título, autor ou gênero.
+      </div>
+    </aside>
   );
 }
 
