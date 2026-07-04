@@ -19,8 +19,8 @@ export function AdminEmptyState({
   className?: string;
 }) {
   return (
-    <div className={cn("rounded-3xl border border-white/10 bg-white/[0.03] p-10 text-center", className)}>
-      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-300/15 bg-cyan-300/10 text-cyan-200">
+    <div className={cn("admin-hub-empty rounded-3xl p-10 text-center", className)}>
+      <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary">
         <Icon className="h-6 w-6" />
       </div>
       <h3 className="text-base font-semibold text-slate-100">{title}</h3>
@@ -28,7 +28,7 @@ export function AdminEmptyState({
       {actionHref && actionLabel && (
         <Link
           href={actionHref}
-          className="mt-5 inline-flex rounded-full border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:bg-cyan-300/15"
+          className="mt-5 inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-medium text-primary transition hover:bg-primary/15"
         >
           {actionLabel}
         </Link>
