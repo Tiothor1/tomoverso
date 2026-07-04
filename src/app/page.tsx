@@ -20,6 +20,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { NovelTitle } from "@/components/novel/novel-title";
 import { hasCjk } from "@/lib/display-title";
 import { getDb } from "@/lib/db";
+import { getCurrentUser } from "@/lib/auth";
 import { publicReadableNovelSql, publicVisibleMangaSql } from "@/lib/public-catalog";
 import { CurationBadge, OriginalBadge } from "@/components/badges/content-badges";
 import { proxyImageUrl } from "@/lib/manga/image-proxy";
@@ -93,13 +94,15 @@ function CoverImage({ src, alt, className = "" }: { src: string; alt: string; cl
   return <img src={src} alt={alt} loading="eager" className={`h-full w-full object-cover transition duration-500 group-hover:scale-[1.035] ${className}`} />;
 }
 
-export default function HomePage() {
+export default async function HomePage() {
   let stats = { novels: 0, mangas: 0, chapters: 0, pages: 0, users: 0 };
   let featuredNovels: NovelRow[] = [];
   let recentNovels: NovelRow[] = [];
   let hotMangas: MangaRow[] = [];
   let originalNovels: NovelRow[] = [];
   let originalMangas: MangaRow[] = [];
+  const user = await getCurrentUser().catch(() => null);
+  const publishHref = user ? "/dashboard/novels/new" : "/auth/signup";
 
   try {
     const db = getDb();
@@ -208,7 +211,7 @@ export default function HomePage() {
                 <Link href="/explore">Começar a ler <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="h-12 rounded-full border-border/70 bg-background/70 px-6 backdrop-blur">
-                <Link href="/auth/signup"><PenLine className="mr-2 h-4 w-4" /> Publicar minha história</Link>
+                <Link href={publishHref}><PenLine className="mr-2 h-4 w-4" /> {user ? "Publicar minha obra" : "Publicar minha história"}</Link>
               </Button>
             </div>
 
@@ -297,7 +300,7 @@ export default function HomePage() {
               <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
                 A vitrine de originais é reservada para obras brasileiras publicadas no Tomo Verso Editora.
               </p>
-              <Button asChild className="mt-5 rounded-full"><Link href="/auth/signup">Publicar minha história</Link></Button>
+              <Button asChild className="mt-5 rounded-full"><Link href={publishHref}>{user ? "Publicar minha obra" : "Publicar minha história"}</Link></Button>
             </div>
           )}
         </div>
@@ -315,7 +318,7 @@ export default function HomePage() {
             </p>
             <div className="flex flex-col justify-center gap-3 sm:flex-row">
               <Button size="lg" asChild className="h-12 rounded-full bg-white px-7 text-slate-950 hover:bg-white/90">
-                <Link href="/auth/signup">Criar conta grátis <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link href={user ? "/dashboard" : "/auth/signup"}>{user ? "Ir para o painel" : "Criar conta grátis"} <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="h-12 rounded-full border-white/20 bg-white/5 px-7 text-white hover:bg-white/10 hover:text-white">
                 <Link href="/explore"><Bookmark className="mr-2 h-4 w-4" /> Começar a ler</Link>

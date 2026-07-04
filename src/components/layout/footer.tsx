@@ -2,9 +2,13 @@ import Link from "next/link";
 import { BookOpen, Heart, Code2, MessageCircle, Send, Store } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { getSiteConfig } from "@/lib/site-config";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function Footer() {
   const config = getSiteConfig();
+  const user = await getCurrentUser().catch(() => null);
+  const publishHref = user ? "/dashboard/novels/new" : config.publish_cta_href;
+  const publishLabel = user ? "Publicar" : config.publish_cta_label;
 
   return (
     <footer className="site-footer mt-20 border-t border-border/40 bg-card/30">
@@ -42,7 +46,7 @@ export async function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/how-to" className="hover:text-primary transition-colors">Como criar LN</Link></li>
               <li><Link href="/dashboard" className="hover:text-primary transition-colors">Painel do autor</Link></li>
-              <li><Link href={config.publish_cta_href} className="hover:text-primary transition-colors">{config.publish_cta_label}</Link></li>
+              <li><Link href={publishHref} className="hover:text-primary transition-colors">{publishLabel}</Link></li>
               <li><Link href="/search" className="hover:text-primary transition-colors">Buscar</Link></li>
             </ul>
           </div>

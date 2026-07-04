@@ -18,7 +18,8 @@ export async function Navbar() {
   const db = getDb();
   const sub = user ? getUserActiveSubscription(db, user.id) : null;
   const storeHref = config.storefront_href || "/store";
-  const publishHref = config.publish_cta_href || "/auth/signup";
+  const publishHref = user ? "/dashboard/novels/new" : (config.publish_cta_href || "/auth/signup");
+  const publishLabel = user ? "Publicar" : config.publish_cta_label;
 
   return (
     <>
@@ -74,7 +75,7 @@ export async function Navbar() {
               showStore={!!config.storefront_enabled}
               storeHref={storeHref}
               publishHref={publishHref}
-              publishLabel={config.publish_cta_label}
+              publishLabel={publishLabel}
               subBadge={sub?.badge_label || null}
             />
 
@@ -102,7 +103,7 @@ export async function Navbar() {
               showStore={!!config.storefront_enabled}
               storeHref={storeHref}
               username={user?.username}
-              publishLabel={config.publish_cta_label}
+              publishLabel={publishLabel}
               publishHref={publishHref}
               subBadge={sub?.badge_label || null}
             />
