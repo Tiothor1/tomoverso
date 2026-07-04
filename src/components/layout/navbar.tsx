@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { BookOpen, Compass, Home, PenLine, Sparkles, Store } from "lucide-react";
+import { BookOpen, Compass, Crown, Home, PenLine, Sparkles, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileMenu } from "@/components/layout/mobile-menu";
 import { NavbarMoreMenu } from "@/components/layout/site-preferences-menu";
@@ -61,6 +61,10 @@ export async function Navbar() {
             <NavLink href={publishHref}>
               <PenLine className="mr-1.5 h-4 w-4" />
               Publicar
+            </NavLink>
+            <NavLink href="/autor-plus" tone="accent">
+              <Crown className="mr-1.5 h-4 w-4" />
+              Autor+
             </NavLink>
             {config.storefront_enabled ? (
               <NavLink href={storeHref}>

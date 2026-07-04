@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { getCurrentUser } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { getAuthorPlusStatus } from "@/lib/author-plus";
 import { logoutAction } from "@/lib/actions/auth-actions";
 
 export const metadata = {
@@ -28,6 +29,7 @@ export default async function DashboardPage() {
   if (!user) redirect("/auth/login");
 
   const db = getDb();
+  const authorPlus = getAuthorPlusStatus(db, user.id);
 
   // Stats
   const authorNovels = db.prepare(`
@@ -55,6 +57,12 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
+          <Button asChild size="lg" variant="outline">
+            <Link href="/dashboard/autor-plus">
+              <Sparkles className="h-4 w-4 mr-2" />
+              {authorPlus.active ? "Central Autor+" : "Preview Autor+"}
+            </Link>
+          </Button>
           <Button asChild size="lg" variant="outline">
             <Link href="/dashboard/seller">
               <WalletCards className="h-4 w-4 mr-2" />
@@ -190,6 +198,21 @@ export default async function DashboardPage() {
                   <div>Continue postando consistentemente</div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-br from-amber-500/12 to-primary/8 border-amber-500/25">
+            <CardContent className="pt-6 space-y-3">
+              <Sparkles className="h-6 w-6 text-amber-400" />
+              <h3 className="font-heading text-lg font-semibold">{authorPlus.active ? "Autor+ ativo" : "Central Autor+"}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {authorPlus.active
+                  ? "Use ideias, assistente editorial, assets, trilhas e estatísticas para evoluir suas obras."
+                  : "Teste o preview grátis e veja as ferramentas que ajudam a transformar ideia em obra publicável."}
+              </p>
+              <Button variant={authorPlus.active ? "default" : "outline"} size="sm" className="w-full" asChild>
+                <Link href="/dashboard/autor-plus">{authorPlus.active ? "Abrir Central" : "Testar preview"}</Link>
+              </Button>
             </CardContent>
           </Card>
 

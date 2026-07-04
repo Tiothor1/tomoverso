@@ -130,6 +130,7 @@ export function MobileMenu({
                     <MobileTile href="/feed" icon={Sparkles} label="Feed" accent="violet" onClose={close} />
                     <MobileTile href="/explore" icon={Compass} label="Catálogo" onClose={close} />
                     <MobileTile href={publishHref} icon={PenLine} label="Publicar" accent="primary" onClose={close} />
+                    <MobileTile href="/autor-plus" icon={Crown} label="Autor+" accent="amber" onClose={close} />
                     {showStore ? <MobileTile href={storeHref} icon={Store} label="Loja" onClose={close} /> : null}
                     {!isLoggedIn ? <MobileTile href="/auth/login" icon={LogIn} label="Entrar" accent="primary" onClose={close} /> : null}
                   </section>
@@ -149,7 +150,6 @@ export function MobileMenu({
                       <MobileRow href="/concurso" icon={Trophy} label="Concursos" accent="amber" onClose={close} />
                       {isLoggedIn ? <MobileRow href="/notifications" icon={Bell} label="Notificações" onClose={close} /> : null}
                       {isLoggedIn ? <MobileRow href="/dashboard" icon={Sparkles} label="Painel" accent="violet" onClose={close} /> : null}
-                      {isAdmin ? <MobileRow href="/admin" icon={Shield} label="Admin" accent="red" onClose={close} /> : null}
                     </nav>
                   </section>
 
