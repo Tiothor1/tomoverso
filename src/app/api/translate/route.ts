@@ -9,6 +9,7 @@ const SUPPORTED = new Set<TargetLang>(["pt", "en", "es", "fr", "de", "it", "ja",
 const MAX_TEXTS = 500;
 const MAX_CHARS_PER_TEXT = 900;
 const USER_AGENT = "Tomoverso-Translate/1.0 (+https://tomoverso.vercel.app)";
+const DELIM = "\n";
 
 function protectBrand(text: string): string {
   return text
@@ -35,6 +36,45 @@ function normalizeTexts(value: unknown): string[] {
   return out;
 }
 
+/** Traduz múltiplos textos em UMA chamada ao Google Translate.
+ *  Usa um único parâmetro q= com os textos separados por \n.
+ *  O Google retorna um array de resultados na mesma ordem. */
+async function translateBatch(texts: string[], target: TargetLang): Promise<Record<string, string>> {
+  const url = new URL("https://translate.googleapis.com/translate_a/single");
+  url.searchParams.set("client", "gtx");
+  url.searchParams.set("sl", "pt");
+  url.searchParams.set("tl", target);
+  url.searchParams.set("dt", "t");
+  url.searchParams.set("q", texts.join(DELIM));
+
+  const response = await fetch(url, {
+    headers: { "User-Agent": USER_AGENT, Accept: "application/json,text/plain,*/*" },
+    cache: "no-store",
+  });
+
+  const translations: Record<string, string> = {};
+
+  if (!response.ok) return translations;
+
+  const json = await response.json();
+  // Formato da resposta: [ [["en1","pt1",...],["en2","pt2",...],...], null, "pt", ... ]
+  const results = json?.[0];
+  if (!Array.isArray(results)) return translations;
+
+  for (let i = 0; i < results.length && i < texts.length; i++) {
+    const entry = results[i];
+    if (!Array.isArray(entry)) continue;
+    const raw = entry[0]; // translated text (may have trailing \n)
+    if (typeof raw !== "string") continue;
+    const cleaned = raw.replace(/\n+$/, "").trim();
+    if (cleaned) {
+      translations[texts[i]] = protectBrand(cleaned);
+    }
+  }
+
+  return translations;
+}
+
 export async function POST(req: Request) {
   try {
     const body = await req.json().catch(() => ({}));
@@ -45,39 +85,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, target, translations: Object.fromEntries(texts.map((t) => [t, t])) });
     }
 
-    // BATCH OTIMIZADO: envia TODOS os textos em UMA chamada ao Google Translate
-    // usando múltiplos parâmetros q= na URL
-    const url = new URL("https://translate.googleapis.com/translate_a/single");
-    url.searchParams.set("client", "gtx");
-    url.searchParams.set("sl", "pt");
-    url.searchParams.set("tl", target);
-    url.searchParams.set("dt", "t");
-    texts.forEach((text) => url.searchParams.append("q", text));
+    const translations = await translateBatch(texts, target);
 
-    const response = await fetch(url, {
-      headers: { "User-Agent": USER_AGENT, Accept: "application/json,text/plain,*/*" },
-      cache: "no-store",
-    });
-
-    const translations: Record<string, string> = {};
-
-    if (response.ok) {
-      const json = await response.json();
-      // Resposta do Google com múltiplos q=:
-      // [ [["en1", "pt1"]], [["en2", "pt2"]], ... ]
-      if (Array.isArray(json)) {
-        json.forEach((result: unknown, index: number) => {
-          if (Array.isArray(result) && result[0] && Array.isArray(result[0])) {
-            const translated = result[0][0];
-            if (typeof translated === "string" && translated.trim()) {
-              translations[texts[index]] = protectBrand(translated);
-            }
-          }
-        });
-      }
-    }
-
-    // Preencher textos que não foram traduzidos com o original
+    // Garantir que todo texto tenha tradução (fallback = original)
     for (const text of texts) {
       if (!translations[text]) translations[text] = text;
     }
