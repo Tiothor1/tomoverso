@@ -88,6 +88,10 @@ export default async function MangaDetailPage({
   const totalPages = chapters.reduce((acc, c) => acc + c.page_count, 0);
   const firstChapter = chapters[chapters.length - 1]; // DESC order, first = last item
   const lastChapter = chapters[0];
+  const maxChapterNumber = lastChapter?.chapter_number || chapters.length;
+  const chapterSummary = maxChapterNumber > chapters.length
+    ? `${chapters.length} disponíveis · até cap. ${maxChapterNumber}`
+    : `${chapters.length} disponíveis`;
 
   return (
     <div className="aurora-bg">
@@ -141,7 +145,7 @@ export default async function MangaDetailPage({
               {lastChapter && lastChapter.id !== firstChapter?.id && (
                 <Button asChild variant="outline" className="glass-panel w-full">
                   <Link href={`/manga/${manga.slug}/${lastChapter.slug}`}>
-                    Último cap ({lastChapter.chapter_number})
+                    Último importado: cap. {lastChapter.chapter_number}
                   </Link>
                 </Button>
               )}
@@ -170,7 +174,7 @@ export default async function MangaDetailPage({
                 <span className="text-muted-foreground flex items-center gap-1">
                   <BookOpen className="h-3.5 w-3.5" /> Capítulos
                 </span>
-                <span className="font-medium">{chapters.length}</span>
+                <span className="text-right font-medium">{chapterSummary}</span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground flex items-center gap-1">
@@ -228,7 +232,7 @@ export default async function MangaDetailPage({
             <div>
               <div className="flex items-baseline justify-between mb-4">
                 <h2 className="font-heading text-2xl font-bold">
-                  Capítulos ({chapters.length})
+                  Capítulos ({chapterSummary})
                 </h2>
                 {chapters.length > 0 && (
                   <span className="text-sm text-muted-foreground">

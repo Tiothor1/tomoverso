@@ -47,6 +47,11 @@ const CHAPTER_COUNT_SQL = `(SELECT COUNT(*) FROM manga_chapters ch
     AND EXISTS (SELECT 1 FROM manga_pages p WHERE p.chapter_id = ch.id AND coalesce(p.image_url, p.local_path, '') <> '')
 )`;
 
+const MAX_CHAPTER_NUMBER_SQL = `COALESCE((SELECT MAX(ch.chapter_number) FROM manga_chapters ch
+  WHERE ch.manga_id = m.id
+    AND EXISTS (SELECT 1 FROM manga_pages p WHERE p.chapter_id = ch.id AND coalesce(p.image_url, p.local_path, '') <> '')
+), 0)`;
+
 function getCover(r: { cover_local_path?: string | null; cover_url?: string | null }) {
   return r.cover_local_path || r.cover_url || "";
 }
@@ -143,6 +148,7 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
       SELECT m.id, m.slug, m.title, m.synopsis, m.cover_url, m.cover_local_path,
              m.author, m.artist, m.status, m.source, m.source_url, m.created_at, m.updated_at,
              ${CHAPTER_COUNT_SQL} AS chapter_count,
+             ${MAX_CHAPTER_NUMBER_SQL} AS max_chapter_number,
              COALESCE((SELECT json_group_array(mt.tag) FROM manga_tags mt WHERE mt.manga_id = m.id), '[]') AS tags,
              EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type='manga' AND cc.item_id = m.id AND COALESCE(cc.is_original,0)=1) AS is_original
       FROM mangas m
@@ -163,7 +169,8 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
     const heroManga = page === 1 && !hasActiveFilter(sp)
       ? db.prepare(`
           SELECT m.id, m.slug, m.title, m.synopsis, m.cover_url, m.cover_local_path, m.author,
-                 ${CHAPTER_COUNT_SQL} AS chapter_count
+                 ${CHAPTER_COUNT_SQL} AS chapter_count,
+                 ${MAX_CHAPTER_NUMBER_SQL} AS max_chapter_number
           FROM mangas m
           WHERE ${PUBLIC_MANGA_SQL}
           ORDER BY chapter_count DESC LIMIT 1
@@ -174,6 +181,7 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
       ? db.prepare(`
           SELECT m.id, m.slug, m.title, m.synopsis, m.cover_url, m.cover_local_path, m.author, m.artist, m.status, m.source, m.source_url,
                  ${CHAPTER_COUNT_SQL} AS chapter_count,
+                 ${MAX_CHAPTER_NUMBER_SQL} AS max_chapter_number,
                  COALESCE((SELECT json_group_array(mt.tag) FROM manga_tags mt WHERE mt.manga_id = m.id), '[]') AS tags,
                  EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type='manga' AND cc.item_id = m.id AND COALESCE(cc.is_original,0)=1) AS is_original
           FROM mangas m

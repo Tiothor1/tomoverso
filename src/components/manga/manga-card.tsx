@@ -13,6 +13,7 @@ interface MangaCardProps {
     is_original?: boolean | number | null;
     views?: number | null;
     engagement_score?: number | null;
+    max_chapter_number?: number | null;
   };
   variant?: "default" | "compact";
 }
@@ -45,6 +46,10 @@ export function MangaCard({ manga, variant = "default" }: MangaCardProps) {
   const href = `/manga/${manga.slug}`;
   const compact = variant === "compact";
   const tags = (manga.tags || []).filter(Boolean).slice(0, compact ? 2 : 3);
+  const availableChapters = manga.chapter_count || 0;
+  const maxChapter = Number(manga.max_chapter_number || 0);
+  const chapterLabel = `${availableChapters} ${availableChapters === 1 ? "cap disponível" : "caps disponíveis"}`;
+  const rangeLabel = maxChapter > availableChapters ? `até cap. ${maxChapter}` : null;
 
   return (
     <Card className="neon-card group/work-card flex h-full flex-col overflow-hidden transition duration-300 hover:-translate-y-1 hover:border-primary/35 hover:shadow-[0_18px_60px_rgba(0,0,0,0.28)]">
@@ -60,7 +65,7 @@ export function MangaCard({ manga, variant = "default" }: MangaCardProps) {
         <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2">
           <StatusBadge status={manga.status} />
           <span className="rounded-full border border-white/15 bg-black/45 px-2 py-1 text-[10px] font-bold text-white backdrop-blur">
-            {manga.chapter_count || 0} caps
+            {availableChapters} caps
           </span>
         </div>
       </Link>
@@ -86,7 +91,10 @@ export function MangaCard({ manga, variant = "default" }: MangaCardProps) {
         <div className="mt-auto flex items-center justify-between gap-2 border-t border-border/50 pt-3">
           <span className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
             <BookOpen className="h-3.5 w-3.5 text-primary" />
-            {manga.chapter_count || 0} capítulos
+            <span className="flex flex-col leading-tight">
+              <span>{chapterLabel}</span>
+              {rangeLabel ? <span className="text-[10px] font-medium text-muted-foreground/80">{rangeLabel}</span> : null}
+            </span>
           </span>
           <div className="flex gap-2">
             <Button asChild size="sm" className="h-8 rounded-full px-3"><Link href={href}>Ler</Link></Button>

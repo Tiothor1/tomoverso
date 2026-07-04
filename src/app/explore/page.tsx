@@ -19,7 +19,7 @@ export const metadata = {
 const PAGE_SIZE = 24;
 
 type KindFilter = "all" | "novel" | "manga" | "manhwa" | "book";
-type SortFilter = "popular" | "recent" | "chapters" | "title";
+type SortFilter = "popular" | "recent" | "updated" | "chapters" | "title";
 type StatusFilter = "all" | "ongoing" | "completed" | "hiatus" | "dropped";
 
 interface SearchParams {
@@ -254,6 +254,7 @@ function loadItems(db: ReturnType<typeof getDb>): CatalogItem[] {
       SELECT m.id, m.slug, m.title, m.synopsis, m.cover_url, m.cover_local_path, m.author, m.artist,
              m.status, m.source, m.source_url, m.created_at, m.updated_at,
              (SELECT COUNT(*) FROM manga_chapters ch WHERE ch.manga_id = m.id AND EXISTS (SELECT 1 FROM manga_pages p WHERE p.chapter_id = ch.id AND COALESCE(p.image_url, p.local_path, '') <> '')) AS chapter_count,
+             COALESCE((SELECT MAX(ch.chapter_number) FROM manga_chapters ch WHERE ch.manga_id = m.id AND EXISTS (SELECT 1 FROM manga_pages p WHERE p.chapter_id = ch.id AND COALESCE(p.image_url, p.local_path, '') <> '')), 0) AS max_chapter_number,
              COALESCE((SELECT json_group_array(mt.tag) FROM manga_tags mt WHERE mt.manga_id = m.id), '[]') AS tags,
              EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type='manga' AND cc.item_id = m.id AND COALESCE(cc.is_original,0)=1) AS is_original
       FROM mangas m
@@ -313,7 +314,7 @@ function sortItems(items: CatalogItem[], sort: SortFilter) {
   const list = [...items];
   if (sort === "title") return list.sort((a, b) => a.title.localeCompare(b.title, "pt-BR"));
   if (sort === "chapters") return list.sort((a, b) => b.chapter_count - a.chapter_count || a.title.localeCompare(b.title, "pt-BR"));
-  if (sort === "recent") return list.sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime());
+  if (sort === "recent" || sort === "updated") return list.sort((a, b) => new Date(b.updated_at || b.created_at).getTime() - new Date(a.updated_at || a.created_at).getTime());
   return list.sort((a, b) => Number(b.is_hot) - Number(a.is_hot) || b.views - a.views || b.chapter_count - a.chapter_count);
 }
 
@@ -436,16 +437,16 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
       </section>
 
       <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8">
-        <section className="glass-panel rounded-3xl p-4 md:p-5">
-          <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <section className="glass-panel rounded-3xl border-primary/10 p-3 shadow-sm md:p-4">
+          <div className="mb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <h2 className="flex items-center gap-2 font-heading text-xl font-black"><SlidersHorizontal className="h-5 w-5 text-primary" /> Filtros de descoberta</h2>
-              <p className="text-sm text-muted-foreground">Combine tipo, status, gênero, autor e tamanho da obra.</p>
+              <h2 className="flex items-center gap-2 font-heading text-lg font-black"><SlidersHorizontal className="h-5 w-5 text-primary" /> Filtrar catálogo</h2>
+              <p className="text-xs text-muted-foreground">Busca limpa por tipo, status, gênero, autor e capítulos.</p>
             </div>
             {activeCount > 0 ? <Button variant="outline" asChild><Link href="/explore"><X className="h-4 w-4" /> Limpar filtros</Link></Button> : null}
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             <FilterRow label="Tipo">
               <Chip href={buildHref(sp, { kind: null, page: null })} active={!sp.kind || sp.kind === "all"}>Todos</Chip>
               <Chip href={buildHref(sp, { kind: "novel", page: null })} active={sp.kind === "novel"}>Novels</Chip>
@@ -469,15 +470,10 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
 
             <FilterRow label="Gênero">
               <Chip href={buildHref(sp, { genre: null, page: null })} active={!sp.genre}>Todos</Chip>
-              {genres.slice(0, 12).map(([genre]) => <Chip key={genre} href={buildHref(sp, { genre, page: null })} active={sp.genre === genre}>{genre}</Chip>)}
+              {genres.slice(0, 8).map(([genre]) => <Chip key={genre} href={buildHref(sp, { genre, page: null })} active={sp.genre === genre}>{genre}</Chip>)}
             </FilterRow>
 
-            <FilterRow label="Tags">
-              <Chip href={buildHref(sp, { tag: null, page: null })} active={!sp.tag}>Todas</Chip>
-              {tags.slice(0, 10).map(([tag]) => <Chip key={tag} href={buildHref(sp, { tag, page: null })} active={sp.tag === tag}>{tag}</Chip>)}
-            </FilterRow>
-
-            <form action="/explore" className="grid gap-3 border-t border-border/50 pt-4 md:grid-cols-[1fr_180px_180px_160px_auto]">
+            <form action="/explore" className="grid gap-3 border-t border-border/50 pt-3 md:grid-cols-[1fr_180px_170px_150px_auto]">
               <input type="hidden" name="kind" value={sp.kind || ""} />
               <input type="hidden" name="genre" value={sp.genre || ""} />
               <input type="hidden" name="tag" value={sp.tag || ""} />
@@ -494,14 +490,14 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
                 <input name="author" defaultValue={sp.author || ""} placeholder="Nome do autor" className="h-10 w-full rounded-xl border border-input bg-background/55 px-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary/60" />
               </label>
               <label className="space-y-1 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                <span>Número de capítulos</span>
+                <span>Capítulos mín.</span>
                 <input name="minChapters" type="number" min="0" defaultValue={sp.minChapters || ""} placeholder="Mínimo" className="h-10 w-full rounded-xl border border-input bg-background/55 px-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary/60" />
               </label>
               <label className="space-y-1 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
                 <span>Ordenação</span>
                 <select name="sort" defaultValue={sort} className="h-10 w-full rounded-xl border border-input bg-background/55 px-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary/60">
                 <option value="popular">Populares</option>
-                <option value="recent">Recentes</option>
+                <option value="updated">Atualizados</option>
                 <option value="chapters">Mais capítulos</option>
                 <option value="title">A-Z</option>
                 </select>
