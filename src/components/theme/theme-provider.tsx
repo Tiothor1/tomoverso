@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 export type ThemePreference = "dark" | "light" | "system";
 export type ResolvedTheme = "dark" | "light";
-export type ColorTheme = "purple" | "blue" | "rose" | "amber";
+export type ColorTheme = "sepia" | "blue" | "purple" | "rose" | "amber";
 
 type StoredTheme = {
   theme?: unknown;
@@ -30,7 +30,8 @@ type ThemeProviderState = {
 const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undefined);
 
 const validThemes: ThemePreference[] = ["dark", "light", "system"];
-const validColors: ColorTheme[] = ["purple", "blue", "rose", "amber"];
+const validColors: ColorTheme[] = ["sepia", "blue", "purple", "rose", "amber"];
+const freeColors: ColorTheme[] = ["sepia", "blue", "purple"];
 
 function normalizeTheme(value: unknown, fallback: ThemePreference): ThemePreference {
   return validThemes.includes(value as ThemePreference) ? (value as ThemePreference) : fallback;
@@ -38,7 +39,6 @@ function normalizeTheme(value: unknown, fallback: ThemePreference): ThemePrefere
 
 function normalizeColor(value: unknown, fallback: ColorTheme): ColorTheme {
   if (validColors.includes(value as ColorTheme)) return value as ColorTheme;
-  if (value === "sepia") return "amber";
   return fallback;
 }
 
@@ -64,7 +64,7 @@ function readStoredPreferences(storageKey: string, defaultTheme: ThemePreference
     const storedColor = normalizeColor(parsed.color, defaultColor);
     return {
       theme: normalizeTheme(parsed.theme, defaultTheme),
-      color: storedColor === "purple" || hasSubscriberCookie() ? storedColor : "purple",
+      color: freeColors.includes(storedColor) || hasSubscriberCookie() ? storedColor : "sepia",
     };
   } catch {
     return { theme: defaultTheme, color: defaultColor };
@@ -83,7 +83,7 @@ function applyPreferences(theme: ThemePreference, resolvedTheme: ResolvedTheme, 
 export function ThemeProvider({
   children,
   defaultTheme = "dark",
-  defaultColor = "purple",
+  defaultColor = "sepia",
   storageKey = "tomoverso-ui-theme",
   ...props
 }: ThemeProviderProps) {
@@ -120,7 +120,7 @@ export function ThemeProvider({
     resolvedTheme,
     colorTheme,
     setTheme: (t) => setThemeState(normalizeTheme(t, "dark")),
-    setColorTheme: (c) => setColorThemeState(normalizeColor(c, "purple")),
+    setColorTheme: (c) => setColorThemeState(normalizeColor(c, "sepia")),
     toggleTheme: () => setThemeState((t) => (t === "dark" ? "light" : "dark")),
   };
 

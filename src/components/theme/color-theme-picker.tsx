@@ -13,8 +13,9 @@ import {
 import { ColorTheme, useTheme } from "@/components/theme/theme-provider";
 
 const colors: Array<{ id: ColorTheme; name: string; preview: string; pro?: boolean }> = [
-  { id: "purple", name: "Padrão Tomo", preview: "oklch(0.58 0.2 295)" },
-  { id: "blue", name: "Azul editorial", preview: "oklch(0.58 0.18 240)", pro: true },
+  { id: "sepia", name: "Sépia principal", preview: "oklch(0.7 0.12 55)" },
+  { id: "blue", name: "Azul editorial", preview: "oklch(0.58 0.18 240)" },
+  { id: "purple", name: "Roxo clássico", preview: "oklch(0.58 0.2 295)" },
   { id: "rose", name: "Rosa premium", preview: "oklch(0.62 0.2 340)", pro: true },
   { id: "amber", name: "Dourado pro", preview: "oklch(0.72 0.16 78)", pro: true },
 ];

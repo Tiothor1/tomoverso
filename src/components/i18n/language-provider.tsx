@@ -56,7 +56,12 @@ function setCookie(name: string, value: string) {
 }
 
 function readInitialLanguage(): LanguageCode {
-  return "pt";
+  if (typeof window === "undefined") return "pt";
+  try {
+    return normalizeLanguage(window.localStorage.getItem(LANGUAGE_STORAGE_KEY) || getCookie(LANGUAGE_COOKIE));
+  } catch {
+    return "pt";
+  }
 }
 
 function shouldSkipElement(element: Element | null): boolean {
@@ -169,8 +174,8 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
 
   const applyHtmlLanguage = useCallback((next: LanguageCode, status: "ready" | "translating" | "error" = "ready") => {
     if (typeof document === "undefined") return;
-    document.documentElement.lang = "pt-BR";
-    document.documentElement.setAttribute("data-locale", "pt");
+    document.documentElement.lang = htmlLang[next] || "pt-BR";
+    document.documentElement.setAttribute("data-locale", next);
     document.documentElement.setAttribute("data-translation-status", status);
   }, []);
 
@@ -201,10 +206,13 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
 
   const fastTranslatePage = useCallback(async (next: LanguageCode, signal?: AbortSignal) => {
     if (typeof document === "undefined" || !document.body) return;
-    restorePortuguese();
-    applyHtmlLanguage("pt", "ready");
-    setIsTranslating(false);
-    return;
+
+    if (next === "pt") {
+      restorePortuguese();
+      applyHtmlLanguage("pt", "ready");
+      setIsTranslating(false);
+      return;
+    }
 
     const currentLocale = document.documentElement.getAttribute("data-locale");
     if (currentLocale && currentLocale !== "pt" && currentLocale !== next) restorePortuguese();
@@ -331,7 +339,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
 
   const value = useMemo<LanguageProviderState>(() => ({
     language,
-    setLanguage: () => setLanguageState("pt"),
+    setLanguage: (next) => setLanguageState(normalizeLanguage(next)),
     isTranslating,
   }), [language, isTranslating]);
 
