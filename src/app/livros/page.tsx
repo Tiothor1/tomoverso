@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { getDb } from "@/lib/db";
-import { BookOpen, Search, Filter } from "lucide-react";
+import { BookOpen, Search, Filter, PenLine, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SaveWorkButton } from "@/components/work/save-work-button";
 
 export const revalidate = 120;
 
@@ -23,6 +24,17 @@ interface BookRow {
   cover_local_path: string | null;
   genres: string;
   pages: number;
+  is_featured?: number;
+}
+
+function safeJsonArray(value: string | null | undefined): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+  } catch {
+    return [];
+  }
 }
 
 export default async function LivrosPage({ searchParams }: { searchParams: Promise<{ genero?: string; q?: string; page?: string }> }) {
@@ -91,23 +103,54 @@ export default async function LivrosPage({ searchParams }: { searchParams: Promi
             <p className="text-muted-foreground">Nenhum livro encontrado.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 md:gap-5">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {books.map(book => {
               const coverSrc = book.cover_local_path || book.cover_url;
+              const tags = safeJsonArray(book.genres).slice(0, 3);
               return (
-              <Link key={book.id} href={`/livros/${book.slug}`} className="group">
-                <div className="aspect-[3/4] rounded-xl overflow-hidden bg-muted mb-2.5 shadow-sm">
-                  {coverSrc ? (
-                    <img src={coverSrc} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-muted">
-                      <BookOpen className="h-8 w-8 text-muted-foreground/40" />
+                <article key={book.id} className="neon-card group/work-card flex h-full flex-col overflow-hidden rounded-2xl border transition duration-300 hover:-translate-y-1 hover:border-primary/35">
+                  <Link href={`/livros/${book.slug}`} className="relative block overflow-hidden bg-muted">
+                    <div className="aspect-[2/3]">
+                      {coverSrc ? (
+                        <img src={coverSrc} alt={book.title} className="story-cover h-full w-full object-cover transition duration-500 group-hover/work-card:scale-[1.04]" loading="lazy" />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-muted">
+                          <BookOpen className="h-10 w-10 text-muted-foreground/40" />
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-                <h3 className="font-medium text-sm leading-tight line-clamp-2 group-hover:text-primary transition-colors">{book.title}</h3>
-                <p className="text-xs text-muted-foreground truncate mt-0.5">{book.author || "Autor desconhecido"}</p>
-              </Link>
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/82 via-transparent to-black/25 opacity-80" />
+                    <div className="absolute left-2 top-2 flex flex-wrap gap-1.5">
+                      {book.is_featured ? <Badge className="bg-primary/92 text-primary-foreground shadow-lg"><Sparkles className="h-3 w-3" /> Original</Badge> : null}
+                      <Badge variant="secondary" className="bg-amber-300/15 text-amber-100 shadow-lg">Livro</Badge>
+                    </div>
+                    <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2">
+                      <Badge variant="outline" className="h-6 rounded-full border-sky-300/25 bg-sky-300/10 px-2 text-[10px] text-sky-100">Completo</Badge>
+                      <span className="rounded-full border border-white/15 bg-black/45 px-2 py-1 text-[10px] font-bold text-white backdrop-blur">{book.pages || 0} págs</span>
+                    </div>
+                  </Link>
+
+                  <div className="flex flex-1 flex-col gap-2.5 p-3 sm:p-4">
+                    <Link href={`/livros/${book.slug}`} className="block">
+                      <h3 className="line-clamp-2 font-heading text-base font-black leading-tight transition-colors group-hover/work-card:text-primary sm:text-lg">{book.title}</h3>
+                    </Link>
+                    <p className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+                      <PenLine className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{book.author || "Autor desconhecido"}</span>
+                    </p>
+                    <div className="flex min-h-5 flex-wrap gap-1.5">
+                      {tags.length > 0 ? tags.map(t => <Badge key={t} variant="secondary" className="max-w-full truncate text-[10px]">{t}</Badge>) : <Badge variant="outline" className="text-[10px]">Livro</Badge>}
+                    </div>
+                    {book.synopsis ? <p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">{book.synopsis}</p> : null}
+                    <div className="mt-auto flex items-center justify-between gap-2 border-t border-border/50 pt-3">
+                      <span className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground"><BookOpen className="h-3.5 w-3.5 text-primary" />{book.pages || 0} páginas</span>
+                      <div className="flex gap-2">
+                        <Button asChild size="sm" className="h-8 rounded-full px-3"><Link href={`/livros/${book.slug}`}>Ler</Link></Button>
+                        <SaveWorkButton id={book.id} type="book" title={book.title} compact />
+                      </div>
+                    </div>
+                  </div>
+                </article>
               );
             })}
           </div>

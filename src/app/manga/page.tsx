@@ -3,6 +3,7 @@ import { ArrowRight, BookOpen, Filter, Flame, Search, Sparkles, X } from "lucide
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { MangaCard } from "@/components/manga/manga-card";
 import { getDb } from "@/lib/db";
 import { publicVisibleMangaSql } from "@/lib/public-catalog";
 
@@ -48,6 +49,16 @@ const CHAPTER_COUNT_SQL = `(SELECT COUNT(*) FROM manga_chapters ch
 
 function getCover(r: { cover_local_path?: string | null; cover_url?: string | null }) {
   return r.cover_local_path || r.cover_url || "";
+}
+
+function safeJsonArray(value: string | null | undefined): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+  } catch {
+    return [];
+  }
 }
 
 function buildHref(params: Record<string, string | null | undefined>, overrides: Record<string, string | null> = {}): string {
@@ -129,14 +140,20 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
     const totalPages = Math.max(1, Math.ceil(totalFiltered / PAGE_SIZE));
 
     const rows = db.prepare(`
-      SELECT m.id, m.slug, m.title, m.cover_url, m.cover_local_path,
-             m.author, m.created_at, m.updated_at,
-             ${CHAPTER_COUNT_SQL} AS chapter_count
+      SELECT m.id, m.slug, m.title, m.synopsis, m.cover_url, m.cover_local_path,
+             m.author, m.artist, m.status, m.source, m.source_url, m.created_at, m.updated_at,
+             ${CHAPTER_COUNT_SQL} AS chapter_count,
+             COALESCE((SELECT json_group_array(mt.tag) FROM manga_tags mt WHERE mt.manga_id = m.id), '[]') AS tags,
+             EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type='manga' AND cc.item_id = m.id AND COALESCE(cc.is_original,0)=1) AS is_original
       FROM mangas m
       WHERE ${where.join(" AND ")}
       ORDER BY ${orderBy}
       LIMIT ? OFFSET ?
-    `).all(...queryParams, PAGE_SIZE, offset) as any[];
+    `).all(...queryParams, PAGE_SIZE, offset).map((m: any) => ({
+      ...m,
+      alternative_titles: [],
+      tags: safeJsonArray(m.tags),
+    })) as any[];
 
     const stats = {
       mangas: (db.prepare(`SELECT COUNT(*) AS c FROM mangas m WHERE ${PUBLIC_MANGA_SQL}`).get() as any).c,
@@ -155,13 +172,15 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
 
     const featured = page === 1 && !hasActiveFilter(sp)
       ? db.prepare(`
-          SELECT m.id, m.slug, m.title, m.cover_url, m.cover_local_path, m.author,
-                 ${CHAPTER_COUNT_SQL} AS chapter_count
+          SELECT m.id, m.slug, m.title, m.synopsis, m.cover_url, m.cover_local_path, m.author, m.artist, m.status, m.source, m.source_url,
+                 ${CHAPTER_COUNT_SQL} AS chapter_count,
+                 COALESCE((SELECT json_group_array(mt.tag) FROM manga_tags mt WHERE mt.manga_id = m.id), '[]') AS tags,
+                 EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type='manga' AND cc.item_id = m.id AND COALESCE(cc.is_original,0)=1) AS is_original
           FROM mangas m
           WHERE ${PUBLIC_MANGA_SQL}
           ORDER BY chapter_count DESC, m.title COLLATE NOCASE ASC
           LIMIT 8
-        `).all() as any[]
+        `).all().map((m: any) => ({ ...m, alternative_titles: [], tags: safeJsonArray(m.tags) })) as any[]
       : [];
 
     const topGenres = db.prepare(`
@@ -245,8 +264,8 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
                   Ver catálogo <ArrowRight className="ml-1 inline h-4 w-4" />
                 </Link>
               </div>
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-                {featured.map(m => <MangaPoster key={m.id} manga={m} dense />)}
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+                {featured.map(m => <MangaCard key={m.id} manga={m} variant="compact" />)}
               </div>
             </section>
           )}
@@ -285,8 +304,8 @@ export default async function MangaCatalogPage({ searchParams }: PageProps) {
                 <Button asChild className="neon-button mt-4"><Link href="/manga">Limpar filtros</Link></Button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-                {rows.map(r => <MangaPoster key={r.id} manga={r} />)}
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {rows.map(r => <MangaCard key={r.id} manga={r} />)}
               </div>
             )}
 

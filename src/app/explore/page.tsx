@@ -138,7 +138,8 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
     SELECT n.id, n.slug, n.title, n.type, n.genres, n.cover_url, n.cover_local_path,
            n.author_id, n.status, n.views, n.created_at,
            u.display_name AS author_name,
-           (SELECT COUNT(*) FROM chapters c WHERE c.novel_id = n.id AND COALESCE(word_count, 0) > 30) as chapter_count
+           (SELECT COUNT(*) FROM chapters c WHERE c.novel_id = n.id AND COALESCE(word_count, 0) > 30) as chapter_count,
+           EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type='novel' AND cc.item_id = n.id AND COALESCE(cc.is_original,0)=1) AS is_original
     FROM novels n
     LEFT JOIN users u ON u.id = n.author_id
     ${where}
@@ -309,7 +310,7 @@ async function ExploreContent({ searchParams }: { searchParams: Promise<SearchPa
           Nenhuma novel encontrada com esses filtros.
         </p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {pageRows.map((n) => (
             <NovelCard key={n.id} novel={n as any} variant="compact" />
           ))}

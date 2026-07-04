@@ -1,5 +1,6 @@
 import { BookOpen } from "lucide-react";
 import type { MangaCardData } from "@/lib/manga/types";
+import { proxyImageUrl } from "@/lib/manga/image-proxy";
 
 interface MangaCoverProps {
   manga: MangaCardData;
@@ -16,9 +17,10 @@ interface MangaCoverProps {
  * NOTA: Server Component — não pode ter onError. O fallback é tratado por CSS.
  */
 export function MangaCover({ manga, className }: MangaCoverProps) {
-  const coverSrc = manga.cover_local_path
+  const rawCoverSrc = manga.cover_local_path
     ? manga.cover_local_path
     : manga.cover_url;
+  const coverSrc = rawCoverSrc ? proxyImageUrl(rawCoverSrc) : "";
 
   if (coverSrc) {
     return (
