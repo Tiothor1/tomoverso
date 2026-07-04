@@ -9,7 +9,6 @@ const SUPPORTED = new Set<TargetLang>(["pt", "en", "es", "fr", "de", "it", "ja",
 const MAX_TEXTS = 500;
 const MAX_CHARS_PER_TEXT = 900;
 const USER_AGENT = "Tomoverso-Translate/1.0 (+https://tomoverso.vercel.app)";
-const DELIM = "\n";
 
 function protectBrand(text: string): string {
   return text
@@ -40,14 +39,10 @@ function normalizeTexts(value: unknown): string[] {
  *  Usa um único parâmetro q= com os textos separados por \n.
  *  O Google retorna um array de resultados na mesma ordem. */
 async function translateBatch(texts: string[], target: TargetLang): Promise<Record<string, string>> {
-  const url = new URL("https://translate.googleapis.com/translate_a/single");
-  url.searchParams.set("client", "gtx");
-  url.searchParams.set("sl", "pt");
-  url.searchParams.set("tl", target);
-  url.searchParams.set("dt", "t");
-  url.searchParams.set("q", texts.join(DELIM));
+  const q = texts.join("\n");
+  const urlStr = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=pt&tl=${target}&dt=t&q=${encodeURIComponent(q)}`;
 
-  const response = await fetch(url, {
+  const response = await fetch(urlStr, {
     headers: { "User-Agent": USER_AGENT, Accept: "application/json,text/plain,*/*" },
     cache: "no-store",
   });
