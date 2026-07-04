@@ -1,8 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { BookOpen, BookText, Search, Sparkles, Store } from "lucide-react";
+import { BookOpen, Compass, Home, PenLine, Sparkles, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { HeaderSearch } from "@/components/layout/header-search";
 import { MobileMenu } from "@/components/layout/mobile-menu";
 import { NavbarMoreMenu } from "@/components/layout/site-preferences-menu";
 import { UserMenu } from "@/components/auth/user-menu";
@@ -18,6 +17,8 @@ export async function Navbar() {
   const config = getSiteConfig();
   const db = getDb();
   const sub = user ? getUserActiveSubscription(db, user.id) : null;
+  const storeHref = config.storefront_href || "/store";
+  const publishHref = config.publish_cta_href || "/auth/signup";
 
   return (
     <>
@@ -27,14 +28,14 @@ export async function Navbar() {
           {config.maintenance_message}
         </div>
       ) : null}
-      <header className="site-navbar sticky top-0 z-50 w-full border-b border-border/70 bg-background/88 shadow-sm backdrop-blur-xl">
-        <div className="container mx-auto flex h-16 max-w-7xl items-center gap-2 px-4">
+      <header className="site-navbar sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 shadow-sm backdrop-blur-xl">
+        <div className="container mx-auto flex h-16 max-w-7xl items-center gap-3 px-4">
           <Link href="/" className="group flex min-w-0 flex-shrink-0 items-center gap-2" aria-label="Tomo Verso Editora início">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
               <BookOpen className="h-5 w-5" />
             </span>
             <span className="hidden min-w-0 sm:block">
-              <span className="block truncate font-heading text-xl font-black leading-none tracking-tight text-foreground">
+              <span className="block truncate font-heading text-lg font-black leading-none tracking-tight text-foreground xl:text-xl">
                 {config.site_name}
               </span>
               <span className="hidden text-[10px] uppercase tracking-[0.18em] text-muted-foreground xl:block">
@@ -43,39 +44,37 @@ export async function Navbar() {
             </span>
           </Link>
 
-          <nav className="hidden items-center gap-1 lg:flex" aria-label="Navegação principal">
+          <nav className="ml-2 hidden items-center gap-1 lg:flex" aria-label="Navegação principal">
+            <NavLink href="/">
+              <Home className="mr-1.5 h-4 w-4" />
+              Início
+            </NavLink>
             <NavLink href="/feed" tone="accent">
               <Sparkles className="mr-1.5 h-4 w-4" />
               Feed
             </NavLink>
-            <NavLink href="/explore">Light Novels</NavLink>
-            <NavLink href="/manga">
-              <BookText className="mr-1.5 h-4 w-4" />
-              Mangás
+            <NavLink href="/explore">
+              <Compass className="mr-1.5 h-4 w-4" />
+              Catálogo
             </NavLink>
-            <NavLink href="/livros">Livros</NavLink>
+            <NavLink href={publishHref}>
+              <PenLine className="mr-1.5 h-4 w-4" />
+              Publicar
+            </NavLink>
             {config.storefront_enabled ? (
-              <NavLink href={config.storefront_href}>
+              <NavLink href={storeHref}>
                 <Store className="mr-1.5 h-4 w-4" />
                 Loja
               </NavLink>
             ) : null}
           </nav>
 
-          <div className="mx-2 hidden max-w-[20rem] flex-1 md:block xl:max-w-[25rem]">
-            <HeaderSearch />
-          </div>
-
           <div className="ml-auto flex shrink-0 items-center gap-1.5">
-            <Button variant="ghost" size="icon" asChild className="rounded-full md:hidden" aria-label="Buscar">
-              <Link href="/search">
-                <Search className="h-5 w-5" />
-              </Link>
-            </Button>
-
             <NavbarMoreMenu
               showStore={!!config.storefront_enabled}
-              storeHref={config.storefront_href || "/store"}
+              storeHref={storeHref}
+              publishHref={publishHref}
+              publishLabel={config.publish_cta_label}
               subBadge={sub?.badge_label || null}
             />
 
@@ -92,7 +91,7 @@ export async function Navbar() {
                 }}
               />
             ) : (
-              <Button asChild className="rounded-full px-4 font-bold">
+              <Button asChild className="rounded-full px-4 font-bold shadow-sm">
                 <Link href="/auth/login">Entrar</Link>
               </Button>
             )}
@@ -101,10 +100,10 @@ export async function Navbar() {
               isLoggedIn={!!user}
               isAdmin={user?.role === "admin"}
               showStore={!!config.storefront_enabled}
-              storeHref={config.storefront_href || "/store"}
+              storeHref={storeHref}
               username={user?.username}
               publishLabel={config.publish_cta_label}
-              publishHref={config.publish_cta_href}
+              publishHref={publishHref}
               subBadge={sub?.badge_label || null}
             />
           </div>

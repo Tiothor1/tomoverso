@@ -7,11 +7,14 @@ import {
   Bell,
   BookOpen,
   BookText,
+  Compass,
   Crown,
+  Home,
   Library,
   LogIn,
   Menu,
   PenLine,
+  Search,
   Shield,
   Sparkles,
   Store,
@@ -31,17 +34,6 @@ interface MobileMenuProps {
   publishHref: string;
   subBadge?: string | null;
 }
-
-const mainLinks = [
-  { href: "/feed", icon: Sparkles, label: "Feed" },
-  { href: "/explore", icon: BookOpen, label: "Light Novels" },
-  { href: "/manga", icon: BookText, label: "Mangás" },
-  { href: "/livros", icon: BookText, label: "Livros" },
-  { href: "/library", icon: Library, label: "Estante" },
-  { href: "/how-to", icon: PenLine, label: "Como criar" },
-  { href: "/concurso", icon: Trophy, label: "Concursos" },
-  { href: "/notifications", icon: Bell, label: "Notificações" },
-];
 
 export function MobileMenu({
   isLoggedIn,
@@ -78,6 +70,8 @@ export function MobileMenu({
     };
   }, [open]);
 
+  const close = () => setOpen(false);
+
   return (
     <>
       <Button
@@ -97,22 +91,23 @@ export function MobileMenu({
               <button
                 type="button"
                 aria-label="Fechar menu"
-                className="absolute inset-0 bg-black/65 backdrop-blur-sm"
-                onClick={() => setOpen(false)}
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={close}
               />
 
-              <aside className="absolute right-0 top-0 flex h-dvh w-[min(90vw,22rem)] flex-col overflow-hidden border-l border-border bg-background/98 shadow-2xl shadow-black/45 backdrop-blur-xl">
-                <header className="relative shrink-0 overflow-hidden border-b border-border/60 px-4 py-4">
+              <aside className="absolute right-0 top-0 flex h-dvh w-[min(92vw,24rem)] flex-col overflow-hidden border-l border-border bg-background/98 shadow-2xl shadow-black/45 backdrop-blur-xl">
+                <header className="relative shrink-0 overflow-hidden border-b border-border/60 px-5 py-5">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_0%,rgba(124,58,237,.14),transparent_34%)]" />
                   <div className="relative flex items-center gap-3 pr-11">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/20">
                       <BookOpen className="h-5 w-5" />
                     </div>
                     <div className="min-w-0">
                       <h2 id={titleId} className="font-heading text-xl font-black leading-tight tracking-tight">
-                        Menu
+                        Tomo Verso
                       </h2>
                       <p className="truncate text-xs text-muted-foreground">
-                        {isLoggedIn && username ? `Olá, ${username}` : "Tudo do Tomo Verso Editora aqui"}
+                        {isLoggedIn && username ? `Olá, ${username}` : "Leia, publique e descubra obras"}
                       </p>
                     </div>
                   </div>
@@ -122,49 +117,45 @@ export function MobileMenu({
                     variant="ghost"
                     size="icon"
                     aria-label="Fechar menu"
-                    className="absolute right-3 top-3"
-                    onClick={() => setOpen(false)}
+                    className="absolute right-3 top-3 rounded-full"
+                    onClick={close}
                   >
                     <X className="h-5 w-5" />
                   </Button>
                 </header>
 
-                <div className="flex-1 overflow-y-auto px-3 py-3">
-                  <section className="grid grid-cols-2 gap-2">
-                    <MobileLink href="/store/plans" icon={Crown} label={subBadge ? `Pro · ${subBadge}` : "Planos Pro"} accent="amber" onClose={() => setOpen(false)} compact />
-                    {showStore ? (
-                      <MobileLink href={storeHref} icon={Store} label="Loja" accent="violet" onClose={() => setOpen(false)} compact />
-                    ) : (
-                      <MobileLink href={publishHref} icon={PenLine} label={publishLabel} accent="primary" onClose={() => setOpen(false)} compact />
-                    )}
+                <div className="flex-1 overflow-y-auto px-4 py-4">
+                  <section aria-label="Links principais" className="grid grid-cols-2 gap-2">
+                    <MobileTile href="/" icon={Home} label="Início" onClose={close} />
+                    <MobileTile href="/feed" icon={Sparkles} label="Feed" accent="violet" onClose={close} />
+                    <MobileTile href="/explore" icon={Compass} label="Catálogo" onClose={close} />
+                    <MobileTile href={publishHref} icon={PenLine} label="Publicar" accent="primary" onClose={close} />
+                    {showStore ? <MobileTile href={storeHref} icon={Store} label="Loja" onClose={close} /> : null}
+                    {!isLoggedIn ? <MobileTile href="/auth/login" icon={LogIn} label="Entrar" accent="primary" onClose={close} /> : null}
                   </section>
 
-                  <nav className="mt-3 grid gap-1" aria-label="Menu principal mobile">
-                    {mainLinks.map((item) => (
-                      <MobileLink key={item.href} href={item.href} icon={item.icon} label={item.label} onClose={() => setOpen(false)} />
-                    ))}
-                  </nav>
+                  <div className="my-4 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
-                  <div className="my-3 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+                  <section aria-label="Mais opções">
+                    <p className="mb-2 px-1 text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">Mais</p>
+                    <nav className="grid gap-1">
+                      <MobileRow href="/search" icon={Search} label="Buscar obras" onClose={close} />
+                      <MobileRow href="/explore" icon={BookOpen} label="Light novels" onClose={close} />
+                      <MobileRow href="/manga" icon={BookText} label="Mangás e manhwas" onClose={close} />
+                      <MobileRow href="/livros" icon={BookText} label="Livros" onClose={close} />
+                      <MobileRow href="/library" icon={Library} label="Minha estante" onClose={close} />
+                      <MobileRow href="/store/plans" icon={Crown} label={subBadge ? `Planos Pro · ${subBadge}` : "Planos Pro"} accent="amber" onClose={close} />
+                      <MobileRow href="/how-to" icon={PenLine} label="Como publicar" onClose={close} />
+                      <MobileRow href="/concurso" icon={Trophy} label="Concursos" accent="amber" onClose={close} />
+                      {isLoggedIn ? <MobileRow href="/notifications" icon={Bell} label="Notificações" onClose={close} /> : null}
+                      {isLoggedIn ? <MobileRow href="/dashboard" icon={Sparkles} label="Painel" accent="violet" onClose={close} /> : null}
+                      {isAdmin ? <MobileRow href="/admin" icon={Shield} label="Admin" accent="red" onClose={close} /> : null}
+                    </nav>
+                  </section>
+
+                  <div className="my-4 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
                   <MobilePreferencesPanel />
-
-                  <div className="my-3 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
-
-                  <nav className="grid gap-1" aria-label="Área do usuário mobile">
-                    {isLoggedIn ? (
-                      <>
-                        <MobileLink href="/dashboard" icon={Sparkles} label="Painel" accent="violet" onClose={() => setOpen(false)} />
-                        <MobileLink href="/dashboard/novels/new" icon={PenLine} label={publishLabel} accent="primary" onClose={() => setOpen(false)} />
-                        {isAdmin ? <MobileLink href="/admin" icon={Shield} label="Admin" accent="red" onClose={() => setOpen(false)} /> : null}
-                      </>
-                    ) : (
-                      <>
-                        <MobileLink href="/auth/login" icon={LogIn} label="Entrar" onClose={() => setOpen(false)} />
-                        <MobileLink href={publishHref} icon={PenLine} label={publishLabel} accent="primary" onClose={() => setOpen(false)} />
-                      </>
-                    )}
-                  </nav>
                 </div>
               </aside>
             </div>,
@@ -175,37 +166,47 @@ export function MobileMenu({
   );
 }
 
-type MobileLinkProps = {
+type MobileItemProps = {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   onClose: () => void;
   accent?: "primary" | "amber" | "violet" | "red";
-  compact?: boolean;
 };
 
-function MobileLink({ href, icon: Icon, label, onClose, accent = "primary", compact = false }: MobileLinkProps) {
-  const accentClass = {
-    primary: "bg-primary/12 text-primary ring-primary/20",
-    amber: "bg-amber-400/12 text-amber-400 ring-amber-400/20",
-    violet: "bg-violet-400/12 text-violet-300 ring-violet-400/20",
-    red: "bg-red-400/12 text-red-400 ring-red-400/20",
-  }[accent];
+const accentClasses = {
+  primary: "bg-primary/12 text-primary ring-primary/20",
+  amber: "bg-amber-400/12 text-amber-400 ring-amber-400/20",
+  violet: "bg-violet-400/12 text-violet-300 ring-violet-400/20",
+  red: "bg-red-400/12 text-red-400 ring-red-400/20",
+};
 
+function MobileTile({ href, icon: Icon, label, onClose, accent = "primary" }: MobileItemProps) {
   return (
     <Link
       href={href}
       onClick={onClose}
-      className={
-        compact
-          ? "neon-card group flex min-h-20 flex-col items-start justify-between rounded-2xl border border-border/50 bg-card/60 p-3 text-sm font-bold text-foreground transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-          : "group flex min-h-11 items-center gap-3 rounded-2xl px-3 py-2 text-sm font-semibold text-foreground/90 transition-colors hover:bg-primary/10 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
-      }
+      className="group flex min-h-24 flex-col justify-between rounded-3xl border border-border/60 bg-card/70 p-4 text-sm font-black text-foreground shadow-sm transition hover:bg-muted/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
     >
-      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ring-1 transition-transform group-hover:scale-110 ${accentClass}`}>
+      <span className={`flex h-9 w-9 items-center justify-center rounded-2xl ring-1 transition-transform group-hover:scale-105 ${accentClasses[accent]}`}>
         <Icon className="h-4 w-4" />
       </span>
-      <span className={compact ? "leading-tight" : "min-w-0 flex-1 truncate"}>{label}</span>
+      <span>{label}</span>
+    </Link>
+  );
+}
+
+function MobileRow({ href, icon: Icon, label, onClose, accent = "primary" }: MobileItemProps) {
+  return (
+    <Link
+      href={href}
+      onClick={onClose}
+      className="group flex min-h-11 items-center gap-3 rounded-2xl px-3 py-2 text-sm font-semibold text-foreground/90 transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+    >
+      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ring-1 ${accentClasses[accent]}`}>
+        <Icon className="h-4 w-4" />
+      </span>
+      <span className="min-w-0 flex-1 truncate">{label}</span>
     </Link>
   );
 }

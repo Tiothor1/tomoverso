@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ComponentType } from "react";
 import {
   BookOpen,
+  BookText,
   Check,
   Crown,
   Languages,
@@ -13,6 +14,7 @@ import {
   Moon,
   Palette,
   PenLine,
+  Search,
   Sparkles,
   Sun,
   Trophy,
@@ -33,6 +35,8 @@ import { cn } from "@/lib/utils";
 type NavbarMoreMenuProps = {
   showStore: boolean;
   storeHref: string;
+  publishHref: string;
+  publishLabel: string;
   subBadge?: string | null;
 };
 
@@ -64,7 +68,7 @@ const languageOptions: Array<{ id: LanguageCode; label: string; short: string; f
   { id: "zh-CN", label: "中文", short: "ZH", flag: "🇨🇳" },
 ];
 
-export function NavbarMoreMenu({ showStore, storeHref, subBadge }: NavbarMoreMenuProps) {
+export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel, subBadge }: NavbarMoreMenuProps) {
   const { theme, resolvedTheme, colorTheme, setTheme, setColorTheme } = useTheme();
   const { language, setLanguage, isTranslating } = useLanguage();
 
@@ -80,31 +84,62 @@ export function NavbarMoreMenu({ showStore, storeHref, subBadge }: NavbarMoreMen
           <MoreHorizontal className="ml-1.5 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-72 p-2">
-        <DropdownMenuLabel>Mais opções</DropdownMenuLabel>
+      <DropdownMenuContent align="end" className="w-80 p-2">
+        <DropdownMenuLabel>Mais no Tomo Verso</DropdownMenuLabel>
+        <DropdownMenuItem asChild>
+          <Link href="/search" className="cursor-pointer gap-2">
+            <Search className="h-4 w-4" />
+            Buscar obras
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/explore" className="cursor-pointer gap-2">
+            <BookOpen className="h-4 w-4" />
+            Light novels
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/manga" className="cursor-pointer gap-2">
+            <BookText className="h-4 w-4" />
+            Mangás e manhwas
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/livros" className="cursor-pointer gap-2">
+            <BookText className="h-4 w-4" />
+            Livros
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/library" className="cursor-pointer gap-2">
             <Library className="h-4 w-4" />
-            Estante
+            Minha estante
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href={publishHref} className="cursor-pointer gap-2">
+            <PenLine className="h-4 w-4 text-primary" />
+            {publishLabel || "Publicar história"}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/how-to" className="cursor-pointer gap-2">
-            <PenLine className="h-4 w-4" />
-            Como criar
+            <Sparkles className="h-4 w-4" />
+            Como publicar
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
           <Link href="/store/plans" className="cursor-pointer gap-2">
             <Crown className="h-4 w-4 text-amber-400" />
-            {subBadge ? `Pro · ${subBadge}` : "Pro"}
+            {subBadge ? `Pro · ${subBadge}` : "Planos Pro"}
           </Link>
         </DropdownMenuItem>
         {showStore ? (
           <DropdownMenuItem asChild>
             <Link href={storeHref} className="cursor-pointer gap-2">
               <BookOpen className="h-4 w-4" />
-              Loja
+              Loja editorial
             </Link>
           </DropdownMenuItem>
         ) : null}
