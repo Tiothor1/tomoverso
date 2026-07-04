@@ -311,27 +311,27 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     persistLanguage(language);
     cacheRef.current = loadCache(language);
     applyHtmlLanguage(language, language === "pt" ? "ready" : "translating");
-    scheduleTranslation(10); // ← delay reduzido de 80ms pra 10ms
+    void fastTranslatePage(language, new AbortController().signal);
   }, [language, persistLanguage, applyHtmlLanguage, scheduleTranslation]);
 
   // Disparar na navegação
   useEffect(() => {
-    scheduleTranslation(50); // ← delay reduzido de 260ms pra 50ms
+    scheduleTranslation(80);
   }, [pathname, scheduleTranslation]);
 
   // MutationObserver para conteúdo dinâmico
   useEffect(() => {
     if (typeof MutationObserver === "undefined" || !document.body) return;
     observerRef.current?.disconnect();
-    let timeout: number | null = null;
+    let moTimer: number | null = null;
     observerRef.current = new MutationObserver(() => {
       if (applyingRef.current || language === "pt") return;
-      if (timeout != null) window.clearTimeout(timeout);
-      timeout = window.setTimeout(() => scheduleTranslation(150), 150); // ← de 420ms pra 150ms
+      if (moTimer != null) window.clearTimeout(moTimer);
+      moTimer = window.setTimeout(() => void fastTranslatePage(language, new AbortController().signal), 200);
     });
     observerRef.current.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: [...attributeNames] });
-    return () => { observerRef.current?.disconnect(); if (timeout != null) window.clearTimeout(timeout); };
-  }, [language, scheduleTranslation]);
+    return () => { observerRef.current?.disconnect(); if (moTimer != null) window.clearTimeout(moTimer); };
+  }, [language, fastTranslatePage]);
 
   useEffect(() => {
     return () => { abortRef.current?.abort(); if (debounceRef.current != null) window.clearTimeout(debounceRef.current); observerRef.current?.disconnect(); };

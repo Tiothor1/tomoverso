@@ -24,7 +24,6 @@ function normalizeTexts(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   const out: string[] = [];
   const seen = new Set<string>();
-
   for (const item of value) {
     if (typeof item !== "string") continue;
     const text = item.trim().replace(/\s+/g, " ");
@@ -33,50 +32,7 @@ function normalizeTexts(value: unknown): string[] {
     out.push(text);
     if (out.length >= MAX_TEXTS) break;
   }
-
   return out;
-}
-
-async function translateOne(text: string, target: TargetLang): Promise<string> {
-  if (target === "pt") return text;
-
-  const url = new URL("https://translate.googleapis.com/translate_a/single");
-  url.searchParams.set("client", "gtx");
-  url.searchParams.set("sl", "pt");
-  url.searchParams.set("tl", target);
-  url.searchParams.set("dt", "t");
-  url.searchParams.set("q", text);
-
-  const response = await fetch(url, {
-    headers: {
-      "User-Agent": USER_AGENT,
-      Accept: "application/json,text/plain,*/*",
-    },
-    cache: "no-store",
-  });
-
-  if (!response.ok) return text;
-  const json = await response.json();
-  const translated = Array.isArray(json?.[0])
-    ? json[0].map((chunk: unknown) => (Array.isArray(chunk) ? chunk[0] || "" : "")).join("")
-    : "";
-
-  return typeof translated === "string" && translated.trim() ? protectBrand(translated) : text;
-}
-
-async function mapWithConcurrency<T, R>(items: T[], limit: number, mapper: (item: T) => Promise<R>): Promise<R[]> {
-  const results: R[] = new Array(items.length);
-  let cursor = 0;
-
-  async function worker() {
-    while (cursor < items.length) {
-      const index = cursor++;
-      results[index] = await mapper(items[index]);
-    }
-  }
-
-  await Promise.all(Array.from({ length: Math.min(limit, items.length) }, worker));
-  return results;
 }
 
 export async function POST(req: Request) {
@@ -85,22 +41,46 @@ export async function POST(req: Request) {
     const target = normalizeTarget(body?.target);
     const texts = normalizeTexts(body?.texts);
 
-    if (target === "pt") {
-      return NextResponse.json({ ok: true, target, translations: Object.fromEntries(texts.map((text) => [text, text])) });
+    if (target === "pt" || texts.length === 0) {
+      return NextResponse.json({ ok: true, target, translations: Object.fromEntries(texts.map((t) => [t, t])) });
     }
 
-    const translated = await mapWithConcurrency(texts, 16, async (text) => {
-      try {
-        return await translateOne(text, target);
-      } catch {
-        return text;
-      }
+    // BATCH OTIMIZADO: envia TODOS os textos em UMA chamada ao Google Translate
+    // usando múltiplos parâmetros q= na URL
+    const url = new URL("https://translate.googleapis.com/translate_a/single");
+    url.searchParams.set("client", "gtx");
+    url.searchParams.set("sl", "pt");
+    url.searchParams.set("tl", target);
+    url.searchParams.set("dt", "t");
+    texts.forEach((text) => url.searchParams.append("q", text));
+
+    const response = await fetch(url, {
+      headers: { "User-Agent": USER_AGENT, Accept: "application/json,text/plain,*/*" },
+      cache: "no-store",
     });
 
     const translations: Record<string, string> = {};
-    texts.forEach((text, index) => {
-      translations[text] = translated[index] || text;
-    });
+
+    if (response.ok) {
+      const json = await response.json();
+      // Resposta do Google com múltiplos q=:
+      // [ [["en1", "pt1"]], [["en2", "pt2"]], ... ]
+      if (Array.isArray(json)) {
+        json.forEach((result: unknown, index: number) => {
+          if (Array.isArray(result) && result[0] && Array.isArray(result[0])) {
+            const translated = result[0][0];
+            if (typeof translated === "string" && translated.trim()) {
+              translations[texts[index]] = protectBrand(translated);
+            }
+          }
+        });
+      }
+    }
+
+    // Preencher textos que não foram traduzidos com o original
+    for (const text of texts) {
+      if (!translations[text]) translations[text] = text;
+    }
 
     return NextResponse.json({ ok: true, target, translations });
   } catch (error: any) {
