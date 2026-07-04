@@ -233,7 +233,7 @@ export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel
             );
           })}
           <p className="col-span-3 px-1 pt-1 text-[11px] leading-snug text-muted-foreground">
-            Idiomas liberados grátis. A preferência fica salva neste navegador.
+            Idiomas liberados grátis. A tradução cobre os menus e botões principais; o conteúdo das obras permanece em português.
           </p>
         </div>
       </DropdownMenuContent>
@@ -334,7 +334,7 @@ export function MobilePreferencesPanel({ hasActiveSubscription }: { hasActiveSub
             })}
           </div>
           <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
-            Idiomas grátis para todos. A tradução é aplicada automaticamente na página.
+            Idiomas grátis para todos. A tradução cobre os menus e botões principais; o conteúdo das obras permanece em português.
           </p>
         </div>
       </div>

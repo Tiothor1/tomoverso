@@ -221,7 +221,9 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     applyHtmlLanguage(next, "translating");
 
     const dictFallback = fallbackDictionary[next as Exclude<LanguageCode, "pt">] || {};
-    const effectiveCache = { ...cacheRef.current };
+    // APENAS FALLBACK DICTIONARY — Google Translate API traduz conteúdo (títulos, autor, números)
+    // e quebra o layout. Só o dicionário fixo é usado para UI conhecida (navbar, botões, labels).
+    const effectiveCache = {};
 
     // Coletar nós de texto e atributos
     const textNodes: Text[] = [];
@@ -267,30 +269,7 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     applyToDom(textNodes, attrElements, textOriginals.current, attributeOriginals.current, effectiveCache, dictFallback);
     applyHtmlLanguage(next, "ready");
 
-    // 2. Buscar textos não encontrados no cache nem no dicionário
-    const missing = allKeys.filter((k) => !effectiveCache[k] && !dictFallback[k]);
-    if (missing.length > 0 && !signal?.aborted) {
-      const batches: string[][] = [];
-      for (let i = 0; i < missing.length; i += BATCH_SIZE) batches.push(missing.slice(i, i + BATCH_SIZE));
-
-      // PARALELO: todas as batches simultâneas
-      try {
-        const results = await Promise.all(batches.map((batch) => fetchBatch(next, batch, signal)));
-        // Merge results into cache
-        for (const result of results) {
-          Object.assign(effectiveCache, result);
-        }
-        Object.assign(cacheRef.current, effectiveCache);
-        saveCache(next, cacheRef.current);
-
-        // Re-aplicar agora com as traduções da API
-        if (!signal?.aborted) {
-          applyToDom(textNodes, attrElements, textOriginals.current, attributeOriginals.current, effectiveCache, dictFallback);
-        }
-      } catch {
-        // Fallback já foi aplicado, deixa como está
-      }
-    }
+    // Apenas fallback — sem API do Google para não corromper conteúdo
 
     applyingRef.current = false;
     setIsTranslating(false);
