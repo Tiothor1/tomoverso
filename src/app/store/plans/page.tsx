@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Brain, Check, Crown, Download, PenTool, ShieldCheck, Sparkles, Wand2, X } from "lucide-react";
+import { ArrowRight, BadgeCheck, Brain, CalendarDays, Check, Crown, Download, PenTool, ShieldCheck, Sparkles, Wand2, X } from "lucide-react";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { getActivePlans, getUserActiveSubscription, formatBRL, formatInterval } from "@/lib/subscriptions";
@@ -67,7 +67,8 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
   const params = searchParams ? await searchParams : {};
   const paymentError = params.error || (params.mp_failure ? "mp_failure" : "");
   const proPlan = plans.find((plan) => plan.id === "pro-monthly") || plans.find((plan) => String(plan.name).toLowerCase().includes("pro"));
-  const authorPlan = plans.find((plan) => plan.id === "author-monthly") || plans.find((plan) => String(plan.role_granted).toLowerCase() === "author");
+  const authorPlan = plans.find((plan) => plan.id === "author-monthly") || plans.find((plan) => String(plan.role_granted).toLowerCase() === "author" && plan.interval === "month");
+  const authorYearlyPlan = plans.find((plan) => plan.id === "author-yearly") || plans.find((plan) => String(plan.role_granted).toLowerCase() === "author" && plan.interval === "year");
 
   return (
     <main className="container mx-auto max-w-7xl px-4 py-10">
@@ -95,7 +96,7 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
         </section>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         <Card className="border-border/70">
           <CardHeader><CardTitle>Gratuito</CardTitle><p className="text-sm text-muted-foreground">Para todo autor começar sem barreira.</p></CardHeader>
           <CardContent className="flex h-full flex-col">
@@ -119,8 +120,19 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
           <CardHeader><CardTitle className="flex items-center gap-2"><Brain className="h-5 w-5 text-amber-400" /> Autor+</CardTitle><p className="text-sm text-muted-foreground">Ferramentas reais para transformar ideia em obra publicável.</p></CardHeader>
           <CardContent>
             <div className="mb-5">{authorPlan ? <><span className="text-3xl font-black">{formatBRL(authorPlan.price_cents)}</span><span className="text-muted-foreground">/{formatInterval(authorPlan.interval)}</span></> : <span className="text-xl font-bold text-muted-foreground">Em breve</span>}</div>
-            <ul className="mb-6 space-y-3">{authorPlusBenefits.map((f)=><li key={f} className="flex gap-3 text-sm"><BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />{f}</li>)}</ul>
+            <ul className="mb-6 space-y-3">{authorPlusBenefits.slice(0, 6).map((f)=><li key={f} className="flex gap-3 text-sm"><BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />{f}</li>)}</ul>
             {authorPlan ? <><form action="/api/payments/checkout" method="POST"><input type="hidden" name="plan_id" value={authorPlan.id} /><Button type="submit" className="w-full rounded-xl bg-amber-400 text-amber-950 hover:bg-amber-300">{user ? "Virar Autor+" : "Entrar para virar Autor+"}<ArrowRight className="ml-2 h-4 w-4" /></Button></form>{user ? <PixPaymentButton planId={authorPlan.id} /> : null}</> : null}
+          </CardContent>
+        </Card>
+
+        <Card className="relative overflow-hidden border-emerald-500/40 bg-gradient-to-b from-emerald-500/10 to-card shadow-2xl shadow-emerald-500/10">
+          <div className="absolute right-4 top-4 rounded-full bg-emerald-400 px-3 py-1 text-xs font-black text-emerald-950">3 meses grátis</div>
+          <CardHeader><CardTitle className="flex items-center gap-2"><CalendarDays className="h-5 w-5 text-emerald-400" /> Autor+ Anual</CardTitle><p className="text-sm text-muted-foreground">Paga uma vez e usa 12 meses. Melhor custo-benefício para autor sério.</p></CardHeader>
+          <CardContent>
+            <div className="mb-1">{authorYearlyPlan ? <><span className="text-3xl font-black">{formatBRL(authorYearlyPlan.price_cents)}</span><span className="text-muted-foreground">/{formatInterval(authorYearlyPlan.interval)}</span></> : <span className="text-xl font-bold text-muted-foreground">Em breve</span>}</div>
+            <p className="mb-5 text-xs font-semibold text-emerald-400">equivale a R$ 14,93/mês · pague 9 e leve 12</p>
+            <ul className="mb-6 space-y-3">{(authorYearlyPlan ? parseFeatures(authorYearlyPlan) : ["Todos os benefícios do Autor+", "3 meses grátis", "12 meses completos de acesso"]).map((f)=><li key={f} className="flex gap-3 text-sm"><BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />{f}</li>)}</ul>
+            {authorYearlyPlan ? <><form action="/api/payments/checkout" method="POST"><input type="hidden" name="plan_id" value={authorYearlyPlan.id} /><Button type="submit" className="w-full rounded-xl bg-emerald-400 text-emerald-950 hover:bg-emerald-300">{user ? "Assinar anual" : "Entrar para assinar"}<ArrowRight className="ml-2 h-4 w-4" /></Button></form>{user ? <PixPaymentButton planId={authorYearlyPlan.id} /> : null}</> : null}
           </CardContent>
         </Card>
       </div>

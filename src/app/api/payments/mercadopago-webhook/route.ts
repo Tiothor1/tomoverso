@@ -127,7 +127,7 @@ export async function POST(req: NextRequest) {
       VALUES (?, ?, ?, ?, 'BRL', ?, ?, ?, ?, ?)
     `).run(
       crypto.randomUUID(),
-      userId || null,
+      userId2 || null,
       plan?.name || "Plano",
       amount,
       paymentMethod,
@@ -137,7 +137,7 @@ export async function POST(req: NextRequest) {
       txStatus
     );
 
-    if (mpStatus === "approved" && userId && planId && plan) {
+    if (mpStatus === "approved" && userId2 && planId && plan) {
       const now = new Date().toISOString();
       const endDate = new Date();
       endDate.setMonth(endDate.getMonth() + (plan.interval === "year" ? 12 : 1));
@@ -146,7 +146,7 @@ export async function POST(req: NextRequest) {
         SELECT id FROM user_subscriptions
         WHERE user_id = ? AND plan_id = ? AND status IN ('active', 'trialing', 'past_due', 'pending')
         ORDER BY created_at DESC LIMIT 1
-      `).get(userId, planId) as any;
+      `).get(userId2, planId) as any;
 
       if (existingSub) {
         db.prepare(`
@@ -158,11 +158,11 @@ export async function POST(req: NextRequest) {
         db.prepare(`
           INSERT INTO user_subscriptions (id, user_id, plan_id, status, current_period_start, current_period_end, mp_payment_id, mp_payer_email)
           VALUES (?, ?, ?, 'active', ?, ?, ?, ?)
-        `).run(crypto.randomUUID(), userId, planId, now, endDate.toISOString(), String(paymentId), payerEmail);
+        `).run(crypto.randomUUID(), userId2, planId, now, endDate.toISOString(), String(paymentId), payerEmail);
       }
 
       if (plan.role_granted === "author") {
-        db.prepare("UPDATE users SET role = 'author' WHERE id = ? AND role = 'user'").run(userId);
+        db.prepare("UPDATE users SET role = 'author' WHERE id = ? AND role = 'user'").run(userId2);
       }
     }
 

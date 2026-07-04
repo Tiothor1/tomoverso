@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 import { createPixPayment } from "@/lib/subscriptions";
+import { randomUUID } from "crypto";
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,6 +37,14 @@ export async function POST(req: NextRequest) {
     if (!pix) {
       return NextResponse.json({ error: "payment_error" }, { status: 502 });
     }
+
+    const now = new Date().toISOString();
+    const endDate = new Date();
+    endDate.setMonth(endDate.getMonth() + (plan.interval === "year" ? 12 : 1));
+    db.prepare(`
+      INSERT INTO user_subscriptions (id, user_id, plan_id, status, current_period_start, current_period_end, mp_payment_id)
+      VALUES (?, ?, ?, 'pending', ?, ?, ?)
+    `).run(randomUUID(), user.id, plan.id, now, endDate.toISOString(), pix.paymentId);
 
     return NextResponse.json({ ok: true, ...pix });
   } catch (err: any) {
