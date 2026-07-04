@@ -5,6 +5,7 @@ import { getDb } from "./db";
 import type { User } from "./types";
 import { createHash, randomUUID } from "crypto";
 import type Database from "better-sqlite3";
+import { getSupabaseAdmin } from "@/lib/supabase/server";
 
 const AUTH_SECRET = process.env.AUTH_SECRET;
 if (!AUTH_SECRET && process.env.VERCEL) {
@@ -46,6 +47,78 @@ export interface AccountBackupPayload {
   displayName: string;
   role: "user" | "admin" | "author";
   createdAt: string;
+}
+
+export function profileToUserRecord(profile: any): UserRecord {
+  return {
+    id: String(profile.id),
+    email: String(profile.email || ""),
+    username: String(profile.username || ""),
+    password_hash: String(profile.password_hash || ""),
+    display_name: String(profile.display_name || profile.username || "Usuário"),
+    avatar_url: profile.avatar_url || null,
+    bio: profile.bio || "",
+    role: (profile.role as UserRecord["role"]) || "user",
+    email_verified: profile.email_verified ? 1 : 0,
+    last_login_at: profile.last_login_at || null,
+    created_at: profile.created_at ? new Date(profile.created_at).toISOString() : new Date().toISOString(),
+    updated_at: profile.updated_at ? new Date(profile.updated_at).toISOString() : new Date().toISOString(),
+  };
+}
+
+export function upsertLocalUserFromProfile(db: Database.Database, profile: any, passwordHash = ""): UserRecord {
+  const record = profileToUserRecord({ ...profile, password_hash: passwordHash });
+  db.prepare(
+    `INSERT INTO users (id, email, username, password_hash, display_name, avatar_url, bio, role, email_verified, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET
+       email = excluded.email,
+       username = excluded.username,
+       password_hash = CASE WHEN excluded.password_hash != '' THEN excluded.password_hash ELSE users.password_hash END,
+       display_name = excluded.display_name,
+       avatar_url = excluded.avatar_url,
+       bio = excluded.bio,
+       role = excluded.role,
+       email_verified = excluded.email_verified,
+       updated_at = excluded.updated_at`
+  ).run(
+    record.id,
+    record.email,
+    record.username,
+    passwordHash || record.password_hash || "",
+    record.display_name,
+    record.avatar_url,
+    record.bio || "",
+    record.role,
+    record.email_verified,
+    record.created_at,
+    record.updated_at
+  );
+  return db.prepare("SELECT * FROM users WHERE id = ?").get(record.id) as UserRecord;
+}
+
+export async function getSupabaseProfileById(id: string): Promise<UserRecord | null> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
+  const { data, error } = await supabase.from("profiles").select("*").eq("id", id).maybeSingle();
+  if (error || !data) return null;
+  return profileToUserRecord(data);
+}
+
+export async function getSupabaseProfileByLogin(login: string, usernameLogin?: string): Promise<UserRecord | null> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) return null;
+  const normalizedLogin = normalizeLogin(login);
+  const normalizedUsername = usernameLogin || normalizeUsername(login);
+
+  if (normalizedLogin.includes("@")) {
+    const byEmail = await supabase.from("profiles").select("*").eq("email", normalizedLogin).maybeSingle();
+    if (!byEmail.error && byEmail.data) return profileToUserRecord(byEmail.data);
+  }
+
+  const byUsername = await supabase.from("profiles").select("*").eq("username", normalizedUsername).maybeSingle();
+  if (!byUsername.error && byUsername.data) return profileToUserRecord(byUsername.data);
+  return null;
 }
 
 export function generateId(): string {
@@ -196,6 +269,13 @@ export async function getCurrentUser(): Promise<UserRecord | null> {
   let user = db
     .prepare("SELECT * FROM users WHERE id = ?")
     .get(payload.userId) as UserRecord | undefined;
+
+  if (!user) {
+    const supabaseProfile = await getSupabaseProfileById(payload.userId);
+    if (supabaseProfile) {
+      user = upsertLocalUserFromProfile(db, supabaseProfile);
+    }
+  }
 
   if (!user) {
     const backup = await getAccountBackupFromCookie();

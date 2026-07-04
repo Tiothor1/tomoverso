@@ -20,6 +20,8 @@ import {
   getAccountBackupFromCookie,
   restoreUserFromBackup,
   verifySessionToken,
+  getSupabaseProfileByLogin,
+  upsertLocalUserFromProfile,
 } from "@/lib/auth";
 import { randomUUID } from "crypto";
 import { cookies } from "next/headers";
@@ -91,8 +93,8 @@ async function createPersistentSession(db: Database.Database, user: UserRecord) 
 
 async function upsertSupabaseProfile(user: UserRecord) {
   const supabase = getSupabaseAdmin();
-  if (!supabase) return;
-  await supabase.from("profiles").upsert({
+  if (!supabase) return { ok: false as const, error: "Supabase não configurado" };
+  const { error } = await supabase.from("profiles").upsert({
     id: user.id,
     email: user.email,
     username: user.username,
@@ -103,36 +105,37 @@ async function upsertSupabaseProfile(user: UserRecord) {
     email_verified: !!user.email_verified,
     updated_at: new Date().toISOString(),
   }, { onConflict: "id" });
+  if (error) return { ok: false as const, error: error.message };
+  return { ok: true as const };
 }
 
-async function createSupabaseAuthUser(input: { email: string; password: string; username: string; displayName: string }) {
+async function createSupabaseAuthUser(input: { email: string; password: string; username: string; displayName: string }): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
   const supabaseAdmin = getSupabaseAdmin();
-  if (supabaseAdmin) {
-    const { data, error } = await supabaseAdmin.auth.admin.createUser({
-      email: input.email,
-      password: input.password,
-      email_confirm: true,
-      user_metadata: { username: input.username, display_name: input.displayName },
-    });
-    if (!error && data.user?.id) return data.user.id;
-    // If user already exists in Supabase, keep local signup error handling as source of truth.
-  }
+  if (!supabaseAdmin) return { ok: false, error: "Supabase não configurado" };
 
-  const supabaseAuth = getSupabaseAuthClient();
-  if (!supabaseAuth) return null;
-  const { data, error } = await supabaseAuth.auth.signUp({
+  const { data, error } = await supabaseAdmin.auth.admin.createUser({
     email: input.email,
     password: input.password,
-    options: { data: { username: input.username, display_name: input.displayName } },
+    email_confirm: true,
+    user_metadata: { username: input.username, display_name: input.displayName },
   });
-  if (error || !data.user?.id) return null;
-  return data.user.id;
+  if (!error && data.user?.id) return { ok: true, id: data.user.id };
+
+  return { ok: false, error: error?.message || "Não consegui criar usuário persistente" };
 }
 
 async function signInWithSupabaseAuth(input: { login: string; password: string }) {
   const supabaseAuth = getSupabaseAuthClient();
-  if (!supabaseAuth || !input.login.includes("@")) return null;
-  const { data, error } = await supabaseAuth.auth.signInWithPassword({ email: input.login, password: input.password });
+  if (!supabaseAuth) return null;
+
+  let email = input.login.includes("@") ? input.login : "";
+  if (!email) {
+    const profile = await getSupabaseProfileByLogin(input.login);
+    email = profile?.email || "";
+  }
+  if (!email) return null;
+
+  const { data, error } = await supabaseAuth.auth.signInWithPassword({ email, password: input.password });
   if (error || !data.user?.id) return null;
   return data.user;
 }
@@ -157,23 +160,27 @@ export async function signupAction(formData: FormData): Promise<ActionResult> {
   const existing = db
     .prepare("SELECT id FROM users WHERE lower(email) = ? OR lower(username) = ?")
     .get(email, username);
-  if (existing) {
+  const existingPersistent = await getSupabaseProfileByLogin(email, username);
+  if (existing || existingPersistent) {
     return { ok: false, error: "Email ou username já cadastrado" };
   }
 
-  const supabaseUserId = await createSupabaseAuthUser({
+  const supabaseCreated = await createSupabaseAuthUser({
     email,
     password: parsed.data.password,
     username,
     displayName: parsed.data.display_name.trim(),
   });
-  const id = supabaseUserId || generateId();
+  if (!supabaseCreated.ok) {
+    return { ok: false, error: "Não consegui salvar a conta no banco permanente. Tente de novo em instantes." };
+  }
+  const id = supabaseCreated.id;
   const passwordHash = await hashPassword(parsed.data.password);
   const isFirstUser = (db.prepare("SELECT COUNT(*) as c FROM users").get() as { c: number }).c === 0;
 
   db.prepare(
     `INSERT INTO users (id, email, username, password_hash, display_name, role, email_verified)
-     VALUES (?, ?, ?, ?, ?, ?, 0)`
+     VALUES (?, ?, ?, ?, ?, ?, 1)`
   ).run(
     id,
     email,
@@ -184,24 +191,14 @@ export async function signupAction(formData: FormData): Promise<ActionResult> {
   );
 
   const user = db.prepare("SELECT * FROM users WHERE id = ?").get(id) as UserRecord;
-  await upsertSupabaseProfile(user);
-
-  // Envia código de verificação por email
-  const { sendVerificationCode } = await import("@/lib/verify-email");
-  const sent = await sendVerificationCode(email).catch(() => false);
-
-  // Se não conseguiu enviar, auto-verifica e vai pro dashboard
-  if (!sent) {
-    db.prepare("UPDATE users SET email_verified = 1 WHERE id = ?").run(id);
-    await createPersistentSession(db, user);
-    revalidatePath("/", "layout");
-    return { ok: true, redirect: "/onboarding" };
+  const profileSaved = await upsertSupabaseProfile(user);
+  if (!profileSaved.ok) {
+    return { ok: false, error: "Conta criada no Auth, mas não consegui salvar o perfil permanente. Tente login pelo email ou fale com suporte." };
   }
 
-  // Código enviado — redireciona pra página de verificação
   await createPersistentSession(db, user);
   revalidatePath("/", "layout");
-  return { ok: true, redirect: `/auth/verify?email=${encodeURIComponent(email)}` };
+  return { ok: true, redirect: "/onboarding" };
 }
 
 export async function loginAction(formData: FormData): Promise<ActionResult> {
@@ -226,6 +223,14 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
       .prepare("SELECT * FROM users WHERE id = ? OR lower(email) = ? LIMIT 1")
       .get(supabaseUser.id, normalizeEmail(supabaseUser.email || login)) as UserRecord | undefined;
 
+    if (!user) {
+      const persistentProfile = await getSupabaseProfileByLogin(supabaseUser.email || login, usernameLogin);
+      if (persistentProfile) {
+        const passwordHash = await hashPassword(parsed.data.password);
+        user = upsertLocalUserFromProfile(db, persistentProfile, passwordHash);
+      }
+    }
+
     if (!user && supabaseUser.email) {
       const passwordHash = await hashPassword(parsed.data.password);
       const username = normalizeUsername(String(supabaseUser.user_metadata?.username || supabaseUser.email.split("@")[0] || "user"));
@@ -235,6 +240,7 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
          VALUES (?, ?, ?, ?, ?, 'user', 1)`
       ).run(supabaseUser.id, normalizeEmail(supabaseUser.email), username, passwordHash, displayName);
       user = db.prepare("SELECT * FROM users WHERE id = ?").get(supabaseUser.id) as UserRecord;
+      await upsertSupabaseProfile(user);
     }
   }
 
