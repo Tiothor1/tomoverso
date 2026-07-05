@@ -1,0 +1,35 @@
+# Caddyfile — Tomo Verso Editora
+# Substitua tomoverso.com.br pelo seu domínio real
+# SSL é automático via Let's Encrypt
+
+tomoverso.com.br {
+    # Redirecionar www para o domínio principal
+    @www {
+        host www.tomoverso.com.br
+    }
+    redir @www https://tomoverso.com.br{uri} permanent
+
+    # Proxy reverso pro Next.js
+    reverse_proxy tomoverso:3000 {
+        # Preservar IP real do visitante
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Logs
+    log {
+        output file /data/logs/access.log
+    }
+
+    # Comprimir CSS/JS/HTML
+    encode zstd gzip
+
+    # Cache de arquivos estáticos
+    header /static/* {
+        Cache-Control "public, max-age=31536000, immutable"
+    }
+    header /_next/static/* {
+        Cache-Control "public, max-age=31536000, immutable"
+    }
+}

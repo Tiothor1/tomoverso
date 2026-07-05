@@ -1,0 +1,9 @@
+node_modules/
+.next/
+.git/
+data/*.db
+data/backups/
+*.md
+.DS_Store
+.gitignore
+.gitattributes

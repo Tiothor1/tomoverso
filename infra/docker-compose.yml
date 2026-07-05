@@ -1,0 +1,46 @@
+services:
+  tomoverso:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+    container_name: tomoverso
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      - NODE_ENV=production
+      - HOSTNAME=0.0.0.0
+      - PORT=3000
+      # ── Banco de dados ──
+      # Persiste o banco SQLite fora do container pra não perder em restart
+      - DB_DIR=/data
+    volumes:
+      - tomoverso_data:/data
+      # ── Uploads locais (se quiser manter num volume separado) ──
+      # - tomoverso_uploads:/app/public/uploads
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── Proxy reverso com SSL automático (Caddy) ──
+  caddy:
+    image: caddy:2-alpine
+    container_name: tomoverso-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - tomoverso
+
+volumes:
+  tomoverso_data:
+  caddy_data:
+  caddy_config:
