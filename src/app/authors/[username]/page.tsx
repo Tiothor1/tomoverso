@@ -1,4 +1,3 @@
-import { notFound } from "next/navigation";
 import Link from "next/link";
 import { BookOpen, Users, Eye, Star, Calendar, ArrowRight, PenLine, MessageCircle, Send, User as UserIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,9 +25,33 @@ export const dynamic = "force-dynamic";
 
 export default async function AuthorPage({ params }: { params: Promise<{ username: string }> }) {
   const { username } = await params;
-  const db = getDb();
+  let db;
+  try { db = getDb(); } catch { db = null; }
+
+  if (!db) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="text-center space-y-4">
+          <h1 className="text-2xl font-bold">Serviço temporariamente indisponível</h1>
+          <p className="text-muted-foreground">O banco de dados ainda está sendo carregado. Tente recarregar a página em alguns segundos.</p>
+          <a href={`/authors/${username}`} className="inline-flex h-10 items-center justify-center rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground">Recarregar</a>
+        </div>
+      </div>
+    );
+  }
+
   const author = db.prepare("SELECT * FROM users WHERE username = ?").get(username) as UserRow | undefined;
-  if (!author) notFound();
+  if (!author) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="text-center space-y-4">
+          <h1 className="text-2xl font-bold">Perfil não encontrado</h1>
+          <p className="text-muted-foreground">Este autor não foi encontrado. Pode ser que o banco de dados ainda esteja sendo carregado.</p>
+          <a href={`/authors/${username}`} className="inline-flex h-10 items-center justify-center rounded-full bg-primary px-6 text-sm font-bold text-primary-foreground">Tentar novamente</a>
+        </div>
+      </div>
+    );
+  }
   const safeAuthor = author!;
 
   const authorNovels = db.prepare(`
