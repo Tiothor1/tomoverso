@@ -55,7 +55,33 @@ Depois:
 docker compose -f /opt/tomoverso/infra/docker-compose.yml restart tomoverso
 ```
 
-## ── 5. Manutenção ──
+## ── 5. Deploy automático via GitHub Actions ──
+
+Você **não precisa rodar script nenhum manualmente**. Uma vez configurado, é igual ao Vercel:
+
+```
+git push origin main   # ← SÓ ISSO. O resto é automático.
+```
+
+### Configurar (uma vez):
+
+```bash
+# 1. No repositório do GitHub:
+#    Settings → Secrets and variables → Actions → New repository secret
+#    Adicione 3 secrets:
+#      VPS_HOST     = IP da sua VPS
+#      VPS_USER     = deploy (ou root)
+#      VPS_SSH_KEY  = sua chave SSH privada
+
+# 2. Testar: dá um git push que o GitHub Action roda sozinho
+```
+
+### Ver o status do deploy:
+
+- Abra o repositório no GitHub → **Actions** → Vai aparecer `Deploy para VPS`
+- Se falhar, você recebe notificação no email do GitHub
+
+## ── 6. Manutenção manual (se precisar) ──
 
 ### Atualizar o site (toda vez que quiser novo deploy):
 
