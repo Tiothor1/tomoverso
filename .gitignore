@@ -43,6 +43,7 @@ skills-lock.json
 .DS_Store
 *.pem
 *.txt
+!ads.txt
 
 # debug
 npm-debug.log*
