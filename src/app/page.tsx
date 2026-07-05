@@ -189,7 +189,7 @@ export default async function HomePage() {
   const originals = [...originalNovels, ...originalMangas];
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,.13),transparent_34%),radial-gradient(circle_at_85%_8%,rgba(14,165,233,.12),transparent_28%),linear-gradient(180deg,rgba(250,247,255,.92),rgba(255,255,255,1)_42%,rgba(250,250,252,1))] dark:bg-[radial-gradient(circle_at_top_left,rgba(124,58,237,.18),transparent_34%),radial-gradient(circle_at_85%_8%,rgba(14,165,233,.12),transparent_28%),linear-gradient(180deg,#0b0712,#0f0b17_44%,#09070d)]">
+    <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,color-mix(in oklch,var(--primary) 16%,transparent),transparent_34%),radial-gradient(circle_at_85%_8%,color-mix(in oklch,var(--primary) 12%,transparent),transparent_28%),linear-gradient(180deg,color-mix(in oklch,var(--background) 60%,transparent),var(--background)_42%,color-mix(in oklch,var(--background) 95%,transparent))] dark:bg-[radial-gradient(circle_at_top_left,color-mix(in oklch,var(--primary) 20%,transparent),transparent_34%),radial-gradient(circle_at_85%_8%,color-mix(in oklch,var(--primary) 12%,transparent),transparent_28%),linear-gradient(180deg,color-mix(in oklch,var(--background) 80%,transparent),color-mix(in oklch,var(--background) 50%,transparent)_44%,transparent)]">
       {/* Hero */}
       <section className="relative border-b border-border/50">
         <div className="container relative mx-auto grid max-w-7xl gap-10 px-4 py-14 md:py-20 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-center lg:py-24">
