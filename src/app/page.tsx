@@ -488,15 +488,15 @@ function MangaTile({ manga, compact = false }: { manga: MangaRow; compact?: bool
   return (
     <Link href={`/manga/${manga.slug}`} className="group block">
       <Card className="h-full overflow-hidden border-border/70 bg-background/80 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:bg-white/[0.035]">
-        <div className="relative aspect-[2/3] overflow-hidden bg-muted">
+        <div className="relative aspect-[4/5] overflow-hidden bg-muted">
           <CoverImage src={getCover(manga)} alt={manga.title} />
           <div className="absolute inset-x-0 top-0 flex justify-between p-2">
             {asCurationLabel(manga.curation_label) ? <CurationBadge label={asCurationLabel(manga.curation_label)!} size="sm" /> : manga.is_original ? <OriginalBadge size="sm" /> : <span className="rounded-full bg-black/55 px-2 py-0.5 text-[9px] font-black uppercase tracking-[0.14em] text-white backdrop-blur">Em alta</span>}
           </div>
         </div>
-        <CardContent className={compact ? "p-3" : "p-4"}>
-          <h3 className="line-clamp-2 font-heading text-sm font-black leading-tight group-hover:text-violet-600 dark:group-hover:text-violet-300">{manga.title}</h3>
-          <p className="mt-1.5 text-xs text-muted-foreground">{manga.chapter_count} capítulos</p>
+        <CardContent className={compact ? "p-2.5" : "p-3"}>
+          <h3 className="line-clamp-2 font-heading text-xs font-black leading-tight group-hover:text-violet-600 dark:group-hover:text-violet-300">{manga.title}</h3>
+          <p className="mt-1 text-[11px] text-muted-foreground">{manga.chapter_count} capítulos</p>
         </CardContent>
       </Card>
     </Link>
@@ -507,16 +507,16 @@ function RecentNovel({ novel }: { novel: NovelRow }) {
   return (
     <Link href={`/novels/${novel.slug}`} className="group block">
       <Card className="h-full border-border/70 bg-background/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:bg-white/[0.035]">
-        <CardContent className="flex gap-3 p-3">
-          <div className="h-24 w-16 shrink-0 overflow-hidden rounded-xl bg-muted">
+        <CardContent className="flex gap-2.5 p-2.5">
+          <div className="h-20 w-14 shrink-0 overflow-hidden rounded-xl bg-muted">
             <CoverImage src={getCover(novel)} alt={novel.title} />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="mb-1.5 flex flex-wrap gap-1">
-              {safeJsonArray(novel.genres).slice(0, 2).map((genre) => <Badge key={genre} variant="secondary" className="rounded-full text-[10px]">{genre}</Badge>)}
+            <div className="mb-1 flex flex-wrap gap-1">
+              {safeJsonArray(novel.genres).slice(0, 2).map((genre) => <Badge key={genre} variant="secondary" className="rounded-full text-[9px] px-1.5 py-0">{genre}</Badge>)}
             </div>
-            <h3 className="line-clamp-2 font-heading text-sm font-black leading-tight group-hover:text-violet-600 dark:group-hover:text-violet-300"><NovelTitle novel={novel as any} /></h3>
-            <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">{novel.synopsis}</p>
+            <h3 className="line-clamp-2 font-heading text-xs font-black leading-tight group-hover:text-violet-600 dark:group-hover:text-violet-300"><NovelTitle novel={novel as any} /></h3>
+            <p className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-muted-foreground">{novel.synopsis}</p>
           </div>
         </CardContent>
       </Card>
@@ -528,13 +528,13 @@ function OriginalNovel({ novel }: { novel: NovelRow }) {
   return (
     <Link href={`/novels/${novel.slug}`} className="group block">
       <Card className="h-full overflow-hidden border-emerald-500/20 bg-background/80 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:bg-white/[0.035]">
-        <div className="relative aspect-[3/4] overflow-hidden bg-muted">
+        <div className="relative aspect-[4/5] overflow-hidden bg-muted">
           <CoverImage src={getCover(novel)} alt={novel.title} />
           <div className="absolute left-2 top-2">{asCurationLabel(novel.curation_label) ? <CurationBadge label={asCurationLabel(novel.curation_label)!} size="sm" /> : <OriginalBadge size="sm" />}</div>
         </div>
-        <CardContent className="p-3">
-          <h3 className="line-clamp-2 font-heading text-sm font-black leading-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-300"><NovelTitle novel={novel as any} /></h3>
-          <p className="mt-1 text-xs text-muted-foreground">{novel.chapter_count || 0} capítulos</p>
+        <CardContent className="p-2.5">
+          <h3 className="line-clamp-2 font-heading text-xs font-black leading-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-300"><NovelTitle novel={novel as any} /></h3>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">{novel.chapter_count || 0} capítulos</p>
         </CardContent>
       </Card>
     </Link>
