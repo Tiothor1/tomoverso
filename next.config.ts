@@ -1,17 +1,21 @@
 import type { NextConfig } from "next";
 
+const standalone = process.env.NEXT_STANDALONE === "1" || process.env.DOCKER_BUILD === "1";
+
 const nextConfig: NextConfig = {
-  output: "standalone",
-  outputFileTracingExcludes: {
-    "*": [
-      "./data/**/*.db",
-      "./data/**/*.db-shm",
-      "./data/**/*.db-wal",
-      "./data/backups/**/*",
-      "./.git/**/*",
-      "./.next/**/*",
-    ],
-  },
+  output: standalone ? "standalone" : undefined,
+  outputFileTracingExcludes: standalone
+    ? {
+        "*": [
+          "./data/**/*.db",
+          "./data/**/*.db-shm",
+          "./data/**/*.db-wal",
+          "./data/backups/**/*",
+          "./.git/**/*",
+          "./.next/**/*",
+        ],
+      }
+    : undefined,
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "t.vndb.org" },
