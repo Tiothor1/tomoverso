@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { Mail, Send, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -191,15 +192,15 @@ export function ContactForm() {
             <CardContent className="pt-6 space-y-3">
               <h2 className="font-heading text-xl font-semibold">Links rápidos</h2>
               <div className="space-y-2 text-sm">
-                <a href="/termos" className="block text-primary hover:underline">
+                <Link href="/termos" className="block text-primary hover:underline">
                   Termos de Uso e Publicação
-                </a>
-                <a href="/privacidade" className="block text-primary hover:underline">
+                </Link>
+                <Link href="/privacidade" className="block text-primary hover:underline">
                   Política de Privacidade
-                </a>
-                <a href="/sobre" className="block text-primary hover:underline">
+                </Link>
+                <Link href="/sobre" className="block text-primary hover:underline">
                   Sobre a Tomo Verso Editora
-                </a>
+                </Link>
               </div>
             </CardContent>
           </Card>

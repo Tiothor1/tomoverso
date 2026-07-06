@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { Loader2, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -102,7 +103,7 @@ export function FeedCommentDrawer({ item, open, isLoggedIn, onClose, loadComment
             </div>
           ) : (
             <Button asChild className="w-full rounded-2xl">
-              <a href="/auth/login">Entrar para comentar</a>
+              <Link href="/auth/login">Entrar para comentar</Link>
             </Button>
           )}
         </footer>

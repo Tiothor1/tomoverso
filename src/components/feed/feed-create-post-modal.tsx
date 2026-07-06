@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { Loader2, PenLine, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -73,10 +74,10 @@ export function FeedCreatePostModal({ open, isLoggedIn, workOptions, onClose, on
             <p className="mt-1 text-white/65">Publique capítulos pelo painel e use posts para chamar leitores para suas páginas, cenas, reviews e novidades.</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Button asChild size="sm" className="rounded-full bg-white text-black hover:bg-fuchsia-100">
-                <a href="/dashboard/novels/new">Criar minha novel</a>
+                <Link href="/dashboard/novels/new">Criar minha novel</Link>
               </Button>
               <Button asChild size="sm" variant="secondary" className="rounded-full bg-white/10 text-white hover:bg-white/15">
-                <a href="/dashboard">Meu painel</a>
+                <Link href="/dashboard">Meu painel</Link>
               </Button>
             </div>
           </div>
@@ -85,7 +86,7 @@ export function FeedCreatePostModal({ open, isLoggedIn, workOptions, onClose, on
             <div className="rounded-3xl border border-amber-300/20 bg-amber-300/10 p-5 text-sm text-amber-50">
               Você precisa entrar para criar postagem.
               <Button asChild className="mt-4 w-full rounded-2xl bg-white text-black hover:bg-amber-100">
-                <a href="/auth/login?redirect=/feed">Entrar</a>
+                <Link href="/auth/login?redirect=/feed">Entrar</Link>
               </Button>
             </div>
           ) : (

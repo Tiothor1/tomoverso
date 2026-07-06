@@ -780,6 +780,215 @@ select:focus-visible {
   50% { box-shadow: 0 0 0 1px color-mix(in oklch, var(--primary) 20%, transparent), 0 16px 34px rgba(8,5,14,.26); }
 }
 
+html[data-intro-seen="true"] .tomoverso-intro-splash {
+  display: none;
+}
+
+.tomoverso-intro-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  color: #fff7df;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(159, 121, 215, .24), transparent 22rem),
+    radial-gradient(circle at 62% 72%, rgba(212, 169, 76, .12), transparent 18rem),
+    linear-gradient(145deg, #08060d, #120d18 48%, #1d1526);
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity .24s ease, transform .24s ease, visibility .24s ease;
+}
+
+.tomoverso-intro-splash.is-leaving {
+  opacity: 0;
+  transform: translateY(-.35rem) scale(.99);
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.tomo-intro-panel {
+  position: relative;
+  width: min(92vw, 28rem);
+  overflow: hidden;
+  border: 1px solid rgba(255, 247, 223, .14);
+  border-radius: 2rem;
+  padding: 2rem;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(255, 247, 223, .075), rgba(255, 255, 255, .025));
+  box-shadow: 0 30px 120px rgba(0, 0, 0, .58), inset 0 1px 0 rgba(255, 247, 223, .12);
+  backdrop-filter: blur(18px) saturate(1.08);
+  animation: tomo-intro-rise .46s ease both;
+}
+
+.tomo-intro-panel::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 10%, rgba(255,247,223,.08), transparent 52%);
+  opacity: .75;
+}
+
+.tomo-intro-mark {
+  position: relative;
+  z-index: 1;
+  margin: 0 auto 1rem;
+  display: grid;
+  height: 4.9rem;
+  width: 4.9rem;
+  place-items: center;
+  border-radius: 1.45rem;
+  border: 1px solid rgba(255, 247, 223, .18);
+  background: rgba(255, 247, 223, .07);
+  box-shadow: inset 0 1px 0 rgba(255,247,223,.14), 0 18px 48px rgba(0,0,0,.35);
+}
+
+.tomo-intro-mark img {
+  height: 4.1rem;
+  width: 4.1rem;
+  border-radius: 1.15rem;
+  object-fit: contain;
+}
+
+.tomo-intro-book {
+  position: relative;
+  z-index: 1;
+  margin: .1rem auto 1.35rem;
+  height: 3.3rem;
+  width: 5.9rem;
+  perspective: 18rem;
+}
+
+.tomo-intro-cover,
+.tomo-intro-page {
+  position: absolute;
+  top: .18rem;
+  height: 2.95rem;
+  width: 2.65rem;
+  border-radius: .32rem .65rem .65rem .32rem;
+  transform-origin: left center;
+}
+
+.tomo-intro-cover-left {
+  left: .25rem;
+  transform: rotateY(16deg) skewY(-1deg);
+  background: linear-gradient(135deg, rgba(255,247,223,.16), rgba(159,121,215,.25));
+  border: 1px solid rgba(255,247,223,.16);
+}
+
+.tomo-intro-cover-right {
+  right: .25rem;
+  transform-origin: right center;
+  transform: rotateY(-16deg) skewY(1deg);
+  background: linear-gradient(135deg, rgba(159,121,215,.25), rgba(212,169,76,.16));
+  border: 1px solid rgba(255,247,223,.16);
+}
+
+.tomo-intro-page {
+  left: 2.95rem;
+  background: linear-gradient(90deg, rgba(255,247,223,.92), rgba(216,199,255,.72));
+  box-shadow: 0 8px 22px rgba(0,0,0,.22);
+}
+
+.tomo-intro-page::after {
+  content: "";
+  position: absolute;
+  inset: .55rem .42rem;
+  border-top: 1px solid rgba(18, 13, 24, .18);
+  border-bottom: 1px solid rgba(18, 13, 24, .12);
+}
+
+.tomo-intro-page-one {
+  animation: tomo-page-turn 1.05s cubic-bezier(.2,.75,.2,1) infinite;
+}
+
+.tomo-intro-page-two {
+  animation: tomo-page-turn 1.05s cubic-bezier(.2,.75,.2,1) .18s infinite;
+  opacity: .75;
+}
+
+.tomo-intro-spine {
+  position: absolute;
+  left: 2.86rem;
+  top: .12rem;
+  height: 3.1rem;
+  width: .18rem;
+  border-radius: 999px;
+  background: rgba(255,247,223,.42);
+  box-shadow: 0 0 12px rgba(255,247,223,.16);
+}
+
+.tomo-intro-copy {
+  position: relative;
+  z-index: 1;
+}
+
+.tomo-intro-kicker {
+  margin: 0;
+  color: rgba(216,199,255,.78);
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+}
+
+.tomo-intro-copy h2 {
+  margin: .35rem 0 0;
+  font-family: var(--font-jakarta), system-ui, sans-serif;
+  font-size: clamp(1.35rem, 5vw, 2rem);
+  font-weight: 950;
+  letter-spacing: -.045em;
+}
+
+.tomo-intro-copy p:last-child {
+  margin: .45rem auto 0;
+  max-width: 20rem;
+  color: rgba(255,247,223,.66);
+  font-size: .92rem;
+  line-height: 1.55;
+}
+
+.tomo-intro-progress {
+  position: relative;
+  z-index: 1;
+  margin: 1.25rem auto 0;
+  height: .22rem;
+  width: min(15rem, 70vw);
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255,247,223,.11);
+}
+
+.tomo-intro-progress::after {
+  content: "";
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--tomo-plum-soft), var(--tomo-gold));
+  transform-origin: left;
+  animation: tomo-intro-progress 1.05s ease both;
+}
+
+@keyframes tomo-intro-rise {
+  from { opacity: 0; transform: translateY(.85rem) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes tomo-page-turn {
+  0% { opacity: 0; transform: rotateY(0deg) translateX(0); }
+  18% { opacity: 1; }
+  65% { opacity: .95; transform: rotateY(-142deg) translateX(-.06rem); }
+  100% { opacity: 0; transform: rotateY(-178deg) translateX(-.08rem); }
+}
+
+@keyframes tomo-intro-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
 /* Animações suaves — aplicadas apenas em elementos interativos, não no html todo */
 button,
 a,

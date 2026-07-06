@@ -7,6 +7,8 @@ import { ContinueReadingBanner } from "@/components/reader/continue-reading-bann
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { CookieConsent } from "@/components/layout/cookie-consent";
+import { TomoversoIntroSplash } from "@/components/layout/tomoverso-intro-splash";
+import { TomoversoRoutePreloader } from "@/components/layout/tomoverso-route-preloader";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -57,7 +59,11 @@ export default function RootLayout({
       <head>
         <link rel="icon" type="image/x-icon" href="/favicon-20260706.ico" />
         <link rel="icon" type="image/png" href="/favicon-20260706.png" />
+        <link rel="preload" as="image" href="/logo-tomoverso-mark-192.png" />
         <link rel="manifest" href="/manifest.json" />
+        <script dangerouslySetInnerHTML={{
+          __html: `(function(){try{document.documentElement.setAttribute('data-intro-seen',sessionStorage.getItem('tomoverso_intro_seen')==='true'?'true':'false');}catch(e){document.documentElement.setAttribute('data-intro-seen','false');}})()`
+        }} />
         <meta property="og:image" content="https://tomoverso.studio/logo-tomoverso-editora-20260706.png" />
         <meta property="og:image:width" content="1254" />
         <meta property="og:image:height" content="1254" />
@@ -77,11 +83,13 @@ export default function RootLayout({
       <body className="antialiased min-h-screen flex flex-col">
         <LanguageProvider>
           <ThemeProvider defaultTheme="dark" defaultColor="sepia">
+            <TomoversoIntroSplash />
             <Navbar />
             <ContinueReadingBanner />
             <main className="flex-1">{children}</main>
             <Footer />
             <CookieConsent />
+            <TomoversoRoutePreloader />
             <Toaster position="top-center" richColors />
             </ThemeProvider>
         </LanguageProvider>

@@ -18,6 +18,7 @@
 
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getCookie } from "@/lib/client-cookies";
 
@@ -51,7 +52,7 @@ export function AdSlot({ format = "auto", className = "" }: { format?: string; c
           Espaço reservado para anúncio.
         </p>
         <p className="mt-2 text-[10px] opacity-30">
-          <a href="/store/plans" className="hover:underline">Assine Pro e remova anúncios</a>
+          <Link href="/store/plans" className="hover:underline">Assine Pro e remova anúncios</Link>
         </p>
       </div>
     </div>
@@ -77,12 +78,12 @@ export function SubscribePrompt() {
       <p className="mt-1 text-sm text-muted-foreground">
         Remova anúncios, tenha acesso antecipado e badge exclusivo.
       </p>
-      <a
+      <Link
         href="/store/plans"
         className="mt-3 inline-block rounded-xl bg-amber-500 px-6 py-2 text-sm font-bold text-amber-950 hover:bg-amber-400"
       >
         Ver planos
-      </a>
+      </Link>
     </div>
   );
 }
