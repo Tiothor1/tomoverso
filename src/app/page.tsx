@@ -192,7 +192,7 @@ export default async function HomePage() {
     <main className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top_left,color-mix(in oklch,var(--primary) 16%,transparent),transparent_34%),radial-gradient(circle_at_85%_8%,color-mix(in oklch,var(--primary) 12%,transparent),transparent_28%),linear-gradient(180deg,color-mix(in oklch,var(--background) 60%,transparent),var(--background)_42%,color-mix(in oklch,var(--background) 95%,transparent))] dark:bg-[radial-gradient(circle_at_top_left,color-mix(in oklch,var(--primary) 20%,transparent),transparent_34%),radial-gradient(circle_at_85%_8%,color-mix(in oklch,var(--primary) 12%,transparent),transparent_28%),linear-gradient(180deg,color-mix(in oklch,var(--background) 80%,transparent),color-mix(in oklch,var(--background) 50%,transparent)_44%,transparent)]">
       {/* Hero */}
       <section className="relative border-b border-border/50">
-        <div className="container relative mx-auto grid max-w-7xl gap-6 px-4 py-8 md:py-14 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-center lg:py-16">
+        <div className="container relative mx-auto grid max-w-7xl gap-5 px-4 py-6 md:py-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center lg:py-12">
           <div className="space-y-5">
             <Badge className="rounded-full border border-violet-500/20 bg-violet-500/8 px-4 py-1 text-xs text-violet-700 shadow-sm dark:text-violet-200">
               <Sparkles className="mr-2 h-3 w-3" /> Editora digital brasileira para leitores e autores
