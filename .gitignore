@@ -44,6 +44,7 @@ skills-lock.json
 *.pem
 *.txt
 !ads.txt
+!robots.txt
 
 # debug
 npm-debug.log*

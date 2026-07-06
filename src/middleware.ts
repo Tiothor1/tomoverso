@@ -61,12 +61,12 @@ export function middleware(request: NextRequest) {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // unsafe-inline needed for Next.js
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://pagead2.googlesyndication.com", // unsafe-inline needed for Next.js
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://*.vercel.app https://*.catbox.moe https://mangaonline.blue https://centralnovel.com https://kakuyomu.jp https://archiveofourown.org https://files.catbox.moe",
+      "img-src 'self' data: blob: https://*.vercel.app https://*.catbox.moe https://mangaonline.blue https://centralnovel.com https://kakuyomu.jp https://archiveofourown.org https://files.catbox.moe https://www.google-analytics.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.vercel.app",
-      "frame-src 'none'",
+      "connect-src 'self' https://*.vercel.app https://www.google-analytics.com https://region1.google-analytics.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net",
+      "frame-src https://googleads.g.doubleclick.net https://*.googlesyndication.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
