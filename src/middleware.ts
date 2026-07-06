@@ -61,7 +61,7 @@ export function middleware(request: NextRequest) {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://pagead2.googlesyndication.com", // unsafe-inline needed for Next.js
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.adtrafficquality.google", // unsafe-inline needed for Next.js
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.vercel.app https://*.catbox.moe https://mangaonline.blue https://centralnovel.com https://kakuyomu.jp https://archiveofourown.org https://files.catbox.moe https://www.google-analytics.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://www.google.com.br",
       "font-src 'self' data:",
