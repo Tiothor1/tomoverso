@@ -3,15 +3,16 @@
 import { useEffect, useRef, useState } from "react";
 
 const INTRO_KEY = "tomoverso_intro_seen";
-const DEFAULT_DURATION_MS = 3000;
-const REDUCED_MOTION_DURATION_MS = 1200;
-const LEAVE_OFFSET = 320;
+const MINIMUM_VISIBLE_MS = 1600;
+const REDUCED_MOTION_MIN_MS = 800;
+const LEAVE_MS = 320;
 
 const LOADING_STAGES = [
   "Organizando a estante para a sua próxima leitura.",
   "Buscando os melhores títulos do catálogo.",
   "Ajeitando as capas e preparando os capítulos.",
   "Quase tudo pronto — separando seu lugar na estante.",
+  "Só mais um instante, já vai.",
 ];
 
 type SplashState = "visible" | "leaving" | "hidden";
@@ -20,10 +21,9 @@ export function TomoversoIntroSplash() {
   const [state, setState] = useState<SplashState>("visible");
   const [stageIndex, setStageIndex] = useState(0);
   const stageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startedAtRef = useRef(0);
 
   useEffect(() => {
-    const timers: ReturnType<typeof setTimeout>[] = [];
-
     try {
       if (window.sessionStorage.getItem(INTRO_KEY) === "true") {
         document.documentElement.setAttribute("data-intro-seen", "true");
@@ -36,33 +36,54 @@ export function TomoversoIntroSplash() {
       document.documentElement.setAttribute("data-intro-seen", "false");
     }
 
+    startedAtRef.current = Date.now();
+
     const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    const duration = prefersReducedMotion ? REDUCED_MOTION_DURATION_MS : DEFAULT_DURATION_MS;
-    const leaveAt = Math.max(180, duration - LEAVE_OFFSET);
+    const minVisible = prefersReducedMotion ? REDUCED_MOTION_MIN_MS : MINIMUM_VISIBLE_MS;
 
-    // Stage rotation: change copy every ~700ms to feel alive
-    const startStage = () => {
-      let idx = 0;
-      setStageIndex(0);
-      stageTimerRef.current = setInterval(() => {
-        idx = (idx + 1) % LOADING_STAGES.length;
-        setStageIndex(idx);
-      }, 680);
-    };
-    startStage();
+    // Stage rotation
+    let idx = 0;
+    setStageIndex(0);
+    stageTimerRef.current = setInterval(() => {
+      idx = (idx + 1) % LOADING_STAGES.length;
+      setStageIndex(idx);
+    }, 680);
 
-    timers.push(setTimeout(() => setState("leaving"), leaveAt));
-    timers.push(
-      setTimeout(() => {
-        if (stageTimerRef.current) clearInterval(stageTimerRef.current);
-        document.documentElement.setAttribute("data-intro-seen", "true");
-        setState("hidden");
-      }, duration)
-    );
+    function tryDismiss() {
+      const elapsed = Date.now() - startedAtRef.current;
+      const remaining = minVisible - elapsed;
+
+      if (remaining > 0) {
+        // Page loaded before minimum time → wait then dismiss
+        setTimeout(() => {
+          setState("leaving");
+          setTimeout(() => {
+            if (stageTimerRef.current) clearInterval(stageTimerRef.current);
+            document.documentElement.setAttribute("data-intro-seen", "true");
+            setState("hidden");
+          }, LEAVE_MS);
+        }, remaining);
+      } else {
+        // Minimum time already passed → dismiss now
+        setState("leaving");
+        setTimeout(() => {
+          if (stageTimerRef.current) clearInterval(stageTimerRef.current);
+          document.documentElement.setAttribute("data-intro-seen", "true");
+          setState("hidden");
+        }, LEAVE_MS);
+      }
+    }
+
+    if (document.readyState === "complete") {
+      // Page already fully loaded (e.g. bfcache restore)
+      tryDismiss();
+    } else {
+      window.addEventListener("load", tryDismiss, { once: true });
+    }
 
     return () => {
-      timers.forEach(clearTimeout);
       if (stageTimerRef.current) clearInterval(stageTimerRef.current);
+      window.removeEventListener("load", tryDismiss);
     };
   }, []);
 
