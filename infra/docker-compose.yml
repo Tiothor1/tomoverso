@@ -7,25 +7,23 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"
+    env_file:
+      - ../.env
     environment:
       - NODE_ENV=production
       - HOSTNAME=0.0.0.0
       - PORT=3000
-      # ── Banco de dados ──
-      # Persiste o banco SQLite fora do container pra não perder em restart
+      # Banco SQLite persistente no volume Docker; não usa /tmp como na Vercel.
       - DB_DIR=/data
     volumes:
       - tomoverso_data:/data
-      # ── Uploads locais (se quiser manter num volume separado) ──
-      # - tomoverso_uploads:/app/public/uploads
     healthcheck:
       test: ["CMD", "wget", "--spider", "http://localhost:3000"]
       interval: 30s
       timeout: 10s
-      retries: 3
-      start_period: 30s
+      retries: 5
+      start_period: 60s
 
-  # ── Proxy reverso com SSL automático (Caddy) ──
   caddy:
     image: caddy:2-alpine
     container_name: tomoverso-caddy

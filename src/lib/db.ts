@@ -5,7 +5,11 @@ import { gunzipSync } from "zlib";
 import { bundledVndbVisualNovels } from "@/lib/data/bundled-vndb-visual-novels";
 
 function getDbDir(): string {
-  // Em Vercel, o filesystem é read-only fora de /tmp
+  // Na VPS/Docker, DB_DIR aponta para um volume persistente (/data).
+  // Na Vercel, o filesystem é read-only fora de /tmp.
+  if (process.env.DB_DIR) {
+    return process.env.DB_DIR;
+  }
   if (process.env.VERCEL || process.env.NODE_ENV === "production") {
     return "/tmp/tomoverso";
   }

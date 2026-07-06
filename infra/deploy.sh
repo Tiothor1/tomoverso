@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # ============================================================
 # deploy.sh — Deploy da Tomo Verso na VPS
-# Uso: ssh vps 'bash -s' < deploy.sh
-# ou: curl -sL https://raw.githubusercontent.com/Tiothor1/tomoverso/main/infra/deploy.sh | bash
+# Uso na VPS:
+#   curl -fsSL https://raw.githubusercontent.com/Tiothor1/tomoverso/main/infra/deploy.sh | bash
 # ============================================================
 set -euo pipefail
 
@@ -10,57 +10,87 @@ REPO_URL="https://github.com/Tiothor1/tomoverso.git"
 APP_DIR="/opt/tomoverso"
 COMPOSE_FILE="$APP_DIR/infra/docker-compose.yml"
 
+if [ "$(id -u)" -eq 0 ]; then
+  SUDO=""
+else
+  SUDO="sudo"
+fi
+
 echo "🚀 Tomo Verso Deploy"
 echo "────────────────────"
 
-# ── 1. Instalar Docker se necessário ──
-if ! command -v docker &>/dev/null; then
-  echo "📦 Instalando Docker..."
-  curl -fsSL https://get.docker.com | bash
-  sudo usermod -aG docker "$USER"
+# ── 1. Pacotes base ─────────────────────────────────────────
+if command -v apt-get >/dev/null 2>&1; then
+  echo "📦 Garantindo pacotes base..."
+  $SUDO apt-get update -y
+  $SUDO apt-get install -y git curl ca-certificates
 fi
 
-if ! command -v docker compose &>/dev/null; then
-  echo "📦 Instalando Docker Compose..."
-  sudo apt-get install -y docker-compose-plugin
+# ── 2. Docker + Compose ─────────────────────────────────────
+if ! command -v docker >/dev/null 2>&1; then
+  echo "🐳 Instalando Docker..."
+  curl -fsSL https://get.docker.com | $SUDO sh
 fi
 
-# ── 2. Clonar/atualizar o repositório ──
-if [ -d "$APP_DIR" ]; then
+if ! docker compose version >/dev/null 2>&1; then
+  echo "🐳 Instalando Docker Compose plugin..."
+  $SUDO apt-get install -y docker-compose-plugin
+fi
+
+# ── 3. Clonar/atualizar repositório ─────────────────────────
+if [ -d "$APP_DIR/.git" ]; then
   echo "🔄 Atualizando repositório..."
   cd "$APP_DIR"
-  git stash || true
-  git pull origin main
+  git fetch origin main
+  git reset --hard origin/main
 else
-  echo "📥 Clonando repositório..."
-  sudo mkdir -p "$APP_DIR"
-  sudo chown "$USER:$USER" "$APP_DIR"
+  echo "📥 Clonando repositório em $APP_DIR..."
+  $SUDO mkdir -p "$APP_DIR"
+  $SUDO chown -R "$(id -un):$(id -gn)" "$APP_DIR"
   git clone "$REPO_URL" "$APP_DIR"
   cd "$APP_DIR"
 fi
 
-# ── 3. Copiar .env (se existir) ──
-if [ -f ".env.production" ]; then
-  echo "🔑 Usando .env.production"
-  cp .env.production .env
+# ── 4. Env file ─────────────────────────────────────────────
+# O compose injeta /opt/tomoverso/.env no container.
+# Se não existir, cria vazio para o compose não falhar.
+if [ ! -f "$APP_DIR/.env" ]; then
+  echo "⚠️  Criando .env vazio. Depois vamos preencher Mercado Pago/Auth/etc."
+  cat > "$APP_DIR/.env" <<'EOF'
+# Tomo Verso production env
+# Preencher depois com AUTH_SECRET, ADMIN_SECRET_PATH, Mercado Pago etc.
+EOF
 fi
 
-# ── 4. Build e restart ──
-echo "🏗️  Buildando containers..."
-docker compose -f "$COMPOSE_FILE" build --no-cache tomoverso
+# ── 5. Firewall básico ──────────────────────────────────────
+if command -v ufw >/dev/null 2>&1; then
+  echo "🛡️  Liberando portas 22/80/443..."
+  $SUDO ufw allow OpenSSH || true
+  $SUDO ufw allow 80/tcp || true
+  $SUDO ufw allow 443/tcp || true
+fi
 
-echo "🔄 Reiniciando serviços..."
+# ── 6. Build e restart ──────────────────────────────────────
+echo "🏗️  Buildando aplicação..."
+docker compose -f "$COMPOSE_FILE" build tomoverso
+
+echo "🔄 Subindo serviços..."
 docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
 
-# ── 5. Verificar se subiu ──
-echo "⏳ Aguardando healthcheck..."
-sleep 10
-if docker compose -f "$COMPOSE_FILE" ps tomoverso | grep -q "healthy"; then
-  echo "✅ Deploy concluído com sucesso!"
-else
-  echo "⚠️  Container pode não estar saudável. Verifique:"
-  echo "   docker compose -f $COMPOSE_FILE logs tomoverso"
-fi
+# ── 7. Verificação ──────────────────────────────────────────
+echo "⏳ Aguardando o app iniciar..."
+sleep 20
 
-echo "📋 Logs:"
-docker compose -f "$COMPOSE_FILE" logs --tail=20 tomoverso
+APP_STATUS="$(docker inspect -f '{{.State.Health.Status}}' tomoverso 2>/dev/null || echo unknown)"
+echo "Status do container: $APP_STATUS"
+
+echo "📋 Últimos logs do app:"
+docker compose -f "$COMPOSE_FILE" logs --tail=40 tomoverso || true
+
+echo "📋 Containers:"
+docker compose -f "$COMPOSE_FILE" ps
+
+echo "✅ Deploy finalizado. Teste:"
+echo "   http://40.116.106.139"
+echo "   https://tomoversodn.northcentralus.cloudapp.azure.com"
+echo "   https://tomoverso.studio (quando o DNS apontar)"

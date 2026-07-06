@@ -1,35 +1,36 @@
 # Caddyfile — Tomo Verso Editora
-# Substitua tomoverso.com.br pelo seu domínio real
-# SSL é automático via Let's Encrypt
+# SSL automático via Let's Encrypt.
+# O host Azure já resolve para a VPS. O domínio tomoverso.studio precisa existir no DNS e apontar A -> 40.116.106.139.
 
-tomoverso.com.br {
-    # Redirecionar www para o domínio principal
-    @www {
-        host www.tomoverso.com.br
-    }
-    redir @www https://tomoverso.com.br{uri} permanent
-
-    # Proxy reverso pro Next.js
+(tomoverso_proxy) {
     reverse_proxy tomoverso:3000 {
-        # Preservar IP real do visitante
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
         header_up X-Forwarded-Proto {scheme}
     }
 
-    # Logs
-    log {
-        output file /data/logs/access.log
-    }
-
-    # Comprimir CSS/JS/HTML
     encode zstd gzip
 
-    # Cache de arquivos estáticos
-    header /static/* {
-        Cache-Control "public, max-age=31536000, immutable"
-    }
     header /_next/static/* {
         Cache-Control "public, max-age=31536000, immutable"
     }
+
+    log {
+        output file /data/logs/tomoverso-access.log
+    }
+}
+
+# Teste imediato por IP, sem SSL.
+http://40.116.106.139 {
+    import tomoverso_proxy
+}
+
+# Teste imediato pelo DNS público da Azure + domínio definitivo quando o DNS existir.
+tomoversodn.northcentralus.cloudapp.azure.com, tomoverso.studio, www.tomoverso.studio {
+    @www {
+        host www.tomoverso.studio
+    }
+    redir @www https://tomoverso.studio{uri} permanent
+
+    import tomoverso_proxy
 }

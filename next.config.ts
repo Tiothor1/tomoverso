@@ -2,6 +2,16 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  outputFileTracingExcludes: {
+    "*": [
+      "./data/**/*.db",
+      "./data/**/*.db-shm",
+      "./data/**/*.db-wal",
+      "./data/backups/**/*",
+      "./.git/**/*",
+      "./.next/**/*",
+    ],
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "t.vndb.org" },
