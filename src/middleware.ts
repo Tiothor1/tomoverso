@@ -18,6 +18,38 @@ function rateLimit(key: string, maxRequests: number, windowMs: number): boolean 
   return true;
 }
 
+function shouldRateLimitAuthRequest(pathname: string, method: string): boolean {
+  // Nunca rate-limit navegação GET/HEAD de páginas como /auth/login.
+  // Antes isso fazia clique rápido no link "Entrar" renderizar JSON 429 cru.
+  if (method === "GET" || method === "HEAD" || method === "OPTIONS") return false;
+
+  return (
+    pathname.startsWith("/api/auth/") ||
+    pathname === "/api/admin/login" ||
+    pathname === "/auth/login" ||
+    pathname === "/auth/signup" ||
+    pathname === "/auth/verify"
+  );
+}
+
+function tooManyAttemptsResponse(request: NextRequest): NextResponse {
+  const headers = new Headers({ "Retry-After": "60" });
+  const accept = request.headers.get("accept") || "";
+  const isApiRequest = request.nextUrl.pathname.startsWith("/api/") || accept.includes("application/json");
+
+  if (isApiRequest) {
+    return NextResponse.json(
+      { error: "Muitas tentativas. Aguarde 1 minuto e tente novamente." },
+      { status: 429, headers }
+    );
+  }
+
+  const url = request.nextUrl.clone();
+  url.pathname = request.nextUrl.pathname.startsWith("/auth/signup") ? "/auth/signup" : "/auth/login";
+  url.searchParams.set("error", "too_many_attempts");
+  return NextResponse.redirect(url, { status: 303, headers });
+}
+
 // Paths that don't need CSRF / heavy security
 const PUBLIC_PATHS = [
   "/_next/",
@@ -73,18 +105,14 @@ export function middleware(request: NextRequest) {
     ].join("; ")
   );
 
-  // ── Rate limiting for auth endpoints ────────────────────────────
-  const isAuthPath = pathname.startsWith("/auth/") || pathname.startsWith("/api/auth/");
+  // ── Rate limiting for auth mutations ─────────────────────────────
   const isApiPath = pathname.startsWith("/api/");
 
-  if (isAuthPath) {
+  if (shouldRateLimitAuthRequest(pathname, request.method)) {
     const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
     const key = `auth:${ip}`;
-    if (!rateLimit(key, 10, 60000)) { // 10 requests per minute
-      return NextResponse.json(
-        { error: "Muitas tentativas. Tente novamente em 1 minuto." },
-        { status: 429 }
-      );
+    if (!rateLimit(key, 10, 60000)) { // 10 mutações por minuto
+      return tooManyAttemptsResponse(request);
     }
   }
 

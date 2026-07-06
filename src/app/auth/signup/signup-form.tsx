@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { BookOpen, Mail, Lock, User, Eye, EyeOff, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,30 @@ export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const submittingRef = useRef(false);
+
+  async function handleSubmit(formData: FormData) {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const result = await signupAction(formData);
+      if (result.redirect) {
+        window.location.href = result.redirect;
+        return;
+      }
+      if (!result.ok && result.error) {
+        setError(result.error);
+      }
+    } catch {
+      setError("Não consegui criar a conta agora. Aguarde alguns segundos e tente de novo.");
+    }
+
+    submittingRef.current = false;
+    setLoading(false);
+  }
 
   return (
     <div className="aurora-bg relative flex min-h-[80vh] items-center justify-center overflow-hidden px-4 py-12">
@@ -35,19 +59,7 @@ export function SignupForm() {
         <Card className="glass-panel">
           <CardContent className="pt-6">
             <form
-              action={async (formData) => {
-                setLoading(true);
-                setError(null);
-                const result = await signupAction(formData);
-                if (result.redirect) {
-                  window.location.href = result.redirect;
-                  return;
-                }
-                if (!result.ok && result.error) {
-                  setError(result.error);
-                  setLoading(false);
-                }
-              }}
+              action={handleSubmit}
               className="space-y-4"
             >
               <div className="space-y-2">

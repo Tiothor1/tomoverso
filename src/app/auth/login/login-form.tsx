@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { BookOpen, Mail, Lock, Eye, EyeOff, ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,19 +13,29 @@ export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const submittingRef = useRef(false);
 
   async function handleSubmit(formData: FormData) {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setLoading(true);
     setError(null);
-    const result = await loginAction(formData);
-    if (result.redirect) {
-      window.location.href = result.redirect;
-      return;
+
+    try {
+      const result = await loginAction(formData);
+      if (result.redirect) {
+        window.location.href = result.redirect;
+        return;
+      }
+      if (!result.ok && result.error) {
+        setError(result.error);
+      }
+    } catch {
+      setError("Não consegui entrar agora. Aguarde alguns segundos e tente de novo.");
     }
-    if (!result.ok && result.error) {
-      setError(result.error);
-      setLoading(false);
-    }
+
+    submittingRef.current = false;
+    setLoading(false);
   }
 
   return (
