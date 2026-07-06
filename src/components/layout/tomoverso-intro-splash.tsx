@@ -1,15 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const INTRO_KEY = "tomoverso_intro_seen";
-const DEFAULT_DURATION_MS = 1050;
-const REDUCED_MOTION_DURATION_MS = 650;
+const DEFAULT_DURATION_MS = 3000;
+const REDUCED_MOTION_DURATION_MS = 1200;
+const LEAVE_OFFSET = 320;
+
+const LOADING_STAGES = [
+  "Organizando a estante para a sua próxima leitura.",
+  "Buscando os melhores títulos do catálogo.",
+  "Ajeitando as capas e preparando os capítulos.",
+  "Quase tudo pronto — separando seu lugar na estante.",
+];
 
 type SplashState = "visible" | "leaving" | "hidden";
 
 export function TomoversoIntroSplash() {
   const [state, setState] = useState<SplashState>("visible");
+  const [stageIndex, setStageIndex] = useState(0);
+  const stageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const timers: ReturnType<typeof setTimeout>[] = [];
@@ -28,17 +38,32 @@ export function TomoversoIntroSplash() {
 
     const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     const duration = prefersReducedMotion ? REDUCED_MOTION_DURATION_MS : DEFAULT_DURATION_MS;
-    const leaveAt = Math.max(120, duration - 260);
+    const leaveAt = Math.max(180, duration - LEAVE_OFFSET);
+
+    // Stage rotation: change copy every ~700ms to feel alive
+    const startStage = () => {
+      let idx = 0;
+      setStageIndex(0);
+      stageTimerRef.current = setInterval(() => {
+        idx = (idx + 1) % LOADING_STAGES.length;
+        setStageIndex(idx);
+      }, 680);
+    };
+    startStage();
 
     timers.push(setTimeout(() => setState("leaving"), leaveAt));
     timers.push(
       setTimeout(() => {
+        if (stageTimerRef.current) clearInterval(stageTimerRef.current);
         document.documentElement.setAttribute("data-intro-seen", "true");
         setState("hidden");
       }, duration)
     );
 
-    return () => timers.forEach(clearTimeout);
+    return () => {
+      timers.forEach(clearTimeout);
+      if (stageTimerRef.current) clearInterval(stageTimerRef.current);
+    };
   }, []);
 
   if (state === "hidden") return null;
@@ -66,7 +91,7 @@ export function TomoversoIntroSplash() {
         <div className="tomo-intro-copy">
           <p className="tomo-intro-kicker">Tomo Verso Editora</p>
           <h2>Abrindo um novo capítulo...</h2>
-          <p>Organizando a estante para a sua próxima leitura.</p>
+          <p className="tomo-intro-sub" key={stageIndex}>{LOADING_STAGES[stageIndex]}</p>
         </div>
 
         <div className="tomo-intro-progress" aria-hidden="true" />

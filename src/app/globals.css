@@ -948,6 +948,11 @@ html[data-intro-seen="true"] .tomoverso-intro-splash {
   color: rgba(255,247,223,.66);
   font-size: .92rem;
   line-height: 1.55;
+  transition: opacity .22s ease;
+}
+
+.tomo-intro-sub {
+  animation: tomo-intro-text-fade .24s ease both;
 }
 
 .tomo-intro-progress {
@@ -969,7 +974,7 @@ html[data-intro-seen="true"] .tomoverso-intro-splash {
   border-radius: inherit;
   background: linear-gradient(90deg, var(--tomo-plum-soft), var(--tomo-gold));
   transform-origin: left;
-  animation: tomo-intro-progress 1.05s ease both;
+  animation: tomo-intro-progress 2.5s ease both;
 }
 
 @keyframes tomo-intro-rise {
@@ -987,6 +992,11 @@ html[data-intro-seen="true"] .tomoverso-intro-splash {
 @keyframes tomo-intro-progress {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
+}
+
+@keyframes tomo-intro-text-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* Animações suaves — aplicadas apenas em elementos interativos, não no html todo */
