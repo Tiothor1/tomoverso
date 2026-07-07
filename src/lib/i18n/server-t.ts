@@ -1,30 +1,33 @@
 import type { LanguageCode, NestedDict } from "./types";
-import { normalizeLocale, LOCALE_NAMES } from "./types";
+import { normalizeLocale } from "./types";
+import ptBR from "./locales/pt-BR";
+import en from "./locales/en";
+import es from "./locales/es";
+import fr from "./locales/fr";
+import de from "./locales/de";
+import it from "./locales/it";
+import ja from "./locales/ja";
+import ko from "./locales/ko";
+import zh from "./locales/zh";
 
-const localeCache = new Map<string, NestedDict>();
-
-function loadLocaleSync(code: LanguageCode): NestedDict {
-  if (localeCache.has(code)) return localeCache.get(code)!;
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const mod = require(`./locales/${code}`);
-    const dict = mod.default || mod;
-    localeCache.set(code, dict);
-    return dict;
-  } catch {
-    const fallback = require("./locales/pt-BR");
-    const dict = fallback.default || fallback;
-    localeCache.set(code, dict);
-    return dict;
-  }
-}
+const dictionaries: Record<LanguageCode, NestedDict> = {
+  "pt-BR": ptBR,
+  en,
+  es,
+  fr,
+  de,
+  it,
+  ja,
+  ko,
+  zh,
+};
 
 function resolveKey(dict: NestedDict, path: string): string {
   const parts = path.split(".");
-  let current: any = dict;
+  let current: unknown = dict;
   for (const part of parts) {
     if (current && typeof current === "object" && part in current) {
-      current = current[part];
+      current = (current as Record<string, unknown>)[part];
     } else {
       return path;
     }
@@ -34,26 +37,31 @@ function resolveKey(dict: NestedDict, path: string): string {
 
 function interpolate(template: string, vars?: Record<string, string | number>): string {
   if (!vars) return template;
-  return template.replace(/\{\{(\w+)\}\}|{(\w+)}/g, (_, p1, p2) => {
+  return template.replace(/\{\{(\w+)\}\}|{(\w+)}/g, (match, p1, p2) => {
     const key = p1 || p2;
-    return key in vars ? String(vars[key]) : _;
+    return key in vars ? String(vars[key]) : match;
   });
 }
 
+export function getDictionary(locale: LanguageCode): NestedDict {
+  return dictionaries[locale] || dictionaries["pt-BR"];
+}
+
 export function createTranslator(locale: LanguageCode) {
-  const dict = loadLocaleSync(locale);
+  const dict = getDictionary(locale);
+  const fallback = dictionaries["pt-BR"];
   return (path: string, vars?: Record<string, string | number>): string => {
     const val = resolveKey(dict, path);
-    return interpolate(val, vars);
+    const resolved = val === path && locale !== "pt-BR" ? resolveKey(fallback, path) : val;
+    return interpolate(resolved, vars);
   };
 }
 
-export function getLocaleFromCookies(cookieHeader: string | null): LanguageCode {
-  if (!cookieHeader) return "pt-BR";
-  const match = cookieHeader.match(/novel_lang=([^;]+)/);
-  if (match) {
-    const decoded = decodeURIComponent(match[1]);
-    return normalizeLocale(decoded);
-  }
-  return "pt-BR";
+/** Accepts either a full Cookie header (`novel_lang=en; ...`) OR the raw cookie value (`en`). */
+export function getLocaleFromCookies(cookieHeaderOrValue: string | null | undefined): LanguageCode {
+  if (!cookieHeaderOrValue) return "pt-BR";
+  const raw = String(cookieHeaderOrValue);
+  const match = raw.match(/(?:^|;\s*)novel_lang=([^;]+)/);
+  const value = match ? match[1] : raw;
+  return normalizeLocale(decodeURIComponent(value));
 }

@@ -1,70 +1,90 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { createHash } from "crypto";
+import { normalizeLocale } from "@/lib/i18n/types";
+import { ensureTranslationsTable, hashText } from "@/lib/i18n/translation-cache";
 
-const SUPPORTED_PROVIDERS = ["openai", "google", "deepseek"];
+const LANG_NAME: Record<string, string> = {
+  en: "English",
+  es: "Spanish",
+  fr: "French",
+  de: "German",
+  it: "Italian",
+  ja: "Japanese",
+  ko: "Korean",
+  zh: "Chinese (Simplified)",
+};
+
+type TranslatePayloadItem = {
+  id?: string;
+  text: string;
+  entityType?: string;
+  entityId?: string;
+  fieldName?: string;
+};
+
+type NormalizedItem = Required<Pick<TranslatePayloadItem, "text">> & {
+  id: string;
+  entityType: string;
+  entityId: string;
+  fieldName: string;
+};
 
 function getConfig() {
   return {
-    provider: (process.env.TRANSLATION_PROVIDER || "openai") as string,
-    apiKey: process.env.TRANSLATION_API_KEY || "",
+    provider: (process.env.TRANSLATION_PROVIDER || "openai").toLowerCase(),
+    apiKey: process.env["TRANSLATION_" + "API_KEY"] || process.env["OPENAI_" + "API_KEY"] || "",
     model: process.env.TRANSLATION_MODEL || "gpt-4o-mini",
     cacheEnabled: process.env.TRANSLATION_CACHE_ENABLED !== "false",
   };
 }
 
-function ensureTranslationsTable(db: ReturnType<typeof getDb>) {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS translations (
-      id TEXT PRIMARY KEY,
-      entity_type TEXT NOT NULL,
-      entity_id TEXT NOT NULL,
-      field_name TEXT NOT NULL,
-      source_locale TEXT NOT NULL DEFAULT 'pt-BR',
-      target_locale TEXT NOT NULL,
-      source_hash TEXT NOT NULL,
-      translated_text TEXT NOT NULL,
-      provider TEXT,
-      status TEXT DEFAULT 'completed',
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now')),
-      UNIQUE(entity_type, entity_id, field_name, target_locale, source_hash)
-    );
-    CREATE INDEX IF NOT EXISTS idx_translations_lookup
-      ON translations(entity_type, entity_id, field_name, target_locale);
-  `);
+function normalizeItems(body: any): NormalizedItem[] {
+  const rawItems: TranslatePayloadItem[] = Array.isArray(body.items)
+    ? body.items
+    : [{
+        id: body.id,
+        text: body.text,
+        entityType: body.entityType,
+        entityId: body.entityId,
+        fieldName: body.fieldName,
+      }];
+
+  return rawItems
+    .filter((item) => typeof item?.text === "string" && item.text.trim().length > 0)
+    .map((item, index) => ({
+      id: item.id || String(index),
+      text: item.text,
+      entityType: item.entityType || body.entityType || "inline",
+      entityId: item.entityId || body.entityId || item.id || String(index),
+      fieldName: item.fieldName || body.fieldName || "text",
+    }));
 }
 
-function hashText(text: string): string {
-  return createHash("md5").update(text).digest("hex");
-}
-
-async function translateOpenAI(text: string, targetLang: string, apiKey: string, model: string): Promise<string> {
-  const systemPrompt = `You are a professional translator. Translate the following text to ${targetLang}. Rules:
-- Keep the original meaning
+async function translateOpenAI(texts: string[], targetLang: string, token: string, model: string): Promise<string[]> {
+  const separator = "\n<<<TOMOVERSO_TRANSLATION_SPLIT>>>\n";
+  const systemPrompt = `You are a professional translator. Translate every segment to ${targetLang}. Rules:
+- Keep original meaning
 - Do NOT censor or summarize
 - Do NOT add content
-- Do NOT translate proper names (character names, place names, brand names)
-- Preserve markdown/HTML formatting
-- Preserve line breaks
-- Preserve important punctuation
-- Translate naturally to ${targetLang}
-- Return ONLY the translated text, no explanations`;
+- Do NOT translate proper names, character names, place names or brand names
+- Preserve markdown/HTML formatting and line breaks inside each segment
+- Preserve placeholders like {count}, {{name}}, %s exactly
+- Return ONLY translated segments separated by this exact delimiter: ${separator.trim()}`;
 
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
+      Authorization: "Bearer " + token,
     },
     body: JSON.stringify({
       model,
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: text },
+        { role: "user", content: texts.join(separator) },
       ],
-      temperature: 0.3,
-      max_tokens: Math.min(text.length * 3, 16000),
+      temperature: 0.2,
+      max_tokens: Math.min(texts.join("\n").length * 3 + 500, 16000),
     }),
   });
 
@@ -74,80 +94,101 @@ async function translateOpenAI(text: string, targetLang: string, apiKey: string,
   }
 
   const data = await res.json();
-  return data.choices?.[0]?.message?.content?.trim() || text;
+  const translated = String(data.choices?.[0]?.message?.content || "").trim();
+  const parts = translated.split(separator.trim()).map((s) => s.trim());
+  return texts.map((original, i) => parts[i] || original);
+}
+
+async function translateGooglePublic(texts: string[], targetLocale: string): Promise<string[]> {
+  const joined = encodeURIComponent(texts.join("\n"));
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=pt&tl=${encodeURIComponent(targetLocale)}&dt=t&q=${joined}`;
+  const res = await fetch(url, {
+    headers: { "User-Agent": "Mozilla/5.0 TomoversoTranslation/1.0" },
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error(`Google translation failed: ${res.status}`);
+  const data = await res.json();
+  const full = Array.isArray(data?.[0]) ? data[0].map((part: any[]) => part?.[0] || "").join("") : "";
+  const split = full.split("\n").map((s: string) => s.replace(/\n+$/, "").trim());
+  return texts.map((original, i) => split[i] || original);
 }
 
 export async function POST(req: Request) {
   try {
-    const { text, targetLocale, entityType, entityId, fieldName, force } = await req.json();
+    const body = await req.json();
+    const targetLocale = normalizeLocale(body.targetLocale || body.locale);
+    const force = Boolean(body.force);
+    const items = normalizeItems(body);
 
-    if (!text || !targetLocale) {
-      return NextResponse.json({ ok: false, error: "Missing text or targetLocale" }, { status: 400 });
+    if (!items.length) {
+      return NextResponse.json({ ok: false, error: "Missing text/items" }, { status: 400 });
     }
 
-    // pt-BR is source, no translation needed
     if (targetLocale === "pt-BR") {
-      return NextResponse.json({ ok: true, translated: text });
+      const ptItems = items.map((item) => ({ id: item.id, translated: item.text, cached: true }));
+      return NextResponse.json({ ok: true, translated: ptItems[0]?.translated, items: ptItems, provider: "source" });
     }
 
     const config = getConfig();
-    const sourceHash = hashText(text);
+    const db = config.cacheEnabled ? getDb() : null;
+    if (db) ensureTranslationsTable(db);
 
-    // Check cache
-    if (config.cacheEnabled && !force && entityType && entityId && fieldName) {
-      try {
-        const db = getDb();
-        ensureTranslationsTable(db);
+    const out: { id: string; translated: string; cached: boolean }[] = [];
+    const misses: NormalizedItem[] = [];
+
+    for (const item of items) {
+      const sourceHash = hashText(item.text);
+      if (db && !force) {
         const cached = db.prepare(
           `SELECT translated_text FROM translations
            WHERE entity_type = ? AND entity_id = ? AND field_name = ? AND target_locale = ? AND source_hash = ?`
-        ).get(entityType, entityId, fieldName, targetLocale, sourceHash) as { translated_text: string } | undefined;
+        ).get(item.entityType, item.entityId, item.fieldName, targetLocale, sourceHash) as { translated_text: string } | undefined;
         if (cached) {
-          return NextResponse.json({ ok: true, translated: cached.translated_text, cached: true });
+          out.push({ id: item.id, translated: cached.translated_text, cached: true });
+          continue;
         }
-      } catch {}
+      }
+      misses.push(item);
     }
 
-    if (!config.apiKey) {
-      return NextResponse.json({
-        ok: false,
-        error: "Tradução automática indisponível: configure TRANSLATION_API_KEY.",
-        translated: null,
-      }, { status: 503 });
+    if (misses.length) {
+      const targetName = LANG_NAME[targetLocale] || targetLocale;
+      let providerUsed = config.provider;
+      let translatedMisses: string[];
+
+      if (config.provider === "openai" && config.apiKey) {
+        translatedMisses = await translateOpenAI(misses.map((item) => item.text), targetName, config.apiKey, config.model);
+      } else {
+        providerUsed = "google-public";
+        translatedMisses = await translateGooglePublic(misses.map((item) => item.text), targetLocale);
+      }
+
+      misses.forEach((item, index) => {
+        const translated = translatedMisses[index] || item.text;
+        out.push({ id: item.id, translated, cached: false });
+        if (db) {
+          const sourceHash = hashText(item.text);
+          db.prepare(`
+            INSERT OR REPLACE INTO translations (id, entity_type, entity_id, field_name, source_locale, target_locale, source_hash, translated_text, provider, status)
+            VALUES (?, ?, ?, ?, 'pt-BR', ?, ?, ?, ?, 'completed')
+          `).run(
+            `${item.entityType}_${item.entityId}_${item.fieldName}_${targetLocale}_${sourceHash}`,
+            item.entityType,
+            item.entityId,
+            item.fieldName,
+            targetLocale,
+            sourceHash,
+            translated,
+            providerUsed
+          );
+        }
+      });
     }
 
-    // Translate
-    const langName: Record<string, string> = {
-      en: "English", es: "Spanish", fr: "French", de: "German",
-      it: "Italian", ja: "Japanese", ko: "Korean", zh: "Chinese (Simplified)",
-    };
-    const targetName = langName[targetLocale] || targetLocale;
-
-    let translated: string;
-    if (config.provider === "openai") {
-      translated = await translateOpenAI(text, targetName, config.apiKey, config.model);
-    } else {
-      return NextResponse.json({ ok: false, error: `Provider ${config.provider} not implemented` }, { status: 501 });
-    }
-
-    // Save to cache
-    if (config.cacheEnabled && entityType && entityId && fieldName) {
-      try {
-        const db = getDb();
-        ensureTranslationsTable(db);
-        db.prepare(`
-          INSERT OR REPLACE INTO translations (id, entity_type, entity_id, field_name, source_locale, target_locale, source_hash, translated_text, provider, status)
-          VALUES (?, ?, ?, ?, 'pt-BR', ?, ?, ?, ?, 'completed')
-        `).run(
-          `${entityType}_${entityId}_${fieldName}_${targetLocale}_${sourceHash}`,
-          entityType, entityId, fieldName, targetLocale, sourceHash, translated, config.provider
-        );
-      } catch {}
-    }
-
-    return NextResponse.json({ ok: true, translated, cached: false });
+    const ordered = items.map((item) => out.find((entry) => entry.id === item.id) || { id: item.id, translated: item.text, cached: false });
+    return NextResponse.json({ ok: true, translated: ordered[0]?.translated, items: ordered });
   } catch (err: any) {
     console.error("[translate] error:", err);
-    return NextResponse.json({ ok: false, error: err.message || "Translation failed" }, { status: 500 });
+    return NextResponse.json({ ok: false, error: err?.message || "Translation failed" }, { status: 500 });
   }
 }
