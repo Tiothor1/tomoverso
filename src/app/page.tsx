@@ -24,6 +24,8 @@ import { getCurrentUser } from "@/lib/auth";
 import { publicReadableNovelSql, publicVisibleMangaSql } from "@/lib/public-catalog";
 import { CurationBadge, OriginalBadge } from "@/components/badges/content-badges";
 import { proxyImageUrl } from "@/lib/manga/image-proxy";
+import { cookies } from "next/headers";
+import { getLocaleFromCookies, createTranslator } from "@/lib/i18n/server-t";
 
 interface NovelRow {
   id: string;
@@ -103,6 +105,9 @@ export default async function HomePage() {
   let originalMangas: MangaRow[] = [];
   const user = await getCurrentUser().catch(() => null);
   const publishHref = user ? "/dashboard/novels/new" : "/auth/signup";
+  const cookieStore = await cookies();
+  const locale = getLocaleFromCookies(cookieStore.get("novel_lang")?.value || null);
+  const t = createTranslator(locale);
 
   try {
     const db = getDb();
@@ -195,23 +200,23 @@ export default async function HomePage() {
         <div className="container relative mx-auto grid max-w-7xl gap-5 px-4 py-6 md:py-10 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-center lg:py-12">
           <div className="space-y-5">
             <Badge className="rounded-full border border-violet-500/20 bg-violet-500/8 px-4 py-1 text-xs text-violet-700 shadow-sm dark:text-violet-200">
-              <Sparkles className="mr-2 h-3 w-3" /> Editora digital brasileira para leitores e autores
+              <Sparkles className="mr-2 h-3 w-3" /> {t("home.hero_badge")}
             </Badge>
             <div className="space-y-4">
               <h1 className="max-w-3xl font-heading text-4xl font-black tracking-[-0.045em] text-foreground md:text-5xl lg:text-6xl">
-                Histórias que parecem feitas para virar vício.
+                {t("home.hero_title")}
               </h1>
               <p className="max-w-2xl text-base leading-7 text-muted-foreground md:text-lg">
-                Leia mangás, manhwas e light novels em português — e publique sua própria história em uma plataforma editorial feita para descobrir novos autores.
+                {t("home.hero_subtitle")}
               </p>
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button size="default" asChild className="h-10 rounded-full bg-violet-700 px-5 text-sm text-white shadow-[0_12px_30px_rgba(109,40,217,.22)] hover:bg-violet-800">
-                <Link href="/explore">Começar a ler <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+                <Link href="/explore">{t("home.cta_explore")} <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
               </Button>
               <Button size="default" variant="outline" asChild className="h-10 rounded-full border-border/70 bg-background/70 px-5 text-sm backdrop-blur">
-                <Link href={publishHref}><PenLine className="mr-2 h-3.5 w-3.5" /> {user ? "Publicar minha obra" : "Publicar minha história"}</Link>
+                <Link href={publishHref}><PenLine className="mr-2 h-3.5 w-3.5" /> {user ? t("home.cta_publish_logged") : t("home.cta_publish")}</Link>
               </Button>
             </div>
 
@@ -219,22 +224,22 @@ export default async function HomePage() {
               <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-violet-500" />
               <input
                 name="q"
-                placeholder="Buscar obra, capítulo, autor..."
+                placeholder={t("home.search_placeholder")}
                 className="h-10 w-full rounded-xl bg-transparent pl-10 pr-24 text-sm outline-none placeholder:text-muted-foreground"
               />
               <button type="submit" className="absolute right-2 top-1/2 h-8 -translate-y-1/2 rounded-xl bg-foreground px-4 text-xs font-bold text-background transition hover:opacity-90">
-                Buscar
+                {t("home.search_button")}
               </button>
             </form>
 
             <div className="grid max-w-lg grid-cols-3 gap-2 pt-1">
-              <StatCard value={compactNumber(stats.mangas)} label="mangás" />
-              <StatCard value={compactNumber(stats.novels)} label="novels" />
-              <StatCard value={compactNumber(stats.chapters)} label="capítulos" />
+              <StatCard value={compactNumber(stats.mangas)} label={t("home.stats_mangas")} />
+              <StatCard value={compactNumber(stats.novels)} label={t("home.stats_novels")} />
+              <StatCard value={compactNumber(stats.chapters)} label={t("home.stats_chapters")} />
             </div>
           </div>
 
-          <HeroRanking mangas={hotMangas.slice(0, 5)} novels={featuredNovels.slice(0, 2)} />
+          <HeroRanking mangas={hotMangas.slice(0, 5)} novels={featuredNovels.slice(0, 2)} t={t} />
         </div>
       </section>
 
@@ -242,25 +247,25 @@ export default async function HomePage() {
       <section className="container mx-auto max-w-7xl px-4 py-12">
         <div className="grid gap-6 md:grid-cols-[.9fr_1.1fr] md:items-start">
           <div>
-            <p className="text-xs font-black uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">O que é</p>
+            <p className="text-xs font-black uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">{t("home.what_is_label")}</p>
             <h2 className="mt-3 max-w-xl font-heading text-2xl font-black tracking-tight md:text-4xl">
-              Uma ponte entre leitores famintos e autores que querem ser descobertos.
+              {t("home.what_is_title")}
             </h2>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <AudienceCard icon={BookOpen} title="Para leitores" text="Catálogo direto ao ponto: mangás, manhwas e novels com capítulos para ler agora, sem tela vazia e sem enrolação." />
-            <AudienceCard icon={Feather} title="Para autores" text="Um espaço para publicar histórias originais, organizar capítulos, criar leitores e crescer com uma marca editorial brasileira." />
-            <AudienceCard icon={ShieldCheck} title="Curadoria editorial" text="A home destaca obras com leitura disponível, originais e séries com maior fôlego. Menos ruído, mais descoberta." />
-            <AudienceCard icon={Users} title="Comunidade viva" text="Feed, comentários, biblioteca e páginas de autor tornam a leitura uma experiência social — não só um arquivo de capítulos." />
+            <AudienceCard icon={BookOpen} title={t("home.for_readers_title")} text={t("home.for_readers_text")} />
+            <AudienceCard icon={Feather} title={t("home.for_authors_title")} text={t("home.for_authors_text")} />
+            <AudienceCard icon={ShieldCheck} title={t("home.curation_title")} text={t("home.curation_text")} />
+            <AudienceCard icon={Users} title={t("home.community_title")} text={t("home.community_text")} />
           </div>
         </div>
       </section>
 
       {/* Featured works */}
       <section className="container mx-auto max-w-7xl px-4 pb-12">
-        <SectionHeader eyebrow="Destaques" title="Obras em destaque" text="Uma vitrine editorial para começar por onde o catálogo já está mais forte." href="/explore" />
+        <SectionHeader eyebrow={t("home.highlights_label")} title={t("home.highlights_title")} text={t("home.highlights_text")} href="/explore" t={t} />
         <div className="grid gap-4 md:grid-cols-[1.1fr_.9fr]">
-          <FeaturedStory novel={heroStory} />
+          <FeaturedStory novel={heroStory} t={t} />
           <div className="grid gap-3">
             {secondaryHero.map((novel) => <MiniNovel key={novel.id} novel={novel} />)}
           </div>
@@ -270,7 +275,7 @@ export default async function HomePage() {
       {/* Hot mangas */}
       <section className="border-y border-border/60 bg-muted/25 py-12 dark:bg-white/[0.025]">
         <div className="container mx-auto max-w-7xl px-4">
-          <SectionHeader eyebrow="Leitura rápida" title="Mangás em alta" text="Capítulos longos, leitura vertical e séries para maratonar no celular." href="/manga" />
+          <SectionHeader eyebrow={t("home.hot_mangas_label")} title={t("home.hot_mangas_title")} text={t("home.hot_mangas_text")} href="/manga" t={t} />
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {hotMangas.slice(0, 8).map((manga) => <MangaTile key={manga.id} manga={manga} />)}
           </div>
@@ -279,7 +284,7 @@ export default async function HomePage() {
 
       {/* Recent novels */}
       <section className="container mx-auto max-w-7xl px-4 py-12">
-        <SectionHeader eyebrow="Novas páginas" title="Novels recentes" text="Histórias para acompanhar capítulo a capítulo — do romance ao sistema, da fantasia ao drama." href="/explore?sort=updated" />
+        <SectionHeader eyebrow={t("home.recent_novels_label")} title={t("home.recent_novels_title")} text={t("home.recent_novels_text")} href="/explore?sort=updated" t={t} />
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {recentNovels.map((novel) => <RecentNovel key={novel.id} novel={novel} />)}
         </div>
@@ -288,7 +293,7 @@ export default async function HomePage() {
       {/* Originals */}
       <section className="container mx-auto max-w-7xl px-4 pb-12">
         <div className="overflow-hidden rounded-[2rem] border border-emerald-500/20 bg-[linear-gradient(135deg,rgba(16,185,129,.10),rgba(124,58,237,.08),rgba(14,165,233,.08))] p-6 shadow-[0_24px_90px_rgba(15,23,42,.08)] md:p-8 dark:bg-white/[0.035]">
-          <SectionHeader eyebrow="Editora" title="Originais da Tomo Verso" text="A missão principal: transformar leitores em fãs de autores brasileiros." href="/how-to" compact />
+          <SectionHeader eyebrow={t("home.originals_label")} title={t("home.originals_title")} text={t("home.originals_text")} href="/how-to" compact t={t} />
           {originals.length > 0 ? (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-6">
               {originalNovels.map((novel) => <OriginalNovel key={novel.id} novel={novel} />)}
@@ -296,9 +301,9 @@ export default async function HomePage() {
             </div>
           ) : (
             <div className="rounded-3xl border border-dashed border-emerald-500/25 bg-background/55 p-8 text-center">
-              <p className="font-heading text-xl font-black">Sua história pode ocupar este espaço.</p>
+              <p className="font-heading text-xl font-black">{t("home.originals_empty_title")}</p>
               <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
-                A vitrine de originais é reservada para obras brasileiras publicadas no Tomo Verso Editora.
+                {t("home.originals_empty_text")}
               </p>
               <Button asChild className="mt-4 rounded-full"><Link href={publishHref}>{user ? "Publicar minha obra" : "Publicar minha história"}</Link></Button>
             </div>
@@ -311,17 +316,17 @@ export default async function HomePage() {
         <div className="relative overflow-hidden rounded-[2rem] bg-[#15111f] p-8 text-center text-white shadow-[0_30px_110px_rgba(15,23,42,.24)] md:p-10">
           <div className="absolute inset-0 opacity-70 [background:radial-gradient(circle_at_20%_20%,rgba(168,85,247,.35),transparent_32%),radial-gradient(circle_at_80%_20%,rgba(14,165,233,.22),transparent_28%)]" />
           <div className="relative mx-auto max-w-3xl space-y-4">
-            <Badge className="rounded-full bg-white/10 text-white hover:bg-white/10"><LibraryBig className="mr-2 h-3.5 w-3.5" /> Biblioteca + editora + comunidade</Badge>
-            <h2 className="font-heading text-2xl font-black tracking-tight md:text-4xl">Entre para o Tomo Verso antes da próxima grande história nascer.</h2>
+            <Badge className="rounded-full bg-white/10 text-white hover:bg-white/10"><LibraryBig className="mr-2 h-3.5 w-3.5" /> {t("home.cta_final_badge")}</Badge>
+            <h2 className="font-heading text-2xl font-black tracking-tight md:text-4xl">{t("home.cta_final_title")}</h2>
             <p className="mx-auto max-w-2xl text-sm text-white/70">
-              Crie sua conta para salvar leituras, acompanhar capítulos, comentar e publicar suas próprias obras quando estiver pronto.
+              {t("home.cta_final_text")}
             </p>
             <div className="flex flex-col justify-center gap-2 sm:flex-row">
               <Button size="default" asChild className="h-10 rounded-full bg-white px-6 text-sm text-slate-950 hover:bg-white/90">
-                <Link href={user ? "/dashboard" : "/auth/signup"}>{user ? "Ir para o painel" : "Criar conta grátis"} <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+                <Link href={user ? "/dashboard" : "/auth/signup"}>{user ? t("home.cta_final_dashboard") : t("home.cta_final_signup")} <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
               </Button>
               <Button size="default" variant="outline" asChild className="h-10 rounded-full border-white/20 bg-white/5 px-6 text-sm text-white hover:bg-white/10 hover:text-white">
-                <Link href="/explore"><Bookmark className="mr-2 h-3.5 w-3.5" /> Começar a ler</Link>
+                <Link href="/explore"><Bookmark className="mr-2 h-3.5 w-3.5" /> {t("home.cta_explore")}</Link>
               </Button>
             </div>
           </div>
@@ -331,7 +336,7 @@ export default async function HomePage() {
   );
 }
 
-function HeroRanking({ mangas, novels }: { mangas: MangaRow[]; novels: NovelRow[] }) {
+function HeroRanking({ mangas, novels, t: tFn }: { mangas: MangaRow[]; novels: NovelRow[]; t: (key: string, vars?: Record<string, string | number>) => string }) {
   const ranking = [
     ...mangas.map((item) => ({
       key: `manga-${item.id}`,
@@ -366,12 +371,12 @@ function HeroRanking({ mangas, novels }: { mangas: MangaRow[]; novels: NovelRow[
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">
-            <Trophy className="h-3.5 w-3.5" /> Ranking
+            <Trophy className="h-3.5 w-3.5" /> {tFn("home.ranking_title")}
           </p>
-          <h2 className="mt-1 font-heading text-2xl font-black tracking-tight">O que a galera está lendo</h2>
+          <h2 className="mt-1 font-heading text-2xl font-black tracking-tight">{tFn("home.ranking_title")}</h2>
         </div>
         <Button asChild size="sm" variant="ghost" className="rounded-full">
-          <Link href="/explore?popular=1">Ver tudo</Link>
+          <Link href="/explore?popular=1">{tFn("common.see_all")}</Link>
         </Button>
       </div>
 
@@ -393,7 +398,7 @@ function HeroRanking({ mangas, novels }: { mangas: MangaRow[]; novels: NovelRow[
       </div>
 
       <div className="mt-4 rounded-2xl border border-dashed border-primary/20 bg-primary/6 p-4 text-sm text-muted-foreground">
-        Quer algo rápido? Comece pelo ranking ou use a busca para achar título, autor ou gênero.
+        {tFn("home.ranking_tip")}
       </div>
     </aside>
   );
@@ -420,7 +425,7 @@ function AudienceCard({ icon: Icon, title, text }: { icon: any; title: string; t
   );
 }
 
-function SectionHeader({ eyebrow, title, text, href, compact = false }: { eyebrow: string; title: string; text: string; href?: string; compact?: boolean }) {
+function SectionHeader({ eyebrow, title, text, href, compact = false, t: tFn }: { eyebrow: string; title: string; text: string; href?: string; compact?: boolean; t: (key: string, vars?: Record<string, string | number>) => string }) {
   return (
     <div className={`mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between ${compact ? "mb-5" : ""}`}>
       <div>
@@ -430,14 +435,14 @@ function SectionHeader({ eyebrow, title, text, href, compact = false }: { eyebro
       </div>
       {href ? (
         <Button variant="ghost" asChild className="w-fit rounded-full hover:text-violet-600 dark:hover:text-violet-300">
-          <Link href={href}>Ver mais <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
+          <Link href={href}>{tFn("common.see_all")} <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link>
         </Button>
       ) : null}
     </div>
   );
 }
 
-function FeaturedStory({ novel }: { novel?: NovelRow }) {
+function FeaturedStory({ novel, t: tFn }: { novel?: NovelRow; t: (key: string, vars?: Record<string, string | number>) => string }) {
   if (!novel) return null;
   return (
     <Link href={`/novels/${novel.slug}`} className="group block">
@@ -456,7 +461,7 @@ function FeaturedStory({ novel }: { novel?: NovelRow }) {
             </div>
             <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4">
               <span className="text-sm text-muted-foreground">{novel.chapter_count || 0} capítulos</span>
-              <span className="text-sm font-bold text-violet-600 dark:text-violet-300">Ler agora →</span>
+              <span className="text-sm font-bold text-violet-600 dark:text-violet-300">{tFn("common.read_now")} →</span>
             </div>
           </CardContent>
         </div>
