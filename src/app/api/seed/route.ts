@@ -207,9 +207,14 @@ E o reino de Vael, pela primeira vez em quatorze anos, parou de queimar.`,
 export async function POST(req: Request) {
   const db = getDb();
 
-  // Segurança: só funciona com SEED_SECRET correto ou se o banco estiver vazio
+  const isProduction = process.env.NODE_ENV === "production" || !!process.env.VERCEL;
   const seedSecret = process.env.SEED_SECRET;
   const reqSeed = new URL(req.url).searchParams.get("secret");
+
+  if (isProduction && (!seedSecret || reqSeed !== seedSecret)) {
+    return NextResponse.json({ ok: false, error: "Não autorizado" }, { status: 404 });
+  }
+
   const userCount = (db.prepare("SELECT COUNT(*) as c FROM users").get() as { c: number }).c;
 
   if (userCount > 0 && (!seedSecret || reqSeed !== seedSecret)) {
@@ -224,7 +229,7 @@ export async function POST(req: Request) {
   // Cria usuário Fábio (admin)
   const existingFabio = db.prepare("SELECT id FROM users WHERE username = ?").get("fabio_tx");
   if (!existingFabio) {
-    const passwordHash = await hashPassword("tomoverso2026");
+    const passwordHash = await hashPassword(process.env.INITIAL_ADMIN_PASSWORD || (isProduction ? generateId() : "tomoverso2026"));
     db.prepare(
       `INSERT INTO users (id, email, username, password_hash, display_name, role, bio)
        VALUES (?, ?, ?, ?, ?, ?, ?)`
@@ -284,7 +289,7 @@ export async function POST(req: Request) {
   return NextResponse.json({
     ok: true,
     message: "Banco populado com sucesso!",
-    credentials: {
+    credentials: isProduction ? undefined : {
       username: "fabio_tx",
       password: "tomoverso2026",
       email: "fabio@tomoverso.com",
@@ -293,6 +298,6 @@ export async function POST(req: Request) {
   });
 }
 
-export async function GET(req: Request) {
-  return POST(req);
+export async function GET() {
+  return NextResponse.json({ ok: false, error: "Método não permitido" }, { status: 405 });
 }

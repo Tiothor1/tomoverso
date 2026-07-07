@@ -8,6 +8,7 @@ import type { Novel } from "@/lib/types";
 import { NovelTitle } from "@/components/novel/novel-title";
 import { SaveWorkButton } from "@/components/work/save-work-button";
 import { cn } from "@/lib/utils";
+import { isOriginalOrUserPosted, shouldShowAttribution } from "@/lib/work-attribution";
 
 type CardNovel = Novel & {
   is_original?: boolean | number | null;
@@ -49,7 +50,7 @@ function typeLabel(type: string | undefined) {
 }
 
 function isOriginal(novel: CardNovel) {
-  return Boolean(novel.is_original) || novel.source === "tomoverso" || novel.source === "original";
+  return isOriginalOrUserPosted(novel);
 }
 
 function isHot(novel: CardNovel) {
@@ -85,7 +86,7 @@ export function NovelCard({ novel, variant = "default", showAuthor = true }: Nov
                 <NovelTitle novel={novel} />
               </h3>
             </Link>
-            {showAuthor && <p className="flex items-center gap-1.5 text-xs text-muted-foreground"><UserRound className="h-3.5 w-3.5" />{authorName(novel)}</p>}
+            {showAuthor && shouldShowAttribution(novel) && <p className="flex items-center gap-1.5 text-xs text-muted-foreground"><UserRound className="h-3.5 w-3.5" />{authorName(novel)}</p>}
             <div className="flex flex-wrap gap-1.5">
               {tags.slice(0, 2).map((g) => <Badge key={g} variant="secondary" className="text-[10px]">{g}</Badge>)}
             </div>
@@ -129,7 +130,7 @@ export function NovelCard({ novel, variant = "default", showAuthor = true }: Nov
           </h3>
         </Link>
 
-        {showAuthor && (
+        {showAuthor && shouldShowAttribution(novel) && (
           <p className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
             <PenLine className="h-3.5 w-3.5 shrink-0" />
             <span className="truncate">{authorName(novel)}</span>

@@ -17,6 +17,7 @@ interface UserRow {
   display_name: string;
   avatar_url: string | null;
   bio: string | null;
+  email: string | null;
   role: string;
   created_at: string;
 }
@@ -40,7 +41,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ usernam
     );
   }
 
-  const author = db.prepare("SELECT * FROM users WHERE username = ?").get(username) as UserRow | undefined;
+  const author = db.prepare("SELECT * FROM users WHERE username = ? AND (email IS NULL OR email NOT LIKE '%@external.author')").get(username) as UserRow | undefined;
   if (!author) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">

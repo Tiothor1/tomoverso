@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft, BookOpen, User, Pencil, Hash, Calendar, Layers,
+  ArrowLeft, BookOpen, Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { MangaCover } from "@/components/manga/manga-cover";
 import { getDb } from "@/lib/db";
 import { publicVisibleMangaSql } from "@/lib/public-catalog";
+import { shouldShowAttribution } from "@/lib/work-attribution";
 
 interface MangaRow {
   id: string;
@@ -24,6 +25,7 @@ interface MangaRow {
   status: "ongoing" | "completed" | "hiatus" | "dropped";
   source: string | null;
   source_url: string | null;
+  is_original: number | null;
 }
 
 interface ChapterRow {
@@ -92,6 +94,7 @@ export default async function MangaDetailPage({
   const chapterSummary = maxChapterNumber > chapters.length
     ? `${chapters.length} disponíveis · até cap. ${maxChapterNumber}`
     : `${chapters.length} disponíveis`;
+  const showAttribution = shouldShowAttribution(manga);
 
   return (
     <div className="aurora-bg">
@@ -121,11 +124,11 @@ export default async function MangaDetailPage({
                   synopsis: manga.synopsis,
                   cover_url: manga.cover_url,
                   cover_local_path: manga.cover_local_path,
-                  author: manga.author,
-                  artist: manga.artist,
+                  author: showAttribution ? manga.author : null,
+                  artist: showAttribution ? manga.artist : null,
                   status: manga.status,
-                  source: manga.source,
-                  source_url: manga.source_url,
+                  source: showAttribution ? manga.source : null,
+                  source_url: showAttribution ? manga.source_url : null,
                   tags,
                   chapter_count: chapters.length,
                 }}
@@ -154,19 +157,15 @@ export default async function MangaDetailPage({
             <Separator />
 
             <div className="space-y-3 text-sm">
-              {manga.author && (
+              {showAttribution && manga.author && (
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-muted-foreground flex items-center gap-1 shrink-0">
-                    <User className="h-3.5 w-3.5" /> Autor
-                  </span>
+                  <span className="text-muted-foreground shrink-0">Autor</span>
                   <span className="font-medium truncate text-right">{manga.author}</span>
                 </div>
               )}
-              {manga.artist && manga.artist !== manga.author && (
+              {showAttribution && manga.artist && manga.artist !== manga.author && (
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-muted-foreground flex items-center gap-1 shrink-0">
-                    <Pencil className="h-3.5 w-3.5" /> Artista
-                  </span>
+                  <span className="text-muted-foreground shrink-0">Artista</span>
                   <span className="font-medium truncate text-right">{manga.artist}</span>
                 </div>
               )}
@@ -186,14 +185,6 @@ export default async function MangaDetailPage({
                 <span className="text-muted-foreground">Status</span>
                 <Badge variant="outline" className={status.className}>{status.label}</Badge>
               </div>
-              {manga.source && (
-                <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/40">
-                  <span className="text-muted-foreground flex items-center gap-1 text-xs">
-                    <Hash className="h-3 w-3" /> Fonte
-                  </span>
-                  <span className="text-xs text-muted-foreground">{manga.source}</span>
-                </div>
-              )}
             </div>
           </aside>
 

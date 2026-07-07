@@ -7,6 +7,7 @@ import { MangaCover } from "./manga-cover";
 import type { MangaCardData } from "@/lib/manga/types";
 import { SaveWorkButton } from "@/components/work/save-work-button";
 import { cn } from "@/lib/utils";
+import { isOriginalOrUserPosted, shouldShowAttribution } from "@/lib/work-attribution";
 
 interface MangaCardProps {
   manga: MangaCardData & {
@@ -31,7 +32,7 @@ function StatusBadge({ status }: { status: MangaCardData["status"] }) {
 }
 
 function isOriginal(manga: MangaCardProps["manga"]) {
-  return Boolean(manga.is_original) || manga.source === "tomoverso" || manga.source === "original";
+  return isOriginalOrUserPosted(manga);
 }
 
 function isHot(manga: MangaCardProps["manga"]) {
@@ -77,10 +78,12 @@ export function MangaCard({ manga, variant = "default" }: MangaCardProps) {
           </h3>
         </Link>
 
-        <p className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
-          <PenLine className="h-3.5 w-3.5 shrink-0" />
-          <span className="truncate">{authorName(manga)}</span>
-        </p>
+        {shouldShowAttribution(manga) && (
+          <p className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground">
+            <PenLine className="h-3.5 w-3.5 shrink-0" />
+            <span className="truncate">{authorName(manga)}</span>
+          </p>
+        )}
 
         <div className="flex min-h-5 flex-wrap gap-1.5">
           {tags.length > 0 ? tags.map((t) => <Badge key={t} variant="secondary" className="max-w-full truncate text-[10px]">{t}</Badge>) : <Badge variant="outline" className="text-[10px]">Manhwa</Badge>}

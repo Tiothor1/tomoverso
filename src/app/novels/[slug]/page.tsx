@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft, BookOpen, Eye, Star, Calendar, User, Heart, Share2, Bookmark, MessageCircle, ListOrdered, Clock, DollarSign, Check,
+  ArrowLeft, BookOpen, Eye, Heart, MessageCircle, ListOrdered, Clock, DollarSign, Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import { NovelCard } from "@/components/novel/novel-card";
 import { NovelTitle } from "@/components/novel/novel-title";
 import { getDb } from "@/lib/db";
 import { publicReadableNovelSql, readableNovelChapterSql } from "@/lib/public-catalog";
+import { shouldShowAttribution } from "@/lib/work-attribution";
 import { getCurrentUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
@@ -50,6 +51,8 @@ interface NovelRow {
   rating_sum: number;
   rating_count: number;
   is_featured: number;
+  source: string | null;
+  is_original: number | null;
   created_at: string;
 }
 
@@ -68,7 +71,10 @@ export default async function NovelPage({ params }: { params: Promise<{ slug: st
   const novelRow = db.prepare(`SELECT * FROM novels WHERE slug = ? AND ${publicReadableNovelSql("novels")}`).get(slug) as NovelRow | undefined;
   if (!novelRow) notFound();
 
-  const author = db.prepare("SELECT username, display_name, avatar_url, bio FROM users WHERE id = ?").get(novelRow.author_id) as AuthorRow | undefined;
+  const showAttribution = shouldShowAttribution(novelRow);
+  const author = showAttribution
+    ? db.prepare("SELECT username, display_name, avatar_url, bio FROM users WHERE id = ?").get(novelRow.author_id) as AuthorRow | undefined
+    : undefined;
 
   const novel = {
     ...novelRow,

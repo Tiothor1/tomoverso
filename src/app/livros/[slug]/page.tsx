@@ -109,10 +109,6 @@ export default async function LivroPage({ params }: { params: Promise<{ slug: st
                 <p className="text-muted-foreground leading-relaxed whitespace-pre-line">{book.synopsis}</p>
               </div>
             )}
-
-            {book.source && (
-              <p className="text-xs text-muted-foreground">Fonte: {book.source}</p>
-            )}
           </div>
         </div>
 

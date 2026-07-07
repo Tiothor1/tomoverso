@@ -123,7 +123,7 @@ export async function GET(req: NextRequest) {
   if (!query) {
     const topNovels = db.prepare(`
       SELECT n.id, n.slug, n.title, n.synopsis, n.type, n.genres, n.tags, n.cover_url, n.cover_local_path,
-             u.display_name AS author_name,
+             CASE WHEN COALESCE(n.is_original,0)=1 OR COALESCE(n.source,'') IN ('','tomoverso','original') THEN u.display_name ELSE NULL END AS author_name,
              (SELECT COUNT(*) FROM chapters c WHERE c.novel_id = n.id AND ${readableNovelChapterSql("c")}) AS chapter_count
       FROM novels n
       LEFT JOIN users u ON u.id = n.author_id
@@ -146,7 +146,8 @@ export async function GET(req: NextRequest) {
 
     if (tableExists(db, "mangas")) {
       const topManga = db.prepare(`
-        SELECT m.id, m.slug, m.title, m.synopsis, m.cover_url, m.cover_local_path, m.author,
+        SELECT m.id, m.slug, m.title, m.synopsis, m.cover_url, m.cover_local_path,
+               CASE WHEN COALESCE(m.is_original,0)=1 OR COALESCE(m.source,'') IN ('','tomoverso','original') THEN m.author ELSE NULL END AS author,
                (SELECT COUNT(*) FROM manga_chapters mc WHERE mc.manga_id = m.id) AS chapter_count
         FROM mangas m
         WHERE ${publicVisibleMangaSql("m")}
@@ -199,14 +200,14 @@ export async function GET(req: NextRequest) {
     const novels = db.prepare(`
       SELECT n.id, n.slug, n.title, n.alternative_titles, n.synopsis, n.type, n.genres, n.tags,
              n.cover_url, n.cover_local_path, n.views,
-             u.display_name AS author_name,
+             CASE WHEN COALESCE(n.is_original,0)=1 OR COALESCE(n.source,'') IN ('','tomoverso','original') THEN u.display_name ELSE NULL END AS author_name,
              (SELECT COUNT(*) FROM chapters c WHERE c.novel_id = n.id AND ${readableNovelChapterSql("c")}) AS chapter_count,
              CASE
                WHEN lower(n.title) = ? THEN 120
                WHEN lower(n.title) LIKE ? THEN 95
                WHEN lower(n.title) LIKE ? THEN 75
                WHEN lower(n.alternative_titles) LIKE ? THEN 68
-               WHEN lower(u.display_name) LIKE ? THEN 58
+               WHEN lower(CASE WHEN COALESCE(n.is_original,0)=1 OR COALESCE(n.source,'') IN ('','tomoverso','original') THEN COALESCE(u.display_name, '') ELSE '' END) LIKE ? THEN 58
                WHEN lower(n.genres) LIKE ? THEN 50
                WHEN lower(n.tags) LIKE ? THEN 48
                WHEN lower(n.synopsis) LIKE ? THEN 25
@@ -216,7 +217,7 @@ export async function GET(req: NextRequest) {
       LEFT JOIN users u ON u.id = n.author_id
       WHERE ${publicReadableNovelSql("n")} AND (
         lower(n.title) LIKE ? OR lower(n.alternative_titles) LIKE ? OR lower(n.synopsis) LIKE ? OR
-        lower(n.genres) LIKE ? OR lower(n.tags) LIKE ? OR lower(COALESCE(u.display_name, '')) LIKE ?
+        lower(n.genres) LIKE ? OR lower(n.tags) LIKE ? OR lower(CASE WHEN COALESCE(n.is_original,0)=1 OR COALESCE(n.source,'') IN ('','tomoverso','original') THEN COALESCE(u.display_name, '') ELSE '' END) LIKE ?
       ) ${typeFilter}
       ORDER BY score DESC, n.views DESC, n.created_at DESC
       LIMIT ?
@@ -239,21 +240,22 @@ export async function GET(req: NextRequest) {
   if ((filter === "all" || filter === "manga") && tableExists(db, "mangas")) {
     const mangas = db.prepare(`
       SELECT m.id, m.slug, m.title, m.alternative_titles, m.synopsis, m.cover_url, m.cover_local_path,
-             m.author, m.artist,
+             CASE WHEN COALESCE(m.is_original,0)=1 OR COALESCE(m.source,'') IN ('','tomoverso','original') THEN m.author ELSE NULL END AS author,
+             CASE WHEN COALESCE(m.is_original,0)=1 OR COALESCE(m.source,'') IN ('','tomoverso','original') THEN m.artist ELSE NULL END AS artist,
              (SELECT COUNT(*) FROM manga_chapters mc WHERE mc.manga_id = m.id) AS chapter_count,
              CASE
                WHEN lower(m.title) = ? THEN 120
                WHEN lower(m.title) LIKE ? THEN 95
                WHEN lower(m.title) LIKE ? THEN 75
                WHEN lower(m.alternative_titles) LIKE ? THEN 65
-               WHEN lower(COALESCE(m.author, '')) LIKE ? THEN 50
-               WHEN lower(COALESCE(m.artist, '')) LIKE ? THEN 45
+               WHEN lower(CASE WHEN COALESCE(m.is_original,0)=1 OR COALESCE(m.source,'') IN ('','tomoverso','original') THEN COALESCE(m.author, '') ELSE '' END) LIKE ? THEN 50
+               WHEN lower(CASE WHEN COALESCE(m.is_original,0)=1 OR COALESCE(m.source,'') IN ('','tomoverso','original') THEN COALESCE(m.artist, '') ELSE '' END) LIKE ? THEN 45
                WHEN lower(m.synopsis) LIKE ? THEN 20
                ELSE 1
              END AS score
       FROM mangas m
       WHERE ${publicVisibleMangaSql("m")} AND (lower(m.title) LIKE ? OR lower(m.alternative_titles) LIKE ? OR lower(m.synopsis) LIKE ? OR
-            lower(COALESCE(m.author, '')) LIKE ? OR lower(COALESCE(m.artist, '')) LIKE ?)
+            lower(CASE WHEN COALESCE(m.is_original,0)=1 OR COALESCE(m.source,'') IN ('','tomoverso','original') THEN COALESCE(m.author, '') ELSE '' END) LIKE ? OR lower(CASE WHEN COALESCE(m.is_original,0)=1 OR COALESCE(m.source,'') IN ('','tomoverso','original') THEN COALESCE(m.artist, '') ELSE '' END) LIKE ?)
       ORDER BY score DESC, m.updated_at DESC
       LIMIT ?
     `).all(exact, starts, like, like, like, like, like, like, like, like, like, like, limit) as any[];
@@ -380,7 +382,8 @@ export async function GET(req: NextRequest) {
              END AS score
       FROM users u
       LEFT JOIN novels n ON n.author_id = u.id
-      WHERE lower(u.username) LIKE ? OR lower(u.display_name) LIKE ? OR lower(COALESCE(u.bio, '')) LIKE ?
+      WHERE (u.email IS NULL OR u.email NOT LIKE '%@external.author')
+        AND (lower(u.username) LIKE ? OR lower(u.display_name) LIKE ? OR lower(COALESCE(u.bio, '')) LIKE ?)
       GROUP BY u.id
       ORDER BY score DESC, work_count DESC
       LIMIT ?

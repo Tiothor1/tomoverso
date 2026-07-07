@@ -32,6 +32,14 @@ function shouldRateLimitAuthRequest(pathname: string, method: string): boolean {
   );
 }
 
+function isAllowedOrigin(originHost: string, host: string): boolean {
+  if (originHost === host) return true;
+  if (originHost === "tomoverso.studio" || originHost === "www.tomoverso.studio") return true;
+  if (originHost === "localhost" || originHost.startsWith("localhost:")) return true;
+  if (originHost === "127.0.0.1" || originHost.startsWith("127.0.0.1:")) return true;
+  return false;
+}
+
 function tooManyAttemptsResponse(request: NextRequest): NextResponse {
   const headers = new Headers({ "Retry-After": "60" });
   const accept = request.headers.get("accept") || "";
@@ -82,7 +90,13 @@ export function middleware(request: NextRequest) {
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-XSS-Protection", "1; mode=block");
+  response.headers.set("X-DNS-Prefetch-Control", "off");
+  response.headers.set("X-Permitted-Cross-Domain-Policies", "none");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  response.headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  response.headers.set("Cross-Origin-Resource-Policy", "same-origin");
+  response.headers.set("Origin-Agent-Cluster", "?1");
   response.headers.set(
     "Permissions-Policy",
     "camera=(), microphone=(), geolocation=(), interest-cohort=()"
@@ -123,7 +137,7 @@ export function middleware(request: NextRequest) {
     if (origin && host) {
       try {
         const originHost = new URL(origin).host;
-        if (originHost !== host && !originHost.endsWith(".vercel.app")) {
+        if (!isAllowedOrigin(originHost, host)) {
           return NextResponse.json(
             { error: "Requisição rejeitada: origem não autorizada." },
             { status: 403 }
