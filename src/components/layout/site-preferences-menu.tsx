@@ -29,8 +29,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ColorTheme, ThemePreference, useTheme } from "@/components/theme/theme-provider";
-import { LanguageCode, useLanguage } from "@/components/i18n/language-provider";
+import { useLanguage, useTranslate } from "@/components/i18n/language-provider";
 import { cn } from "@/lib/utils";
+import type { LanguageCode } from "@/lib/i18n/types";
 
 type NavbarMoreMenuProps = {
   showStore: boolean;
@@ -56,20 +57,21 @@ const colorOptions: Array<{ id: ColorTheme; label: string; className: string; pr
 ];
 
 const languageOptions: Array<{ id: LanguageCode; label: string; short: string; flag: string }> = [
-  { id: "pt", label: "Português BR", short: "PT", flag: "🇧🇷" },
-  { id: "en", label: "English", short: "EN", flag: "🇺🇸" },
-  { id: "es", label: "Español", short: "ES", flag: "🇪🇸" },
-  { id: "fr", label: "Français", short: "FR", flag: "🇫🇷" },
-  { id: "de", label: "Deutsch", short: "DE", flag: "🇩🇪" },
-  { id: "it", label: "Italiano", short: "IT", flag: "🇮🇹" },
-  { id: "ja", label: "日本語", short: "JA", flag: "🇯🇵" },
-  { id: "ko", label: "한국어", short: "KO", flag: "🇰🇷" },
-  { id: "zh-CN", label: "中文", short: "ZH", flag: "🇨🇳" },
+  { id: "pt-BR", label: "Português", short: "PT", flag: "BR" },
+  { id: "en", label: "English", short: "EN", flag: "US" },
+  { id: "es", label: "Español", short: "ES", flag: "ES" },
+  { id: "fr", label: "Français", short: "FR", flag: "FR" },
+  { id: "de", label: "Deutsch", short: "DE", flag: "DE" },
+  { id: "it", label: "Italiano", short: "IT", flag: "IT" },
+  { id: "ja", label: "日本語", short: "JA", flag: "JP" },
+  { id: "ko", label: "한국어", short: "KO", flag: "KR" },
+  { id: "zh", label: "中文", short: "ZH", flag: "CN" },
 ];
 
 export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel, hasActiveSubscription, subBadge }: NavbarMoreMenuProps) {
   const { theme, resolvedTheme, colorTheme, setTheme, setColorTheme } = useTheme();
   const { language, setLanguage } = useLanguage();
+  const t = useTranslate();
 
   return (
     <DropdownMenu>
@@ -209,7 +211,7 @@ export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel
 
         <DropdownMenuLabel className="flex items-center gap-2 pt-2">
           <Languages className="h-3.5 w-3.5" />
-          Idioma
+          {t("language.select")}
           <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase text-muted-foreground">
             {language.toUpperCase()}
           </span>
@@ -233,7 +235,7 @@ export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel
             );
           })}
           <p className="col-span-3 px-1 pt-1 text-[11px] leading-snug text-muted-foreground">
-            Idiomas liberados grátis. O site mantém o português; a preferência fica salva neste navegador.
+            {t("language.switch_to", { language: "" }).replace("{language}", "").trim() || "Idiomas grátis para todos."}
           </p>
         </div>
       </DropdownMenuContent>
@@ -244,6 +246,7 @@ export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel
 export function MobilePreferencesPanel({ hasActiveSubscription }: { hasActiveSubscription: boolean }) {
   const { theme, resolvedTheme, colorTheme, setTheme, setColorTheme } = useTheme();
   const { language, setLanguage } = useLanguage();
+  const t = useTranslate();
 
   return (
     <section className="rounded-2xl border border-border/60 bg-muted/25 p-3">
@@ -311,7 +314,7 @@ export function MobilePreferencesPanel({ hasActiveSubscription }: { hasActiveSub
 
         <div>
           <p className="mb-1.5 text-xs font-semibold text-muted-foreground">
-            Idioma
+            {t("language.select")}
           </p>
           <div className="grid grid-cols-3 gap-1.5">
             {languageOptions.map((option) => {
@@ -321,7 +324,6 @@ export function MobilePreferencesPanel({ hasActiveSubscription }: { hasActiveSub
                   key={option.id}
                   type="button"
                   onClick={() => setLanguage(option.id)}
-                  aria-label={`Usar idioma ${option.label}`}
                   className={cn(
                     "flex h-10 items-center justify-center gap-1 rounded-xl border text-xs font-semibold",
                     active ? "border-primary/55 bg-primary/12 text-primary" : "border-border bg-background/50"
@@ -334,7 +336,7 @@ export function MobilePreferencesPanel({ hasActiveSubscription }: { hasActiveSub
             })}
           </div>
           <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
-            Idiomas grátis para todos. O site mantém o português; a preferência fica salva neste navegador.
+            {t("language.switch_to", { language: "" }).replace("{language}", "").trim() || "Idiomas grátis para todos."}
           </p>
         </div>
       </div>

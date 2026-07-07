@@ -94,6 +94,7 @@ function createDb() {
       bio TEXT DEFAULT '',
       role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin', 'author')),
       email_verified INTEGER NOT NULL DEFAULT 0,
+      preferred_locale TEXT DEFAULT 'pt-BR',
       last_login_at TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
       updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -943,6 +944,13 @@ function createDb() {
   const vercelIntegration = db.prepare("SELECT provider FROM admin_integrations WHERE provider = 'vercel'").get() as { provider: string } | undefined;
   if (!vercelIntegration) {
     db.prepare(`INSERT INTO admin_integrations (provider, label) VALUES ('vercel', 'Vercel')`).run();
+  }
+
+  // Migration: add preferred_locale to users if missing (SQLite ALTER TABLE is idempotent via try/catch)
+  try {
+    db.exec("ALTER TABLE users ADD COLUMN preferred_locale TEXT DEFAULT 'pt-BR'");
+  } catch {
+    // Column already exists — safe to ignore
   }
 
   // Auto-seed se banco vazio (em produção, na primeira vez)
