@@ -8,11 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { signupAction } from "@/lib/actions/auth-actions";
+import { useTranslate } from "@/components/i18n/language-provider";
+
 export function SignupForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const submittingRef = useRef(false);
+  const t = useTranslate();
 
   async function handleSubmit(formData: FormData) {
     if (submittingRef.current) return;
@@ -30,7 +33,7 @@ export function SignupForm() {
         setError(result.error);
       }
     } catch {
-      setError("Não consegui criar a conta agora. Aguarde alguns segundos e tente de novo.");
+      setError(t("auth.error_generic"));
     }
 
     submittingRef.current = false;
@@ -39,7 +42,6 @@ export function SignupForm() {
 
   return (
     <div className="aurora-bg relative flex min-h-[80vh] items-center justify-center overflow-hidden px-4 py-12">
-      {/* Background com partículas */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-3xl" />
       </div>
@@ -48,11 +50,11 @@ export function SignupForm() {
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
             <BookOpen className="neon-icon-pop h-7 w-7 text-primary" />
-            <span className="gradient-text font-heading text-2xl font-black">Tomo Verso Editora</span>
+            <span className="gradient-text font-heading text-2xl font-black">{t("common.app_name")}</span>
           </Link>
-          <h1 className="font-heading text-3xl font-black">Cria sua conta</h1>
+          <h1 className="font-heading text-3xl font-black">{t("auth.signup_title")}</h1>
           <p className="text-muted-foreground text-sm">
-            Comece a ler e escrever Light Novels em segundos
+            {t("auth.signup_subtitle")}
           </p>
         </div>
 
@@ -63,13 +65,13 @@ export function SignupForm() {
               className="space-y-4"
             >
               <div className="space-y-2">
-                <Label htmlFor="display_name">Como quer ser chamado</Label>
+                <Label htmlFor="display_name">{t("auth.signup_name_label")}</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="display_name"
                     name="display_name"
-                    placeholder="Seu nome"
+                    placeholder={t("auth.signup_name_placeholder")}
                     required
                     minLength={2}
                     maxLength={40}
@@ -79,13 +81,13 @@ export function SignupForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username">{t("auth.signup_username_label")}</Label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">@</span>
                   <Input
                     id="username"
                     name="username"
-                    placeholder="seu_username"
+                    placeholder={t("auth.signup_username_placeholder")}
                     required
                     minLength={3}
                     maxLength={20}
@@ -94,19 +96,19 @@ export function SignupForm() {
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Letras, números e _ (sem espaços)
+                  {t("auth.signup_username_hint")}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">{t("auth.signup_email_label")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="seu@email.com"
+                    placeholder={t("auth.signup_email_placeholder")}
                     required
                     className="pl-9 focus-visible:border-primary/45 focus-visible:ring-primary/20"
                   />
@@ -114,14 +116,14 @@ export function SignupForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
+                <Label htmlFor="password">{t("auth.signup_password_label")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Mínimo 8 caracteres"
+                    placeholder={t("auth.signup_password_hint")}
                     required
                     minLength={8}
                     className="pl-9 pr-10 focus-visible:border-primary/45 focus-visible:ring-primary/20"
@@ -143,7 +145,7 @@ export function SignupForm() {
               )}
 
               <Button type="submit" size="lg" className="neon-button w-full" disabled={loading}>
-                {loading ? "Criando..." : "Criar conta"}
+                {loading ? t("auth.signup_loading") : t("auth.signup_button")}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </form>
@@ -151,16 +153,16 @@ export function SignupForm() {
         </Card>
 
         <p className="text-center text-sm text-muted-foreground">
-          Já tem conta?{" "}
+          {t("auth.signup_has_account")}{" "}
           <Link href="/auth/login" className="text-primary hover:underline font-medium">
-            Entrar
+            {t("auth.signup_login_link")}
           </Link>
         </p>
 
         <div className="text-center text-xs text-muted-foreground space-y-1">
           <div className="flex items-center justify-center gap-1.5">
             <Sparkles className="h-3 w-3 text-primary" />
-            <span>O primeiro usuário vira admin automaticamente</span>
+            <span>{t("auth.signup_free_badge")}</span>
           </div>
         </div>
       </div>

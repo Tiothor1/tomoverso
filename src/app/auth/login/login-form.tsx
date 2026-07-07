@@ -8,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { loginAction } from "@/lib/actions/auth-actions";
+import { useTranslate } from "@/components/i18n/language-provider";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const submittingRef = useRef(false);
+  const t = useTranslate();
 
   async function handleSubmit(formData: FormData) {
     if (submittingRef.current) return;
@@ -31,7 +33,7 @@ export function LoginForm() {
         setError(result.error);
       }
     } catch {
-      setError("Não consegui entrar agora. Aguarde alguns segundos e tente de novo.");
+      setError(t("auth.error_generic"));
     }
 
     submittingRef.current = false;
@@ -48,11 +50,11 @@ export function LoginForm() {
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center gap-2 mb-4">
             <BookOpen className="neon-icon-pop h-7 w-7 text-primary" />
-            <span className="gradient-text font-heading text-2xl font-black">Tomo Verso Editora</span>
+            <span className="gradient-text font-heading text-2xl font-black">{t("common.app_name")}</span>
           </Link>
-          <h1 className="font-heading text-3xl font-black">Bem-vindo de volta</h1>
+          <h1 className="font-heading text-3xl font-black">{t("auth.login_title")}</h1>
           <p className="text-muted-foreground text-sm">
-            Entra pra continuar sua leitura
+            {t("auth.login_subtitle")}
           </p>
         </div>
 
@@ -60,14 +62,14 @@ export function LoginForm() {
           <CardContent className="pt-6">
             <form action={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="login">Email ou username</Label>
+                <Label htmlFor="login">{t("auth.login_label")}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="login"
                     name="login"
                     type="text"
-                    placeholder="seu@email.com ou @username"
+                    placeholder={t("auth.login_placeholder")}
                     required
                     className="pl-9 focus-visible:border-primary/45 focus-visible:ring-primary/20"
                     autoComplete="username"
@@ -76,14 +78,14 @@ export function LoginForm() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="password">Senha</Label>
+                <Label htmlFor="password">{t("auth.password_label")}</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     name="password"
                     type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
+                    placeholder={t("auth.password_placeholder")}
                     required
                     className="pl-9 pr-10 focus-visible:border-primary/45 focus-visible:ring-primary/20"
                     autoComplete="current-password"
@@ -105,7 +107,7 @@ export function LoginForm() {
               )}
 
               <Button type="submit" size="lg" className="neon-button w-full" disabled={loading}>
-                {loading ? "Entrando..." : "Entrar"}
+                {loading ? t("auth.login_loading") : t("auth.login_button")}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             </form>
@@ -113,16 +115,16 @@ export function LoginForm() {
         </Card>
 
         <p className="text-center text-sm text-muted-foreground">
-          Não tem conta?{" "}
+          {t("auth.login_no_account")}{" "}
           <Link href="/auth/signup" className="text-primary hover:underline font-medium">
-            Criar agora
+            {t("auth.login_signup_link")}
           </Link>
         </p>
 
         <div className="text-center text-xs text-muted-foreground space-y-1">
           <div className="flex items-center justify-center gap-1.5">
             <Sparkles className="h-3 w-3 text-primary" />
-            <span>100% gratuito · Sem cartão</span>
+            <span>{t("auth.signup_free_badge")}</span>
           </div>
         </div>
       </div>
