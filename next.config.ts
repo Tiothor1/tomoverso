@@ -67,8 +67,15 @@ const nextConfig: NextConfig = {
     ];
   },
 
-  // 🔐 Admin path configurável via env var — o rewrite real está na middleware.ts
-  // removido: rewrites() duplicado
+  // 🔐 Admin path configurável via env var — rewrite interno no next.config.ts
+  async rewrites() {
+    const adminPath = process.env.ADMIN_SECRET_PATH || "admin-secreto";
+    if (adminPath === "admin-secreto") return [];
+    return [
+      { source: `/${adminPath}`, destination: "/admin-secreto" },
+      { source: `/${adminPath}/:path*`, destination: "/admin-secreto/:path*" },
+    ];
+  },
 };
 
 export default nextConfig;
