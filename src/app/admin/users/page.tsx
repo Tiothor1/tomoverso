@@ -1,10 +1,15 @@
 import { AdminShell } from "@/components/admin/admin-shell";
 import { UsersTable } from "@/components/admin/users-table";
 import { getUserAdminRows } from "@/lib/admin/queries";
+import { getCurrentUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminUsersPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const user = await getCurrentUser();
+  if (!user || user.role !== "admin") redirect("/");
+
   const { q = "" } = await searchParams;
   const rows = getUserAdminRows(q, 80);
 
