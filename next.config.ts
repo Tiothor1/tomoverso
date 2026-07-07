@@ -66,6 +66,33 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+
+  // 🔐 Admin path configurável via env var
+  async rewrites() {
+    const adminPath = process.env.ADMIN_SECRET_PATH || "admin-secreto";
+    const isCustom = process.env.ADMIN_SECRET_PATH && process.env.ADMIN_SECRET_PATH !== "admin-secreto";
+    const rules: { source: string; destination: string }[] = [];
+
+    // Mapeia o path secreto para o admin real
+    rules.push(
+      { source: `/${adminPath}`, destination: "/admin-secreto" },
+      { source: `/${adminPath}/:path*`, destination: "/admin-secreto/:path*" }
+    );
+
+    // Se definiu path customizado, bloqueia o path padrão
+    if (isCustom) {
+      rules.unshift(
+        { source: "/admin-secreto", destination: "/not-found" },
+        { source: "/admin-secreto/:path*", destination: "/not-found" }
+      );
+    }
+
+    return rules;
+  },
 };
 
 export default nextConfig;
+
+// Admin path configuration — defina ADMIN_SECRET_PATH no .env.local ou .env.production
+// Exemplo: ADMIN_SECRET_PATH=admin-X7kPq9
+// Se não definido, usa "admin-secreto" como padrão
