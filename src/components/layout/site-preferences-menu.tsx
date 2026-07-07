@@ -73,6 +73,11 @@ export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel
   const { language, setLanguage } = useLanguage();
   const t = useTranslate();
 
+  function selectLanguage(next: LanguageCode) {
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+    setLanguage(next);
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -223,7 +228,7 @@ export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel
               <button
                 key={option.id}
                 type="button"
-                onClick={() => setLanguage(option.id)}
+                onClick={() => selectLanguage(option.id)}
                 className={cn(
                   "flex min-h-9 items-center justify-center gap-1.5 rounded-lg border px-2 text-xs font-semibold transition-colors",
                   active ? "border-primary/55 bg-primary/12 text-primary" : "border-border/60 bg-muted/30 hover:bg-muted"

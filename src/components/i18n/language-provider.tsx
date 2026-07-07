@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { LanguageCode, NestedDict } from "@/lib/i18n/types";
 import { LOCALE_HTML_MAP, normalizeLocale } from "@/lib/i18n/types";
 import { loadLocale, resolveKey, interpolate } from "@/lib/i18n/client";
@@ -30,15 +31,19 @@ function setCookie(name: string, value: string) {
   document.cookie = `${name}=${encodeURIComponent(value)};path=/;max-age=31536000;SameSite=Lax`;
 }
 
-function readInitial(): LanguageCode {
-  if (typeof window === "undefined") return "pt-BR";
+function readStoredLocale(): LanguageCode | null {
+  if (typeof window === "undefined") return null;
   try {
     const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) || getCookie(LANGUAGE_COOKIE);
-    if (stored) return normalizeLocale(stored);
-    const browser = navigator.language || (navigator as any).userLanguage || "";
-    if (browser) return normalizeLocale(browser);
-  } catch {}
-  return "pt-BR";
+    return stored ? normalizeLocale(stored) : null;
+  } catch {
+    return null;
+  }
+}
+
+function readInitial(): LanguageCode {
+  // PT-BR é o idioma principal. Só sai dele quando o usuário/cookie já escolheu outro idioma.
+  return readStoredLocale() || "pt-BR";
 }
 
 function persist(next: LanguageCode) {
@@ -216,6 +221,7 @@ function AutoTranslateDom({ language, dict }: { language: LanguageCode; dict: Ne
 }
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const [language, setLanguageState] = useState<LanguageCode>(() => readInitial());
   const [dict, setDict] = useState<NestedDict | null>(null);
 
@@ -234,20 +240,29 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     persist(normalized);
     applyHtml(normalized);
     setLanguageState(normalized);
+    loadLocale(normalized).then(setDict).catch(() => {});
     persistUserPref(normalized);
-  }, []);
+    router.refresh();
+  }, [router]);
 
   useEffect(() => {
-    persist(language);
+    const hadStoredAtBoot = readStoredLocale() !== null;
+    if (hadStoredAtBoot) persist(language);
     applyHtml(language);
     fetch("/api/user/locale")
       .then((r) => r.json().catch(() => null))
       .then((data: UserLocalePref | null) => {
-        if (data?.locale && data.locale !== language) {
-          const normalized = normalizeLocale(data.locale);
+        if (!data?.locale) return;
+        const normalized = normalizeLocale(data.locale);
+        const currentStored = readStoredLocale();
+        // Se o usuário clicou em outro idioma enquanto essa request estava em voo,
+        // mantém o clique dele em vez de sobrescrever com preferência antiga do servidor.
+        if (currentStored && currentStored !== normalized) return;
+        if (normalized !== language) {
           persist(normalized);
           applyHtml(normalized);
           setLanguageState(normalized);
+          loadLocale(normalized).then(setDict).catch(() => {});
         }
       })
       .catch(() => {});
