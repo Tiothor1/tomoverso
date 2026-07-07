@@ -4,6 +4,49 @@ import type { NextRequest } from "next/server";
 // Simple in-memory rate limiter (resets on Vercel cold start, fine for MVP)
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 
+const AI_CRAWLER_USER_AGENT_PATTERNS = [
+  /AI2Bot/i,
+  /Amazonbot/i,
+  /anthropic-ai/i,
+  /Applebot-Extended/i,
+  /Bytespider/i,
+  /CCBot/i,
+  /ChatGPT-User/i,
+  /Claude-SearchBot/i,
+  /Claude-User/i,
+  /ClaudeBot/i,
+  /cohere-ai/i,
+  /Diffbot/i,
+  /FacebookBot/i,
+  /Google-Extended/i,
+  /GPTBot/i,
+  /ImagesiftBot/i,
+  /img2dataset/i,
+  /Meta-ExternalAgent/i,
+  /meta-externalfetcher/i,
+  /Omgili/i,
+  /Omgilibot/i,
+  /PerplexityBot/i,
+  /Perplexity-User/i,
+  /Timpibot/i,
+  /YouBot/i,
+];
+
+function isAiCrawler(userAgent: string): boolean {
+  return AI_CRAWLER_USER_AGENT_PATTERNS.some((pattern) => pattern.test(userAgent));
+}
+
+function aiCrawlerBlockedResponse(): NextResponse {
+  return new NextResponse("Acesso bloqueado para crawlers de IA.", {
+    status: 403,
+    headers: {
+      "Content-Type": "text/plain; charset=utf-8",
+      "X-Tomoverso-Bot-Block": "ai-crawler",
+      "X-Robots-Tag": "noai, noimageai, noindex, nofollow",
+    },
+  });
+}
+
 function rateLimit(key: string, maxRequests: number, windowMs: number): boolean {
   const now = Date.now();
   const entry = rateLimitMap.get(key);
@@ -75,6 +118,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  const userAgent = request.headers.get("user-agent") || "";
+  const allowPolicyFiles = pathname === "/robots.txt" || pathname === "/sitemap.xml";
+  if (!allowPolicyFiles && userAgent && isAiCrawler(userAgent)) {
+    return aiCrawlerBlockedResponse();
+  }
+
   // ── Secret Admin Path ─────────────────────────────────────────
   const adminSecret = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
   if (pathname === `/${adminSecret}` || pathname.startsWith(`/${adminSecret}/`)) {
@@ -97,6 +146,7 @@ export function middleware(request: NextRequest) {
   response.headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
   response.headers.set("Cross-Origin-Resource-Policy", "same-origin");
   response.headers.set("Origin-Agent-Cluster", "?1");
+  response.headers.set("X-Robots-Tag", "noai, noimageai");
   response.headers.set(
     "Permissions-Policy",
     "camera=(), microphone=(), geolocation=(), interest-cohort=()"
@@ -107,12 +157,12 @@ export function middleware(request: NextRequest) {
     "Content-Security-Policy",
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.adtrafficquality.google", // unsafe-inline needed for Next.js
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.adtrafficquality.google https://challenges.cloudflare.com", // unsafe-inline needed for Next.js
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://*.vercel.app https://*.catbox.moe https://mangaonline.blue https://centralnovel.com https://kakuyomu.jp https://archiveofourown.org https://files.catbox.moe https://www.google-analytics.com https://googleads.g.doubleclick.net https://pagead2.googlesyndication.com https://www.google.com https://www.google.com.br https://*.adtrafficquality.google",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.vercel.app https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://stats.g.doubleclick.net https://www.google.com https://*.adtrafficquality.google",
-      "frame-src https://googleads.g.doubleclick.net https://*.googlesyndication.com https://*.adtrafficquality.google https://www.google.com",
+      "connect-src 'self' https://*.vercel.app https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://pagead2.googlesyndication.com https://googleads.g.doubleclick.net https://stats.g.doubleclick.net https://www.google.com https://*.adtrafficquality.google https://challenges.cloudflare.com",
+      "frame-src https://googleads.g.doubleclick.net https://*.googlesyndication.com https://*.adtrafficquality.google https://www.google.com https://challenges.cloudflare.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",

@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { TurnstileWidget } from "@/components/security/turnstile-widget";
 
 export function ContactForm() {
   const [formData, setFormData] = useState({
@@ -23,8 +24,9 @@ export function ContactForm() {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const turnstileToken = new FormData(e.currentTarget).get("cf-turnstile-response");
     setStatus("loading");
     setErrorMsg("");
 
@@ -32,7 +34,7 @@ export function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, turnstileToken }),
       });
 
       const data = await res.json();
@@ -123,6 +125,8 @@ export function ContactForm() {
                   minLength={10}
                 />
               </div>
+
+              <TurnstileWidget className="flex justify-center" />
 
               <Button type="submit" className="w-full" disabled={status === "loading"}>
                 {status === "loading" ? (

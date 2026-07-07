@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { generateId } from "@/lib/auth";
+import { verifyTurnstileToken } from "@/lib/security/turnstile";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, email, subject, message } = body;
+    const { name, email, subject, message, turnstileToken } = body;
+
+    const antiBot = await verifyTurnstileToken(
+      turnstileToken,
+      req.headers.get("cf-connecting-ip") || req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip")
+    );
+    if (!antiBot.ok) {
+      return NextResponse.json({ error: antiBot.error }, { status: 403 });
+    }
 
     // Validação básica
     if (!name || !email || !subject || !message) {
