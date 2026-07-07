@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobilePreferencesPanel } from "@/components/layout/site-preferences-menu";
+import { useTranslate } from "@/components/i18n/language-provider";
 
 interface MobileMenuProps {
   isLoggedIn: boolean;
@@ -50,6 +51,7 @@ export function MobileMenu({
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const titleId = useId();
+  const t = useTranslate();
 
   useEffect(() => {
     setMounted(true);
@@ -80,7 +82,7 @@ export function MobileMenu({
         variant="ghost"
         size="icon"
         className="rounded-full hover:bg-primary/10 hover:text-primary lg:hidden"
-        aria-label="Abrir menu"
+        aria-label={t("nav.more")}
         aria-expanded={open}
         onClick={() => setOpen(true)}
       >
@@ -92,7 +94,7 @@ export function MobileMenu({
             <div className="fixed inset-0 z-[120] lg:hidden" role="dialog" aria-modal="true" aria-labelledby={titleId}>
               <button
                 type="button"
-                aria-label="Fechar menu"
+                aria-label={t("common.close")}
                 className="absolute inset-0 bg-black/60 backdrop-blur-sm"
                 onClick={close}
               />
@@ -106,10 +108,10 @@ export function MobileMenu({
                     </div>
                     <div className="min-w-0">
                       <h2 id={titleId} className="font-heading text-xl font-black leading-tight tracking-tight">
-                        Tomo Verso
+                        {t("common.app_name")}
                       </h2>
                       <p className="truncate text-xs text-muted-foreground">
-                        {isLoggedIn && username ? `Olá, ${username}` : "Leia, publique e descubra obras"}
+                        {isLoggedIn && username ? `Olá, ${username}` : t("common.tagline")}
                       </p>
                     </div>
                   </div>
@@ -118,7 +120,7 @@ export function MobileMenu({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    aria-label="Fechar menu"
+                    aria-label={t("common.close")}
                     className="absolute right-3 top-3 rounded-full"
                     onClick={close}
                   >
@@ -139,8 +141,8 @@ export function MobileMenu({
 
                   <div className="my-4 h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
-                  <section aria-label="Mais opções">
-                    <p className="mb-2 px-1 text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">Mais</p>
+                  <section aria-label={t("nav.more")}>
+                    <p className="mb-2 px-1 text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">{t("nav.more")}</p>
                     <nav className="grid gap-1">
                       <MobileRow href="/search" icon={Search} label="Buscar obras" onClose={close} />
                       <MobileRow href="/explore" icon={BookOpen} label="Light novels" onClose={close} />
