@@ -509,6 +509,7 @@ function createDb() {
       current_period_end TEXT NOT NULL,
       cancel_at_period_end INTEGER NOT NULL DEFAULT 0,
       mp_preference_id TEXT,
+      mp_preapproval_id TEXT,
       mp_payment_id TEXT,
       mp_payer_email TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -981,6 +982,7 @@ function migrateUserSubscriptionsPendingStatus(db: Database.Database) {
       current_period_end TEXT NOT NULL,
       cancel_at_period_end INTEGER NOT NULL DEFAULT 0,
       mp_preference_id TEXT,
+      mp_preapproval_id TEXT,
       mp_payment_id TEXT,
       mp_payer_email TEXT,
       created_at TEXT NOT NULL DEFAULT (datetime('now')),
@@ -990,10 +992,10 @@ function migrateUserSubscriptionsPendingStatus(db: Database.Database) {
     );
     INSERT INTO user_subscriptions_new (
       id, user_id, plan_id, status, current_period_start, current_period_end,
-      cancel_at_period_end, mp_preference_id, mp_payment_id, mp_payer_email, created_at, updated_at
+      cancel_at_period_end, mp_preference_id, mp_preapproval_id, mp_payment_id, mp_payer_email, created_at, updated_at
     )
     SELECT id, user_id, plan_id, status, current_period_start, current_period_end,
-      cancel_at_period_end, mp_preference_id, mp_payment_id, mp_payer_email, created_at, updated_at
+      cancel_at_period_end, mp_preference_id, NULL, mp_payment_id, mp_payer_email, created_at, updated_at
     FROM user_subscriptions;
     DROP TABLE user_subscriptions;
     ALTER TABLE user_subscriptions_new RENAME TO user_subscriptions;

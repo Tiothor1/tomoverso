@@ -111,7 +111,7 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
           <CardContent>
             <div className="mb-5">{proPlan ? <><span className="text-3xl font-black">{formatBRL(proPlan.price_cents)}</span><span className="text-muted-foreground">/{formatInterval(proPlan.interval)}</span></> : <span className="text-xl font-bold text-muted-foreground">Em breve</span>}</div>
             <ul className="mb-6 space-y-3">{(proPlan ? parseFeatures(proPlan) : readerFeatures).slice(0, 7).map((f)=><li key={f} className="flex gap-3 text-sm"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{f}</li>)}</ul>
-            {proPlan ? <><form action="/api/payments/checkout" method="POST"><input type="hidden" name="plan_id" value={proPlan.id} /><Button type="submit" className="w-full rounded-xl">{user ? "Assinar Pro" : "Entrar para assinar"}</Button></form>{user ? <PixPaymentButton planId={proPlan.id} /> : null}</> : null}
+            {proPlan ? <><form action="/api/payments/checkout" method="POST"><input type="hidden" name="plan_id" value={proPlan.id} /><Button type="submit" className="w-full rounded-xl">{user ? "Assinar Pro" : "Entrar para assinar"}</Button></form><div className="mt-2 flex gap-2">{user ? <><PixPaymentButton planId={proPlan.id} /><form action="/api/payments/preapproval" method="POST"><input type="hidden" name="plan_id" value={proPlan.id} /><Button type="submit" size="sm" variant="outline" className="flex-1 rounded-xl text-xs">Recorrente (cartão)</Button></form></> : null}</div></> : null}
           </CardContent>
         </Card>
 
@@ -121,7 +121,7 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
           <CardContent>
             <div className="mb-5">{authorPlan ? <><span className="text-3xl font-black">{formatBRL(authorPlan.price_cents)}</span><span className="text-muted-foreground">/{formatInterval(authorPlan.interval)}</span></> : <span className="text-xl font-bold text-muted-foreground">Em breve</span>}</div>
             <ul className="mb-6 space-y-3">{authorPlusBenefits.slice(0, 6).map((f)=><li key={f} className="flex gap-3 text-sm"><BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />{f}</li>)}</ul>
-            {authorPlan ? <><form action="/api/payments/checkout" method="POST"><input type="hidden" name="plan_id" value={authorPlan.id} /><Button type="submit" className="w-full rounded-xl bg-amber-400 text-amber-950 hover:bg-amber-300">{user ? "Virar Autor+" : "Entrar para virar Autor+"}<ArrowRight className="ml-2 h-4 w-4" /></Button></form>{user ? <PixPaymentButton planId={authorPlan.id} /> : null}</> : null}
+            {authorPlan ? <><form action="/api/payments/checkout" method="POST"><input type="hidden" name="plan_id" value={authorPlan.id} /><Button type="submit" className="w-full rounded-xl bg-amber-400 text-amber-950 hover:bg-amber-300">{user ? "Virar Autor+" : "Entrar para virar Autor+"}<ArrowRight className="ml-2 h-4 w-4" /></Button></form><div className="mt-2 flex gap-2">{user ? <><PixPaymentButton planId={authorPlan.id} /><form action="/api/payments/preapproval" method="POST"><input type="hidden" name="plan_id" value={authorPlan.id} /><Button type="submit" size="sm" variant="outline" className="flex-1 rounded-xl text-xs">Recorrente (cartão)</Button></form></> : null}</div></> : null}
           </CardContent>
         </Card>
 
@@ -132,7 +132,7 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
             <div className="mb-1">{authorYearlyPlan ? <><span className="text-3xl font-black">{formatBRL(authorYearlyPlan.price_cents)}</span><span className="text-muted-foreground">/{formatInterval(authorYearlyPlan.interval)}</span></> : <span className="text-xl font-bold text-muted-foreground">Em breve</span>}</div>
             <p className="mb-5 text-xs font-semibold text-emerald-400">equivale a R$ 14,93/mês · pague 9 e leve 12</p>
             <ul className="mb-6 space-y-3">{(authorYearlyPlan ? parseFeatures(authorYearlyPlan) : ["Todos os benefícios do Autor+", "3 meses grátis", "12 meses completos de acesso"]).map((f)=><li key={f} className="flex gap-3 text-sm"><BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />{f}</li>)}</ul>
-            {authorYearlyPlan ? <><form action="/api/payments/checkout" method="POST"><input type="hidden" name="plan_id" value={authorYearlyPlan.id} /><Button type="submit" className="w-full rounded-xl bg-emerald-400 text-emerald-950 hover:bg-emerald-300">{user ? "Assinar anual" : "Entrar para assinar"}<ArrowRight className="ml-2 h-4 w-4" /></Button></form>{user ? <PixPaymentButton planId={authorYearlyPlan.id} /> : null}</> : null}
+            {authorYearlyPlan ? <><form action="/api/payments/checkout" method="POST"><input type="hidden" name="plan_id" value={authorYearlyPlan.id} /><Button type="submit" className="w-full rounded-xl bg-emerald-400 text-emerald-950 hover:bg-emerald-300">{user ? "Assinar anual" : "Entrar para assinar"}<ArrowRight className="ml-2 h-4 w-4" /></Button></form><div className="mt-2 flex gap-2">{user ? <><PixPaymentButton planId={authorYearlyPlan.id} /><form action="/api/payments/preapproval" method="POST"><input type="hidden" name="plan_id" value={authorYearlyPlan.id} /><Button type="submit" size="sm" variant="outline" className="flex-1 rounded-xl text-xs">Recorrente (cartão)</Button></form></> : null}</div></> : null}
           </CardContent>
         </Card>
       </div>
@@ -147,6 +147,14 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
         <h2 className="font-heading text-2xl font-bold">Quer ver antes de pagar?</h2>
         <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">Entre na Central Autor+ em modo preview. Você testa ideias e assistente editorial com limites; assets e trilhas avançadas ficam bloqueados até assinar.</p>
         <Button asChild variant="outline" className="mt-4 rounded-xl"><Link href={user ? "/dashboard/autor-plus" : "/auth/signup"}>Testar preview Autor+ <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
+      </section>
+
+      <section className="mt-8 rounded-xl border border-muted/30 bg-muted/10 p-5 text-center text-xs text-muted-foreground">
+        <p className="font-medium text-foreground">ℹ️ Sobre renovação</p>
+        <p className="mt-1 max-w-xl mx-auto">
+          No momento, as assinaturas funcionam com pagamento manual. Cada ciclo (mês/ano) exige um novo pagamento.
+          A renovação automática está em desenvolvimento e será ativada em breve.
+        </p>
       </section>
     </main>
   );

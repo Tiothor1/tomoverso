@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { cancelPreapproval } from "@/lib/subscriptions";
 
 export async function POST(req: NextRequest) {
   const user = await getCurrentUser();
@@ -15,8 +16,15 @@ export async function POST(req: NextRequest) {
   `).get(user.id) as any;
 
   if (sub) {
+    // Cancela no Mercado Pago se tiver preapproval recorrente
+    if (sub.mp_preapproval_id) {
+      await cancelPreapproval(sub.mp_preapproval_id).catch((err) =>
+        console.error("[cancel] failed to cancel MP preapproval:", err)
+      );
+    }
+
     db.prepare(`
-      UPDATE user_subscriptions SET cancel_at_period_end = 1, updated_at = datetime('now') WHERE id = ?
+      UPDATE user_subscriptions SET status = 'canceled', cancel_at_period_end = 1, updated_at = datetime('now') WHERE id = ?
     `).run(sub.id);
   }
 

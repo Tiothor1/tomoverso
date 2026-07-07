@@ -82,13 +82,16 @@ export function getActivePlans(): any[] {
 
 /** Busca assinatura ativa do usuário */
 export function getUserActiveSubscription(db: any, userId: string): (any) | null {
-  return db.prepare(`
+  // Also check that period hasn't expired (defense for between cron runs)
+  const sub = db.prepare(`
     SELECT us.*, sp.name AS plan_name, sp.badge_label, sp.role_granted
     FROM user_subscriptions us
     JOIN subscription_plans sp ON sp.id = us.plan_id
     WHERE us.user_id = ? AND us.status IN ('active', 'trialing')
+      AND us.current_period_end >= datetime('now')
     ORDER BY us.created_at DESC LIMIT 1
-  `).get(userId) || null;
+  `).get(userId) as any;
+  return sub || null;
 }
 
 /** Lista transações do usuário */
@@ -241,4 +244,81 @@ export async function checkPaymentStatus(paymentId: string) {
   });
   if (!res.ok) return null;
   return res.json();
+}
+
+/** Cria preapproval (assinatura recorrente) no Mercado Pago */
+export async function createPreapproval(params: {
+  planId: string;
+  planName: string;
+  priceCents: number;
+  interval: string;
+  userId: string;
+  userEmail: string;
+  userName?: string;
+}): Promise<{ preapprovalId: string; checkoutUrl: string } | null> {
+  const token = await getMercadoPagoAccessToken();
+  if (!token) return null;
+
+  const label = params.interval === "year" ? "anual" : "mensal";
+  const title = `Tomo Verso Editora ${params.planName} — ${label}`;
+
+  const body = {
+    back_url: `${SITE_URL}/dashboard/subscription`,
+    auto_recurring: {
+      frequency: 1,
+      frequency_type: params.interval === "year" ? "months" as const : "months" as const,
+      transaction_amount: params.priceCents / 100,
+      currency_id: "BRL",
+      ...(params.interval === "year" ? { repetitions: 12 } : {}),
+    },
+    payer_email: params.userEmail,
+    reason: title,
+    external_reference: `${params.userId}:${params.planId}`,
+    notification_url: `${SITE_URL}/api/payments/mercadopago-webhook`,
+    status: "pending",
+  };
+
+  // Monthly = 1 month, Yearly = send with 12 repetitions (one per month, 12x)
+  if (params.interval === "year") {
+    body.auto_recurring.frequency = 12;
+    body.auto_recurring.frequency_type = "months";
+  }
+
+  const res = await fetch(`${MP_API}/preapproval`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error("[MP] createPreapproval error:", res.status, text);
+    return null;
+  }
+
+  const data = await res.json();
+  return {
+    preapprovalId: data.id,
+    checkoutUrl: data.init_point || data.sandbox_init_point,
+  };
+}
+
+/** Cancela preapproval no Mercado Pago */
+export async function cancelPreapproval(mpPreapprovalId: string): Promise<boolean> {
+  const token = await getMercadoPagoAccessToken();
+  if (!token) return false;
+
+  const res = await fetch(`${MP_API}/preapproval/${mpPreapprovalId}`, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ status: "cancelled" }),
+  });
+
+  return res.ok;
 }

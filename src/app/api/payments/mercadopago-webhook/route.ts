@@ -1,7 +1,9 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
-import { checkPaymentStatus } from "@/lib/subscriptions";
+import { checkPaymentStatus, getMercadoPagoAccessToken } from "@/lib/subscriptions";
+
+const MP_API = "https://api.mercadopago.com";
 
 function parseMercadoPagoSignature(signature: string | null) {
   if (!signature) return null;
@@ -45,6 +47,53 @@ export async function POST(req: NextRequest) {
     const body = await req.json().catch(() => ({}));
     const type = body.type || body.topic || url.searchParams.get("type") || url.searchParams.get("topic");
 
+    // ── PREAPPROVAL (assinatura recorrente) ──────────────
+    if (type === "preapproval" || type === "preapproval_plan") {
+      const preapprovalId = body.data?.id || body.id || url.searchParams.get("data.id");
+      if (!preapprovalId) {
+        return NextResponse.json({ received: true });
+      }
+
+      // Busca preapproval no MP
+      const token = await getMercadoPagoAccessToken();
+      if (!token) {
+        console.error("[MP webhook] No token to fetch preapproval");
+        return NextResponse.json({ received: true });
+      }
+
+      const mpRes = await fetch(`${MP_API}/preapproval/${preapprovalId}`, {
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+
+      if (!mpRes.ok) {
+        console.error("[MP webhook] Failed to fetch preapproval:", await mpRes.text());
+        return NextResponse.json({ received: true });
+      }
+
+      const preapproval = await mpRes.json();
+      const mpStatus = preapproval.status || "pending";
+      const extRef = String(preapproval.external_reference || "");
+      const [refUserId, refPlanId] = extRef.split(":");
+      const payerEmail = preapproval.payer_email || "";
+
+      if ((mpStatus === "authorized" || mpStatus === "approved") && refUserId && refPlanId) {
+        const db = getDb();
+        const now = new Date().toISOString();
+        const endDate = new Date();
+        const plan = db.prepare("SELECT * FROM subscription_plans WHERE id = ?").get(refPlanId) as any;
+        endDate.setMonth(endDate.getMonth() + (plan?.interval === "year" ? 12 : 1));
+
+        db.prepare(`
+          UPDATE user_subscriptions
+          SET status = 'active', mp_payer_email = ?, current_period_start = ?, current_period_end = ?, cancel_at_period_end = 0, updated_at = datetime('now')
+          WHERE mp_preapproval_id = ?
+        `).run(payerEmail, now, endDate.toISOString(), preapprovalId);
+      }
+
+      return NextResponse.json({ received: true });
+    }
+
+    // ── REGULAR SUBSCRIPTION PAYMENT (one-time) ──────
     if (type && type !== "payment") {
       return NextResponse.json({ received: true });
     }
