@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { cookies } from "next/headers";
 import { BookOpen, Compass, Crown, Home, PenLine, Sparkles, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileMenu } from "@/components/layout/mobile-menu";
@@ -11,6 +12,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getSiteConfig } from "@/lib/site-config";
 import { getDb } from "@/lib/db";
 import { getUserActiveSubscription } from "@/lib/subscriptions";
+import { getLocaleFromCookies, createTranslator } from "@/lib/i18n/server-t";
 
 export async function Navbar() {
   const user = await getCurrentUser();
@@ -20,6 +22,9 @@ export async function Navbar() {
   const storeHref = config.storefront_href || "/store";
   const publishHref = user ? "/dashboard/novels/new" : (config.publish_cta_href || "/auth/signup");
   const publishLabel = user ? "Publicar" : config.publish_cta_label;
+  const cookieStore = await cookies();
+  const locale = getLocaleFromCookies(cookieStore.get("novel_lang")?.value || null);
+  const t = createTranslator(locale);
 
   return (
     <>
@@ -45,31 +50,31 @@ export async function Navbar() {
             </span>
           </Link>
 
-          <nav className="ml-2 hidden items-center gap-1 lg:flex" aria-label="Navegação principal">
+          <nav className="ml-2 hidden items-center gap-1 lg:flex" aria-label={t("nav.more")}>
             <NavLink href="/">
               <Home className="mr-1.5 h-4 w-4" />
-              Início
+              {t("nav.home")}
             </NavLink>
             <NavLink href="/feed" tone="accent">
               <Sparkles className="mr-1.5 h-4 w-4" />
-              Feed
+              {t("nav.feed")}
             </NavLink>
             <NavLink href="/explore">
               <Compass className="mr-1.5 h-4 w-4" />
-              Catálogo
+              {t("nav.catalog")}
             </NavLink>
             <NavLink href={publishHref}>
               <PenLine className="mr-1.5 h-4 w-4" />
-              Publicar
+              {t("nav.publish")}
             </NavLink>
             <NavLink href="/autor-plus" tone="accent">
               <Crown className="mr-1.5 h-4 w-4" />
-              Autor+
+              {t("nav.author_plus")}
             </NavLink>
             {config.storefront_enabled ? (
               <NavLink href={storeHref}>
                 <Store className="mr-1.5 h-4 w-4" />
-                Loja
+                {t("nav.store")}
               </NavLink>
             ) : null}
           </nav>
@@ -98,7 +103,7 @@ export async function Navbar() {
               />
             ) : (
               <Button asChild className="rounded-full px-4 font-bold shadow-sm">
-                <Link href="/auth/login">Entrar</Link>
+                <Link href="/auth/login">{t("nav.login")}</Link>
               </Button>
             )}
 

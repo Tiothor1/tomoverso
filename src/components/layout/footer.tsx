@@ -1,14 +1,19 @@
 import Link from "next/link";
 import { BookOpen, Heart, Code2, MessageCircle, Send, Store } from "lucide-react";
+import { cookies } from "next/headers";
 import { Separator } from "@/components/ui/separator";
 import { getSiteConfig } from "@/lib/site-config";
 import { getCurrentUser } from "@/lib/auth";
+import { getLocaleFromCookies, createTranslator } from "@/lib/i18n/server-t";
 
 export async function Footer() {
   const config = getSiteConfig();
   const user = await getCurrentUser().catch(() => null);
   const publishHref = user ? "/dashboard/novels/new" : config.publish_cta_href;
   const publishLabel = user ? "Publicar" : config.publish_cta_label;
+  const cookieStore = await cookies();
+  const locale = getLocaleFromCookies(cookieStore.get("novel_lang")?.value || null);
+  const t = createTranslator(locale);
 
   return (
     <footer className="site-footer mt-20 border-t border-border/40 bg-card/30">
@@ -31,31 +36,31 @@ export async function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-3 font-heading text-sm font-semibold">Ler</h3>
+            <h3 className="mb-3 font-heading text-sm font-semibold">{t("nav.catalog")}</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/explore" className="hover:text-primary transition-colors">Explorar novels</Link></li>
-              <li><Link href="/manga" className="hover:text-primary transition-colors">Catálogo de mangás</Link></li>
-              {config.storefront_enabled ? <li><Link href={config.storefront_href} className="hover:text-primary transition-colors">Loja editorial</Link></li> : null}
-              <li><Link href="/explore?filter=populares" className="hover:text-primary transition-colors">Populares</Link></li>
-              <li><Link href="/explore?filter=recentes" className="hover:text-primary transition-colors">Recentes</Link></li>
+              <li><Link href="/explore" className="hover:text-primary transition-colors">{t("nav.light_novels")}</Link></li>
+              <li><Link href="/manga" className="hover:text-primary transition-colors">{t("nav.mangas")}</Link></li>
+              {config.storefront_enabled ? <li><Link href={config.storefront_href} className="hover:text-primary transition-colors">{t("nav.store")}</Link></li> : null}
+              <li><Link href="/explore?filter=populares" className="hover:text-primary transition-colors">{t("common.popular")}</Link></li>
+              <li><Link href="/explore?filter=recentes" className="hover:text-primary transition-colors">{t("common.new")}</Link></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="mb-3 font-heading text-sm font-semibold">Criar</h3>
+            <h3 className="mb-3 font-heading text-sm font-semibold">{t("nav.publish")}</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/how-to" className="hover:text-primary transition-colors">Como criar LN</Link></li>
-              <li><Link href="/dashboard" className="hover:text-primary transition-colors">Painel do autor</Link></li>
+              <li><Link href="/how-to" className="hover:text-primary transition-colors">{t("nav.how_to")}</Link></li>
+              <li><Link href="/dashboard" className="hover:text-primary transition-colors">{t("nav.dashboard")}</Link></li>
               <li><Link href={publishHref} className="hover:text-primary transition-colors">{publishLabel}</Link></li>
-              <li><Link href="/search" className="hover:text-primary transition-colors">Buscar</Link></li>
+              <li><Link href="/search" className="hover:text-primary transition-colors">{t("common.search")}</Link></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="mb-3 font-heading text-sm font-semibold">Projeto</h3>
+            <h3 className="mb-3 font-heading text-sm font-semibold">{t("nav.more")}</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/sobre" className="hover:text-primary transition-colors">Quem somos</Link></li>
-              {config.storefront_enabled ? <li><Link href={config.storefront_href} className="hover:text-primary transition-colors"><Store className="mr-1 inline h-3 w-3" /> Loja</Link></li> : null}
+              {config.storefront_enabled ? <li><Link href={config.storefront_href} className="hover:text-primary transition-colors"><Store className="mr-1 inline h-3 w-3" /> {t("nav.store")}</Link></li> : null}
               <li><a href={`mailto:${config.support_email}`} className="hover:text-primary transition-colors">{config.support_email}</a></li>
               <li><Link href="/termos" className="hover:text-primary transition-colors">Termos</Link></li>
             </ul>
@@ -67,7 +72,7 @@ export async function Footer() {
         <div className="flex flex-col items-center justify-between gap-3 pt-6 text-sm text-muted-foreground sm:flex-row">
           <div>© {new Date().getFullYear()} {config.site_name}. Feito com <Heart className="inline h-3 w-3 fill-red-500 text-red-500" /> no Brasil.</div>
           <div className="flex items-center gap-4 text-xs">
-            <span>Status: <span className="text-emerald-400">● Online</span></span>
+            <span>{t("common.status_ongoing")}: <span className="text-emerald-400">● Online</span></span>
             <span>v0.2.0</span>
           </div>
         </div>
