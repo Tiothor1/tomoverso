@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 
 function getRemaining(target: string) {
   const diff = new Date(target).getTime() - Date.now();
@@ -20,8 +20,7 @@ function pad(n: number) {
 export function LaunchPage() {
   const [remaining, setRemaining] = useState({ h: 99, m: 99, s: 99 });
   const [currentInfo, setCurrentInfo] = useState(0);
-  const playerRef = useRef<any>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [activated, setActivated] = useState(false);
 
   useEffect(() => {
     const target = document.body.getAttribute("data-launch-target") || "2026-07-09T22:00:00-03:00";
@@ -35,59 +34,6 @@ export function LaunchPage() {
     return () => clearInterval(interval);
   }, []);
 
-  // YouTube IFrame API for reliable looping
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    // Load YouTube IFrame API if not already loaded
-    if (!(window as any).YT) {
-      const tag = document.createElement("script");
-      tag.src = "https://www.youtube.com/iframe_api";
-      const first = document.getElementsByTagName("script")[0];
-      first?.parentNode?.insertBefore(tag, first);
-    }
-
-    const onReady = () => {
-      playerRef.current = new (window as any).YT.Player(container, {
-        height: "100%",
-        width: "100%",
-        videoId: "U6oxLf6D1us",
-        playerVars: {
-          autoplay: 1,
-          controls: 0,
-          mute: 1,
-          modestbranding: 1,
-          rel: 0,
-          showinfo: 0,
-          iv_load_policy: 3,
-          playsinline: 1,
-        },
-        events: {
-          onStateChange: (event: any) => {
-            if (event.data === (window as any).YT.PlayerState.ENDED) {
-              event.target.playVideo();
-            }
-          },
-        },
-      });
-    };
-
-    // If API already loaded, create player immediately
-    if ((window as any).YT?.Player) {
-      onReady();
-    } else {
-      (window as any).onYouTubeIframeAPIReady = onReady;
-    }
-
-    return () => {
-      if (playerRef.current) {
-        playerRef.current.destroy();
-        playerRef.current = null;
-      }
-    };
-  }, []);
-
   const infos = [
     { icon: "📖", title: "Milhares de novels, mangás e histórias", desc: "Leitura gratuita, sem enrolação. De light novels a webcomics brasileiros." },
     { icon: "✍️", title: "Publique sua própria história", desc: "Crie, edite e publique capítulos. Sua obra, seu universo, seu público." },
@@ -99,11 +45,31 @@ export function LaunchPage() {
 
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#050806] text-white overflow-hidden">
-      {/* Background video — YouTube IFrame API for reliable loop */}
-      <div className="absolute inset-0 z-0 opacity-[0.15] pointer-events-none overflow-hidden">
-        <div ref={containerRef} className="absolute inset-0 h-full w-full" style={{ filter: "blur(4px) saturate(0.5)" }} />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050806]/92 via-[#050806]/75 to-[#050806]/95" />
+      {/* Background video — iframe com loop */}
+      <div className="absolute inset-0 z-0 opacity-[0.18] pointer-events-none overflow-hidden">
+        <iframe
+          src="https://www.youtube.com/embed/U6oxLf6D1us?autoplay=1&loop=1&playlist=U6oxLf6D1us&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0"
+          className="absolute inset-0 h-full w-full"
+          style={{ filter: "blur(4px) saturate(0.5)", transform: "scale(1.1)" }}
+          allow="autoplay; encrypted-media"
+          title="bg"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050806]/90 via-[#050806]/70 to-[#050806]/95" />
       </div>
+
+      {/* Overlay de ativação — some ao clicar/tocar */}
+      {!activated ? (
+        <button
+          type="button"
+          onClick={() => setActivated(true)}
+          className="absolute inset-0 z-20 flex cursor-pointer flex-col items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity duration-500 hover:bg-black/30"
+        >
+          <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-amber-300/50 bg-amber-300/10 text-amber-200 shadow-xl shadow-amber-950/30">
+            <svg className="ml-1 h-8 w-8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </div>
+          <p className="mt-4 text-sm font-bold text-amber-100">Toque para ativar o Tomoverso</p>
+        </button>
+      ) : null}
 
       {/* Content */}
       <div className="relative z-10 flex h-full w-full flex-col overflow-y-auto">
