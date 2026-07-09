@@ -288,7 +288,8 @@ if (maxDownloads === 0) {
 
 const seen = new Set(existingIds);
 const candidates = [];
-for (const term of TERMS) {
+const candidateLimit = Number(process.env.TOMOMUSIC_MAX_CANDIDATES || Math.max(maxDownloads * 4, 240));
+outer: for (const term of TERMS) {
   for (let page = 0; page < PAGES_PER_TERM; page += 1) {
     const offset = page * PAGE_LIMIT;
     process.stdout.write(`Query ${term} offset ${offset}... `);
@@ -313,6 +314,10 @@ for (const term of TERMS) {
       const size = Number(file.file_rawsize || 0);
       const mood = classifyMood(term, item);
       candidates.push({ id, item, file, term, mood, duration, size });
+      if (candidates.length >= candidateLimit) {
+        console.log(`Candidate limit reached: ${candidates.length}`);
+        break outer;
+      }
     }
   }
 }
