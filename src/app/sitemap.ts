@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { getDb } from "@/lib/db";
 import { publicVisibleNovelSql, publicVisibleMangaSql } from "@/lib/public-catalog";
 
-const BASE_URL = "https://tomoversoeditora.com";
+const BASE_URL = "https://tomoverso.studio";
 
 function safeDate(value: string | null | undefined): Date {
   const d = new Date(value ?? "");
