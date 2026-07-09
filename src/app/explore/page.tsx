@@ -10,7 +10,7 @@ import { NovelCard } from "@/components/novel/novel-card";
 import { SaveWorkButton } from "@/components/work/save-work-button";
 import { getDb } from "@/lib/db";
 import { readableTitle } from "@/lib/display-title";
-import { publicVisibleMangaSql, publicVisibleNovelSql } from "@/lib/public-catalog";
+import { publicReadableNovelSql, publicVisibleMangaSql } from "@/lib/public-catalog";
 
 export const metadata = {
   title: "Catálogo — Tomo Verso Editora",
@@ -244,7 +244,7 @@ function loadItems(db: ReturnType<typeof getDb>): CatalogItem[] {
            EXISTS (SELECT 1 FROM catalog_controls cc WHERE cc.item_type='novel' AND cc.item_id = n.id AND COALESCE(cc.is_original,0)=1) AS is_original
     FROM novels n
     LEFT JOIN users u ON u.id = n.author_id
-    WHERE ${publicVisibleNovelSql("n")}
+    WHERE ${publicReadableNovelSql("n")}
     LIMIT 600
   `).all() as any[];
   items.push(...novelRows.map(parseNovelRow));

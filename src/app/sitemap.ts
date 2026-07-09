@@ -1,6 +1,6 @@
 import { MetadataRoute } from "next";
 import { getDb } from "@/lib/db";
-import { publicVisibleNovelSql, publicVisibleMangaSql } from "@/lib/public-catalog";
+import { publicReadableNovelSql, publicVisibleMangaSql } from "@/lib/public-catalog";
 
 const BASE_URL = "https://tomoverso.studio";
 
@@ -29,7 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Novel slugs
   const novels = db.prepare(
-    `SELECT slug, updated_at FROM novels n WHERE ${publicVisibleNovelSql("n")} ORDER BY n.updated_at DESC`
+    `SELECT slug, updated_at FROM novels n WHERE ${publicReadableNovelSql("n")} ORDER BY n.updated_at DESC`
   ).all() as { slug: string; updated_at: string }[];
 
   const novelRoutes: MetadataRoute.Sitemap = novels.map((n) => ({
