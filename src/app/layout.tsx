@@ -59,7 +59,7 @@ export default async function RootLayout({
   try {
     const headersList = await headers();
     const path = headersList.get("x-invoke-path") || headersList.get("next-url") || "";
-    isAdminRoute = path.startsWith("/admin-secreto") || path.startsWith("/api/admin");
+    isAdminRoute = path.startsWith("/admin-secreto") || path.startsWith("/api/admin") || path.startsWith("/auth/") || path.startsWith("/_next/");
   } catch {
     isAdminRoute = false;
   }
