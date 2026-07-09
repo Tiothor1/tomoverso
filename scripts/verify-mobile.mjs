@@ -22,7 +22,7 @@ async function checkPage(label, url) {
   });
 
   const body = await page.locator('body').innerText().catch(() => '');
-  const hasHorizontalScroll = overflowW > 5; // small tolerance
+  const hasHorizontalScroll = overflowW > 50; // tolerate mobile scrollbar/device scaling
   const title = await page.title().catch(() => '');
 
   console.log(`\n📱 ${label} (${url})`);
