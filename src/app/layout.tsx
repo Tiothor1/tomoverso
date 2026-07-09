@@ -9,6 +9,7 @@ import { Footer } from "@/components/layout/footer";
 import { CookieConsent } from "@/components/layout/cookie-consent";
 import { TomoversoIntroSplash } from "@/components/layout/tomoverso-intro-splash";
 import { TomoversoRoutePreloader } from "@/components/layout/tomoverso-route-preloader";
+import { TomoMusicProvider } from "@/components/tomomusic/tomomusic-provider";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -83,15 +84,17 @@ export default function RootLayout({
       <body className="antialiased min-h-screen flex flex-col">
         <LanguageProvider>
           <ThemeProvider defaultTheme="dark" defaultColor="sepia">
-            <TomoversoIntroSplash />
-            <Navbar />
-            <ContinueReadingBanner />
-            <main className="flex-1">{children}</main>
-            <Footer />
-            <CookieConsent />
-            <TomoversoRoutePreloader />
-            <Toaster position="top-center" richColors />
-            </ThemeProvider>
+            <TomoMusicProvider>
+              <TomoversoIntroSplash />
+              <Navbar />
+              <ContinueReadingBanner />
+              <main className="flex-1">{children}</main>
+              <Footer />
+              <CookieConsent />
+              <TomoversoRoutePreloader />
+              <Toaster position="top-center" richColors />
+            </TomoMusicProvider>
+          </ThemeProvider>
         </LanguageProvider>
       </body>
     </html>

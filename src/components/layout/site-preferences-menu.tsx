@@ -7,6 +7,7 @@ import {
   BookText,
   Check,
   Crown,
+  Headphones,
   Languages,
   Library,
   Monitor,
@@ -108,6 +109,12 @@ export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel
           <Link href="/manga" className="cursor-pointer gap-2">
             <BookText className="h-4 w-4" />
             Mangás e manhwas
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/tomomusic" className="cursor-pointer gap-2">
+            <Headphones className="h-4 w-4 text-amber-400" />
+            TomoMusic
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>

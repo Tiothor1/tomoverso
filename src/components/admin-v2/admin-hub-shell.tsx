@@ -11,6 +11,7 @@ import {
   FileSearch,
   FileText,
   Globe2,
+  Headphones,
   Home,
   Layers3,
   LockKeyhole,
@@ -95,6 +96,7 @@ function navGroups(secretPath: string): NavGroup[] {
       items: [
         { label: "Configurações", href: "/admin/site", icon: Settings, key: "site", hint: "Site principal" },
         { label: "Feed admin", href: `${root}/feed`, icon: Activity, key: "feed", hint: "Moderação" },
+        { label: "TomoMusic", href: `${root}/tomomusic`, icon: Headphones, key: "tomomusic", hint: "Áudio" },
         { label: "Integrações", href: "/admin/integrations", icon: Globe2, key: "integrations" },
         { label: "Segurança", href: `${root}/setup`, icon: LockKeyhole, key: "setup" },
       ],

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { cookies } from "next/headers";
-import { BookOpen, Compass, Crown, Home, PenLine, Sparkles, Store } from "lucide-react";
+import { BookOpen, Compass, Crown, Headphones, Home, PenLine, Sparkles, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MobileMenu } from "@/components/layout/mobile-menu";
 import { NavbarMoreMenu } from "@/components/layout/site-preferences-menu";
@@ -62,6 +62,10 @@ export async function Navbar() {
             <NavLink href="/explore">
               <Compass className="mr-1.5 h-4 w-4" />
               {t("nav.catalog")}
+            </NavLink>
+            <NavLink href="/tomomusic" tone="accent">
+              <Headphones className="mr-1.5 h-4 w-4" />
+              TomoMusic
             </NavLink>
             <NavLink href={publishHref}>
               <PenLine className="mr-1.5 h-4 w-4" />

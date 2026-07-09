@@ -9,6 +9,7 @@ import {
   BookText,
   Compass,
   Crown,
+  Headphones,
   Home,
   Library,
   LogIn,
@@ -133,6 +134,7 @@ export function MobileMenu({
                     <MobileTile href="/" icon={Home} label="Início" onClose={close} />
                     <MobileTile href="/feed" icon={Sparkles} label="Feed" accent="violet" onClose={close} />
                     <MobileTile href="/explore" icon={Compass} label="Catálogo" onClose={close} />
+                    <MobileTile href="/tomomusic" icon={Headphones} label="TomoMusic" accent="amber" onClose={close} />
                     <MobileTile href={publishHref} icon={PenLine} label="Publicar" accent="primary" onClose={close} />
                     <MobileTile href="/autor-plus" icon={Crown} label="Autor+" accent="amber" onClose={close} />
                     {showStore ? <MobileTile href={storeHref} icon={Store} label="Loja" onClose={close} /> : null}
@@ -147,6 +149,7 @@ export function MobileMenu({
                       <MobileRow href="/search" icon={Search} label="Buscar obras" onClose={close} />
                       <MobileRow href="/explore" icon={BookOpen} label="Light novels" onClose={close} />
                       <MobileRow href="/manga" icon={BookText} label="Mangás e manhwas" onClose={close} />
+                      <MobileRow href="/tomomusic" icon={Headphones} label="TomoMusic" accent="amber" onClose={close} />
                       <MobileRow href="/livros" icon={BookText} label="Livros" onClose={close} />
                       <MobileRow href="/library" icon={Library} label="Minha estante" onClose={close} />
                       <MobileRow href="/store/plans" icon={Crown} label={subBadge ? `Planos Pro · ${subBadge}` : "Planos Pro"} accent="amber" onClose={close} />
