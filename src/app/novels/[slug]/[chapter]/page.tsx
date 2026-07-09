@@ -159,7 +159,7 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen overflow-x-hidden">
       <ReadingProgress />
 
       <div className="border-b border-border/40 bg-muted/20 sticky top-16 z-30 backdrop-blur-md">

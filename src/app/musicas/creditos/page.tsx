@@ -41,9 +41,9 @@ export default function MusicCreditsPage() {
                 </div>
               </div>
               <dl className="mt-4 grid gap-2 text-xs text-slate-400 sm:grid-cols-2">
-                <div><dt className="text-slate-500">Fonte</dt><dd><a href={track.source_url} target="_blank" rel="noopener noreferrer" className="text-amber-200 hover:text-amber-100">{track.source_url}</a></dd></div>
-                <div><dt className="text-slate-500">Licença</dt><dd><a href={track.license_url} target="_blank" rel="noopener noreferrer" className="text-amber-200 hover:text-amber-100">{track.license_name}</a></dd></div>
-                <div><dt className="text-slate-500">Arquivo local</dt><dd>{track.local_file}</dd></div>
+                <div><dt className="text-slate-500">Fonte</dt><dd className="break-all"><a href={track.source_url} target="_blank" rel="noopener noreferrer" className="text-amber-200 hover:text-amber-100">{track.source_url}</a></dd></div>
+                <div><dt className="text-slate-500">Licença</dt><dd className="break-all"><a href={track.license_url} target="_blank" rel="noopener noreferrer" className="text-amber-200 hover:text-amber-100">{track.license_name}</a></dd></div>
+                <div><dt className="text-slate-500">Arquivo local</dt><dd className="break-all">{track.local_file}</dd></div>
                 <div><dt className="text-slate-500">Data de download</dt><dd>{track.downloaded_at?.slice(0, 10) || "—"}</dd></div>
               </dl>
             </article>

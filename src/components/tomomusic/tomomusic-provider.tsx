@@ -373,6 +373,7 @@ function TomoMusicPlayer({ notice, onClearNotice }: { notice: string | null; onC
           <span className={cn("flex h-7 w-7 items-center justify-center rounded-full bg-amber-300/15 text-amber-200", music.isPlaying && "animate-pulse")}>
             <Headphones className="h-4 w-4" />
           </span>
+          <span className="inline sm:hidden">♪</span>
           <span className="hidden sm:inline">TomoMusic</span>
           <ChevronUp className="h-3.5 w-3.5 opacity-70" />
         </button>
