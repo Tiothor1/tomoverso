@@ -4,7 +4,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { useRouter } from "next/navigation";
 import type { LanguageCode, NestedDict } from "@/lib/i18n/types";
 import { LOCALE_HTML_MAP, normalizeLocale } from "@/lib/i18n/types";
-import { loadLocale, resolveKey, interpolate } from "@/lib/i18n/client";
+import { loadLocale, resolveKey, interpolate, getPreloaded } from "@/lib/i18n/client";
+import ptBR from "@/lib/i18n/locales/pt-BR";
 
 const LANGUAGE_STORAGE_KEY = "tomoverso-locale";
 const LANGUAGE_COOKIE = "novel_lang";
@@ -223,7 +224,7 @@ function AutoTranslateDom({ language, dict }: { language: LanguageCode; dict: Ne
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [language, setLanguageState] = useState<LanguageCode>(() => readInitial());
-  const [dict, setDict] = useState<NestedDict | null>(null);
+  const [dict, setDict] = useState<NestedDict | null>(() => getPreloaded() || ptBR);
 
   useEffect(() => {
     let cancelled = false;
