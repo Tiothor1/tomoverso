@@ -22,7 +22,7 @@ export function CookieConsent() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 animate-in slide-in-from-bottom-2 fade-in duration-300">
+    <div className="fixed bottom-0 inset-x-0 z-50 overflow-x-hidden animate-in slide-in-from-bottom-2 fade-in duration-300">
       <div className="mx-auto max-w-7xl px-4 pb-4">
         <div className="glass-panel flex flex-col items-center gap-3 rounded-2xl border border-border/60 p-4 shadow-2xl sm:flex-row sm:gap-4">
           <p className="text-center text-sm text-muted-foreground sm:text-left sm:flex-1">
