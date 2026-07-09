@@ -1,8 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { signupAction } from "@/lib/actions/auth-actions";
-import { TurnstileWidget } from "@/components/security/turnstile-widget";
+import { launchSignupAction } from "@/lib/actions/launch-signup-action";
 
 export function LaunchSignup() {
   const [error, setError] = useState<string | null>(null);
@@ -16,7 +15,7 @@ export function LaunchSignup() {
     setLoading(true);
     setError(null);
     try {
-      const result = await signupAction(formData);
+      const result = await launchSignupAction(formData);
       if (result.redirect) {
         setSuccess(true);
         return;
@@ -93,10 +92,6 @@ export function LaunchSignup() {
           placeholder="Mínimo 8 caracteres"
           className="h-10 w-full rounded-xl border border-white/10 bg-white/[0.04] px-4 text-sm text-white outline-none placeholder:text-slate-600 focus:border-amber-300/40"
         />
-      </div>
-
-      <div className="flex justify-center pt-1">
-        <TurnstileWidget className="scale-[0.85]" />
       </div>
 
       {error && (
