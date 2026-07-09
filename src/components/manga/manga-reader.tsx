@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useState, useCallback, useRef, useEffect } from "react";
-import { ChevronLeft, ChevronRight, List, ArrowLeft, Maximize, Minimize, Bookmark, BookmarkCheck } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ReaderSideActions } from "@/components/reader/reader-side-actions";
 
 export interface MangaReaderChapter {
   id: string;
@@ -118,7 +119,7 @@ export function MangaReader({
 
   return (
     <div ref={containerRef} className="min-h-screen bg-[#06040a] text-foreground">
-      {/* Topbar */}
+      {/* Topbar — simplified, only back + chapter info */}
       <div className="sticky top-0 z-40 border-b border-white/10 bg-[#06040a]/92 shadow-[0_8px_28px_rgba(0,0,0,0.35)] backdrop-blur-xl">
         <div className="container mx-auto max-w-7xl px-4 h-14 flex items-center justify-between gap-2">
           <Button variant="ghost" size="sm" asChild className="text-white hover:bg-white/10 shrink-0">
@@ -128,36 +129,9 @@ export function MangaReader({
               <span className="sm:hidden">Voltar</span>
             </Link>
           </Button>
-          <div className="flex items-center gap-1 min-w-0">
-            <Badge variant="outline" className="shrink-0 border-primary/35 bg-primary/10 text-xs text-white shadow-[0_0_18px_rgba(168,85,247,0.18)]">
-              Cap {chapter.chapter_number}
-            </Badge>
-            {/* Mode toggle */}
-            <button
-              onClick={() => { setMode(mode === "scroll" ? "page" : "scroll"); setPageIdx(0); }}
-              className="whitespace-nowrap rounded-full border border-white/10 bg-white/10 px-2 py-1 text-[10px] text-white/75 hover:bg-primary/15 hover:text-white"
-              title={mode === "scroll" ? "Modo página" : "Modo scroll"}
-            >
-              {mode === "scroll" ? "📄 Pág" : "📜 Scroll"}
-            </button>
-            {/* Fullscreen */}
-            <button
-              onClick={toggleFullscreen}
-              className="rounded-full p-1.5 text-white/70 hover:bg-primary/15 hover:text-white"
-              title={fullscreen ? "Sair da tela cheia" : "Tela cheia"}
-            >
-              {fullscreen ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
-            </button>
-            {/* Bookmark */}
-            <button
-              onClick={toggleBookmark}
-              className={`rounded-full p-1.5 ${bookmarked ? "text-yellow-400 drop-shadow-[0_0_10px_rgba(250,204,21,0.45)]" : "text-white/70"} hover:bg-primary/15 hover:text-white`}
-              title={bookmarked ? "Remover marcador" : "Marcar página"}
-            >
-              {bookmarked ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
-            </button>
-          </div>
-          <ChapterListButton manga={manga} allChapters={allChapters} currentChapterId={chapter.id} />
+          <Badge variant="outline" className="shrink-0 border-primary/35 bg-primary/10 text-xs text-white shadow-[0_0_18px_rgba(168,85,247,0.18)]">
+            Cap {chapter.chapter_number}
+          </Badge>
         </div>
       </div>
 
@@ -262,6 +236,24 @@ export function MangaReader({
           )}
         </div>
       </div>
+
+      {/* Side actions bar — fixed right side */}
+      <ReaderSideActions
+        manga={manga}
+        chapter={chapter}
+        chapters={allChapters}
+        currentPage={pageIdx}
+        totalPages={pages.length}
+        bookmarked={bookmarked}
+        fullscreen={fullscreen}
+        mode={mode}
+        onToggleBookmark={toggleBookmark}
+        onToggleFullscreen={toggleFullscreen}
+        onToggleMode={() => { setMode(mode === "scroll" ? "page" : "scroll"); setPageIdx(0); }}
+        onChapterSelect={(url) => { window.location.href = url; }}
+      />
+
+      {/* Music player (global) */}
     </div>
   );
 }
@@ -298,43 +290,5 @@ function PageImage({ page, index, total }: { page: MangaReaderPage; index: numbe
         {page.page_number} / {total}
       </div>
     </div>
-  );
-}
-
-function ChapterListButton({ manga, allChapters, currentChapterId }: {
-  manga: { slug: string };
-  allChapters: MangaReaderChapter[];
-  currentChapterId: string;
-}) {
-  return (
-    <details className="relative">
-      <summary className="list-none cursor-pointer inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-white/10 text-white">
-        <List className="h-4 w-4" />
-      </summary>
-      <div className="absolute right-0 top-full mt-2 w-72 max-h-[70vh] overflow-y-auto bg-[#1a1a1a] border border-white/10 rounded-lg shadow-2xl z-50">
-        <div className="p-3 border-b border-white/10 text-xs uppercase tracking-wider text-white/50 font-semibold">
-          Capítulos
-        </div>
-        <div className="p-1">
-          {allChapters.map((c) => {
-            const active = c.id === currentChapterId;
-            return (
-              <Link
-                key={c.id}
-                href={`/manga/${manga.slug}/${c.slug}`}
-                className={`flex items-center gap-2 px-3 py-2 rounded text-sm hover:bg-white/10 ${
-                  active ? "bg-primary/20 text-primary" : "text-white/80"
-                }`}
-              >
-                <span className="font-mono text-xs text-white/50 w-10 shrink-0">
-                  #{String(c.chapter_number).padStart(3, "0")}
-                </span>
-                <span className="truncate">{c.title || `Capítulo ${c.chapter_number}`}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-    </details>
   );
 }

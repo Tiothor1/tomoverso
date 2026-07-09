@@ -154,6 +154,14 @@ export function TomoMusicProvider({ children }: { children: ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
+    const onFullscreen = () => {
+      if (document.fullscreenElement) setMinimizedState(true);
+    };
+    document.addEventListener("fullscreenchange", onFullscreen);
+    return () => document.removeEventListener("fullscreenchange", onFullscreen);
+  }, []);
+
+  useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
     audio.volume = volumeState;
@@ -351,120 +359,107 @@ function TomoMusicPlayer({ notice, onClearNotice }: { notice: string | null; onC
     const needle = query.trim().toLowerCase();
     if (!needle) return true;
     return `${track.title} ${track.artist} ${track.mood} ${track.genre}`.toLowerCase().includes(needle);
-  }).slice(0, 12);
+  }).slice(0, 10);
 
   if (music.minimized) {
     return (
-      <div className="fixed bottom-4 right-4 z-[70] print:hidden">
+      <div className="fixed bottom-3 right-3 z-[70] print:hidden sm:bottom-4 sm:right-4">
         <button
           type="button"
           aria-label="Expandir TomoMusic"
           onClick={() => music.setMinimized(false)}
-          className="group flex items-center gap-3 rounded-full border border-amber-300/25 bg-[#07100d]/92 px-4 py-3 text-sm font-black text-amber-100 shadow-2xl shadow-black/45 backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-amber-200/45"
+          className="flex h-11 items-center gap-2 rounded-full border border-black/60 bg-black/88 px-3 text-xs font-black text-amber-100 shadow-xl shadow-black/35 backdrop-blur-md transition hover:bg-black"
         >
-          <span className={cn("flex h-10 w-10 items-center justify-center rounded-full bg-amber-300/12 text-amber-200", music.isPlaying && "animate-pulse")}>
-            <Headphones className="h-5 w-5" />
+          <span className={cn("flex h-7 w-7 items-center justify-center rounded-full bg-amber-300/15 text-amber-200", music.isPlaying && "animate-pulse")}>
+            <Headphones className="h-4 w-4" />
           </span>
-          <span className="block">TomoMusic</span>
-          <ChevronUp className="h-4 w-4 opacity-70" />
+          <span className="hidden sm:inline">TomoMusic</span>
+          <ChevronUp className="h-3.5 w-3.5 opacity-70" />
         </button>
       </div>
     );
   }
 
   return (
-    <section className="fixed bottom-3 left-3 right-3 z-[70] mx-auto max-w-5xl print:hidden sm:bottom-4 sm:left-auto sm:right-4 sm:w-[430px]" aria-label="TomoMusic player global">
-      <div className="overflow-hidden rounded-[1.7rem] border border-amber-300/20 bg-[#08110f]/95 text-slate-100 shadow-2xl shadow-black/50 backdrop-blur-2xl">
-        <div className="relative overflow-hidden p-4">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_15%_0%,rgba(245,190,90,.18),transparent_34%),radial-gradient(circle_at_85%_20%,rgba(22,78,99,.22),transparent_42%)]" />
-          <div className="relative flex items-center gap-3">
-            <button type="button" onClick={music.togglePlay} className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-amber-200/20 bg-slate-950 shadow-xl">
-              {current?.cover_url ? <img src={current.cover_url} alt="" className="h-full w-full object-cover" /> : <Headphones className="m-auto mt-5 h-6 w-6 text-amber-200" />}
-              <span className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition group-hover:opacity-100" />
+    <section className="fixed bottom-2 left-2 right-2 z-[70] mx-auto max-w-[360px] print:hidden sm:bottom-4 sm:left-auto sm:right-4 sm:mx-0" aria-label="TomoMusic player global">
+      <div className="overflow-hidden rounded-2xl border border-amber-300/18 bg-[#07100d]/96 text-slate-100 shadow-xl shadow-black/45 backdrop-blur-xl">
+        <div className="relative p-2.5">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={music.togglePlay}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-300 text-slate-950 shadow-lg shadow-amber-950/25 hover:bg-amber-200"
+              title={music.isPlaying ? "Pausar" : "Tocar"}
+            >
+              {music.isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
             </button>
             <div className="min-w-0 flex-1">
-              <div className="mb-1 flex items-center gap-2">
-                <span className="rounded-full border border-amber-300/20 bg-amber-300/10 px-2 py-0.5 text-[10px] font-black uppercase tracking-[0.18em] text-amber-100">TomoMusic</span>
-                {music.activated ? <span className="text-[10px] text-emerald-200">ativo</span> : <span className="text-[10px] text-slate-400">sem autoplay</span>}
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-amber-200">TomoMusic</span>
+                {!music.activated ? <span className="text-[10px] text-slate-500">clique p/ ativar</span> : null}
               </div>
-              <h3 className="truncate text-sm font-black text-white">{current?.title || "Ativar TomoMusic"}</h3>
-              <p className="truncate text-xs text-slate-400">{current?.artist || "Música ambiente royalty-free para leitura"}</p>
+              <h3 className="truncate text-xs font-black text-white">{current?.title || "Música ambiente"}</h3>
+              <p className="truncate text-[11px] text-slate-500">{current?.artist || "Escolha uma faixa sem sair da leitura"}</p>
             </div>
-            <div className="flex shrink-0 items-center gap-1">
-              <button type="button" onClick={() => setOpenList((v) => !v)} className="rounded-xl p-2 text-slate-300 hover:bg-white/10" title="Lista"><ListMusic className="h-4 w-4" /></button>
-              <button type="button" onClick={() => music.setMinimized(true)} className="rounded-xl p-2 text-slate-300 hover:bg-white/10" title="Minimizar"><Minimize2 className="h-4 w-4" /></button>
-            </div>
+            <button type="button" onClick={() => setOpenList((v) => !v)} className="rounded-full p-2 text-slate-400 hover:bg-white/10 hover:text-white" title="Lista"><ListMusic className="h-4 w-4" /></button>
+            <button type="button" onClick={() => music.setMinimized(true)} className="rounded-full p-2 text-slate-400 hover:bg-white/10 hover:text-white" title="Minimizar"><Minimize2 className="h-4 w-4" /></button>
           </div>
 
-          <div className="relative mt-4">
+          <div className="mt-2">
             <input
               type="range"
               min={0}
               max={Math.max(1, music.duration)}
               value={Math.min(music.currentTime, Math.max(1, music.duration))}
               onChange={(e) => music.seek(Number(e.target.value))}
-              className="h-1.5 w-full accent-amber-300"
+              className="h-1 w-full accent-amber-300"
               aria-label="Progresso"
             />
-            <div className="mt-1 flex justify-between text-[11px] text-slate-500"><span>{fmt(music.currentTime)}</span><span>{fmt(music.duration)}</span></div>
+            <div className="mt-0.5 flex justify-between text-[10px] text-slate-600"><span>{fmt(music.currentTime)}</span><span>{fmt(music.duration)}</span></div>
           </div>
 
-          <div className="relative mt-3 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-1">
-              <button type="button" onClick={music.previous} className="rounded-full p-2 text-slate-200 hover:bg-white/10" title="Anterior"><SkipBack className="h-4 w-4" /></button>
-              <button type="button" onClick={music.togglePlay} className="rounded-full bg-amber-300 px-4 py-3 text-slate-950 shadow-lg shadow-amber-950/30 hover:bg-amber-200" title={music.isPlaying ? "Pausar" : "Tocar"}>
-                {music.isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
+          <div className="mt-1.5 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-0.5">
+              <button type="button" onClick={music.previous} className="rounded-full p-1.5 text-slate-300 hover:bg-white/10" title="Anterior"><SkipBack className="h-3.5 w-3.5" /></button>
+              <button type="button" onClick={music.next} className="rounded-full p-1.5 text-slate-300 hover:bg-white/10" title="Próxima"><SkipForward className="h-3.5 w-3.5" /></button>
+              <button type="button" onClick={() => music.setShuffle(!music.shuffle)} className={cn("rounded-full p-1.5 hover:bg-white/10", music.shuffle ? "text-amber-200" : "text-slate-500")} title="Embaralhar"><Shuffle className="h-3.5 w-3.5" /></button>
+              <button type="button" onClick={() => music.setLoopMode(music.loopMode === "off" ? "track" : music.loopMode === "track" ? "playlist" : "off")} className={cn("rounded-full p-1.5 hover:bg-white/10", music.loopMode !== "off" ? "text-amber-200" : "text-slate-500")} title="Loop">
+                {music.loopMode === "track" ? <Repeat1 className="h-3.5 w-3.5" /> : <Repeat className="h-3.5 w-3.5" />}
               </button>
-              <button type="button" onClick={music.next} className="rounded-full p-2 text-slate-200 hover:bg-white/10" title="Próxima"><SkipForward className="h-4 w-4" /></button>
             </div>
             <div className="flex items-center gap-1">
-              <button type="button" onClick={() => music.setShuffle(!music.shuffle)} className={cn("rounded-full p-2 hover:bg-white/10", music.shuffle ? "text-amber-200" : "text-slate-400")} title="Embaralhar"><Shuffle className="h-4 w-4" /></button>
-              <button type="button" onClick={() => music.setLoopMode(music.loopMode === "off" ? "track" : music.loopMode === "track" ? "playlist" : "off")} className={cn("rounded-full p-2 hover:bg-white/10", music.loopMode !== "off" ? "text-amber-200" : "text-slate-400")} title="Loop">
-                {music.loopMode === "track" ? <Repeat1 className="h-4 w-4" /> : <Repeat className="h-4 w-4" />}
-              </button>
-              <button type="button" onClick={() => current && music.likeTrack(current.id)} className={cn("rounded-full p-2 hover:bg-white/10", current?.liked ? "text-amber-200" : "text-slate-400")} title="Curtir"><ThumbsUp className="h-4 w-4" /></button>
-              <button type="button" onClick={() => current && music.favoriteTrack(current.id)} className={cn("rounded-full p-2 hover:bg-white/10", current?.favorited ? "text-rose-300" : "text-slate-400")} title="Favoritar"><Heart className={cn("h-4 w-4", current?.favorited && "fill-current")} /></button>
+              <button type="button" onClick={() => current && music.likeTrack(current.id)} className={cn("rounded-full p-1.5 hover:bg-white/10", current?.liked ? "text-amber-200" : "text-slate-500")} title="Curtir"><ThumbsUp className="h-3.5 w-3.5" /></button>
+              <button type="button" onClick={() => current && music.favoriteTrack(current.id)} className={cn("rounded-full p-1.5 hover:bg-white/10", current?.favorited ? "text-rose-300" : "text-slate-500")} title="Favoritar"><Heart className={cn("h-3.5 w-3.5", current?.favorited && "fill-current")} /></button>
+              <button type="button" onClick={() => music.setMuted(!music.muted)} className="rounded-full p-1.5 text-slate-500 hover:bg-white/10 hover:text-white" title="Mutar">{music.muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}</button>
+              <input type="range" min={0} max={1} step={0.01} value={music.volume} onInput={(e) => music.setVolume(Number((e.target as HTMLInputElement).value))} onChange={(e) => music.setVolume(Number(e.target.value))} className="w-14 accent-amber-300 sm:w-20" aria-label="Volume" />
             </div>
           </div>
-
-          <div className="relative mt-3 flex items-center gap-2">
-            <button type="button" onClick={() => music.setMuted(!music.muted)} className="rounded-xl p-2 text-slate-300 hover:bg-white/10" title="Mutar">{music.muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}</button>
-            <input type="range" min={0} max={1} step={0.01} value={music.volume} onInput={(e) => music.setVolume(Number((e.target as HTMLInputElement).value))} onChange={(e) => music.setVolume(Number(e.target.value))} className="w-full accent-amber-300" aria-label="Volume" />
-            <span className="w-12 text-right text-[11px] text-slate-500">{Math.round(music.volume * 100)}%</span>
-          </div>
-
-          {current ? (
-            <div className="relative mt-2 flex items-center justify-between text-[11px] text-slate-500">
-              <span>{current.like_count} likes · {current.play_count} plays</span>
-              <Link href="/musicas/creditos" className="text-amber-200/80 hover:text-amber-100">créditos</Link>
-            </div>
-          ) : null}
         </div>
 
         {notice ? (
-          <div className="flex items-center justify-between border-t border-amber-300/15 bg-amber-300/10 px-4 py-2 text-xs text-amber-50">
+          <div className="flex items-center justify-between border-t border-amber-300/15 bg-amber-300/10 px-3 py-2 text-[11px] text-amber-50">
             <span>{notice}</span>
-            <button type="button" onClick={onClearNotice} className="rounded p-1 hover:bg-white/10"><X className="h-3.5 w-3.5" /></button>
+            <button type="button" onClick={onClearNotice} className="rounded p-1 hover:bg-white/10"><X className="h-3 w-3" /></button>
           </div>
         ) : null}
 
         {openList ? (
-          <div className="border-t border-white/10 bg-slate-950/80 p-3">
+          <div className="border-t border-white/10 bg-slate-950/88 p-2.5">
             <label className="relative block">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Pesquisar música, artista ou clima..." className="h-10 w-full rounded-2xl border border-white/10 bg-white/[0.04] pl-10 pr-3 text-sm outline-none focus:border-amber-300/40" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Buscar música..." className="h-9 w-full rounded-xl border border-white/10 bg-white/[0.04] pl-9 pr-3 text-xs outline-none focus:border-amber-300/40" />
             </label>
-            <div className="mt-3 max-h-72 space-y-2 overflow-y-auto pr-1">
+            <div className="mt-2 max-h-56 space-y-1 overflow-y-auto pr-1">
               {visibleTracks.map((track) => (
-                <button key={track.id} type="button" onClick={() => music.playTrack(track, music.tracks)} className={cn("flex w-full items-center gap-3 rounded-2xl border p-2 text-left transition hover:bg-white/[0.06]", current?.id === track.id ? "border-amber-300/25 bg-amber-300/10" : "border-white/10 bg-white/[0.03]")}>
-                  {track.cover_url ? <img src={track.cover_url} alt="" className="h-11 w-11 rounded-xl object-cover" /> : <div className="h-11 w-11 rounded-xl bg-white/10" />}
-                  <span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-slate-100">{track.title}</span><span className="block truncate text-xs text-slate-500">{track.artist} · {track.mood}</span></span>
-                  <span className="text-[11px] text-slate-500">{fmt(track.duration_seconds)}</span>
+                <button key={track.id} type="button" onClick={() => music.playTrack(track, music.tracks)} className={cn("flex w-full items-center gap-2 rounded-xl border p-2 text-left transition hover:bg-white/[0.06]", current?.id === track.id ? "border-amber-300/25 bg-amber-300/10" : "border-white/10 bg-white/[0.03]")}>
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/[0.05] text-amber-200"><Play className="h-3 w-3" /></span>
+                  <span className="min-w-0 flex-1"><span className="block truncate text-xs font-semibold text-slate-100">{track.title}</span><span className="block truncate text-[11px] text-slate-500">{track.artist} · {track.mood}</span></span>
+                  <span className="text-[10px] text-slate-600">{fmt(track.duration_seconds)}</span>
                 </button>
               ))}
             </div>
-            <Link href="/tomomusic" className="mt-3 flex items-center justify-center gap-2 rounded-2xl border border-amber-300/20 bg-amber-300/10 px-3 py-2 text-xs font-bold text-amber-100 hover:bg-amber-300/15">
-              <Maximize2 className="h-3.5 w-3.5" /> Abrir central TomoMusic
+            <Link href="/tomomusic" className="mt-2 flex items-center justify-center gap-2 rounded-xl border border-amber-300/20 bg-amber-300/10 px-3 py-2 text-[11px] font-bold text-amber-100 hover:bg-amber-300/15">
+              Abrir catálogo
             </Link>
           </div>
         ) : null}

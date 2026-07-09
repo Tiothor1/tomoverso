@@ -1,9 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Heart, Bookmark, Share2, MessageCircle, Eye, Clock, Link as LinkIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import {
+  Bookmark,
+  BookmarkCheck,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Eye,
+  Heart,
+  Link as LinkIcon,
+  MessageCircle,
+  Share2,
+} from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface ChapterActionsProps {
   chapterId: string;
@@ -24,10 +35,10 @@ export function ChapterActions({
   const [bookmarked, setBookmarked] = useState(false);
   const [likes, setLikes] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
+  const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
     setReadingTime(Math.ceil(wordCount / 250));
-    // Carrega likes/bookmarks do localStorage
     const stored = localStorage.getItem("tomoverso-chapter-states");
     if (stored) {
       try {
@@ -36,9 +47,7 @@ export function ChapterActions({
           setLiked(true);
           setLikes(states[chapterId].likes || 1);
         }
-        if (states[chapterId]?.bookmarked) {
-          setBookmarked(true);
-        }
+        if (states[chapterId]?.bookmarked) setBookmarked(true);
       } catch {}
     }
   }, [chapterId, wordCount]);
@@ -52,44 +61,18 @@ export function ChapterActions({
 
   function toggleLike() {
     const newLiked = !liked;
-    const newLikes = newLiked ? likes + 1 : likes - 1;
+    const newLikes = Math.max(0, newLiked ? likes + 1 : likes - 1);
     setLiked(newLiked);
     setLikes(newLikes);
     saveState({ liked: newLiked, likes: newLikes });
-    if (newLiked) toast.success("❤️ Você curtiu este capítulo");
+    if (newLiked) toast.success("Você curtiu este capítulo");
   }
 
   function toggleBookmark() {
     const newBookmarked = !bookmarked;
     setBookmarked(newBookmarked);
     saveState({ bookmarked: newBookmarked });
-    if (newBookmarked) {
-      toast.success("🔖 Salvo! Continue sua leitura a qualquer momento");
-    }
-  }
-
-  function share() {
-    const url = `${window.location.origin}/novels/${novelSlug}/${chapterNumber}`;
-    if (navigator.share) {
-      navigator.share({
-        title: "Tomo Verso Editora",
-        text: "Lendo essa LN incrível no Tomo Verso Editora",
-        url,
-      }).catch(() => copyToClipboard(url));
-    } else {
-      copyToClipboard(url);
-    }
-  }
-
-  function shareWhatsApp() {
-    const url = `${window.location.origin}/novels/${novelSlug}/${chapterNumber}`;
-    const text = encodeURIComponent(`Lendo essa LN incrível no Tomo Verso Editora: ${url}`);
-    window.open(`https://wa.me/?text=${text}`, "_blank", "noopener,noreferrer");
-  }
-
-  function copyLink() {
-    const url = `${window.location.origin}/novels/${novelSlug}/${chapterNumber}`;
-    copyToClipboard(url);
+    if (newBookmarked) toast.success("Capítulo salvo na leitura");
   }
 
   function copyToClipboard(url: string) {
@@ -97,59 +80,57 @@ export function ChapterActions({
     toast.success("Link copiado!");
   }
 
+  function share() {
+    const url = `${window.location.origin}/novels/${novelSlug}/${chapterNumber}`;
+    if (navigator.share) {
+      navigator.share({ title: "Tomo Verso Editora", text: "Lendo no Tomo Verso Editora", url }).catch(() => copyToClipboard(url));
+    } else {
+      copyToClipboard(url);
+    }
+  }
+
+  function copyLink() {
+    copyToClipboard(`${window.location.origin}/novels/${novelSlug}/${chapterNumber}`);
+  }
+
+  const actionClass = "flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-black/55 text-white/65 shadow-lg shadow-black/25 backdrop-blur-md transition hover:bg-black/80 hover:text-white";
+
   return (
-    <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={toggleLike}
-        className={liked ? "text-red-500 hover:text-red-600" : ""}
+    <div className="fixed right-2 top-1/2 z-40 flex -translate-y-1/2 flex-col items-center gap-2 sm:right-3">
+      <button
+        type="button"
+        onClick={() => setHidden((value) => !value)}
+        className="flex h-8 w-8 items-center justify-center rounded-lg border border-black/80 bg-black text-white/75 shadow-lg shadow-black/35 transition hover:text-white"
+        title={hidden ? "Mostrar ícones" : "Esconder ícones"}
+        aria-label={hidden ? "Mostrar ícones da lateral" : "Esconder ícones da lateral"}
       >
-        <Heart className={`h-4 w-4 mr-1.5 ${liked ? "fill-red-500" : ""}`} />
-        {likes > 0 ? likes : "Curtir"}
-      </Button>
+        {hidden ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+      </button>
 
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={toggleBookmark}
-        className={bookmarked ? "text-primary" : ""}
-      >
-        <Bookmark className={`h-4 w-4 mr-1.5 ${bookmarked ? "fill-primary" : ""}`} />
-        {bookmarked ? "Salvo" : "Salvar"}
-      </Button>
-
-      <Button variant="ghost" size="sm" onClick={share}>
-        <Share2 className="h-4 w-4 mr-1.5" />
-        Compartilhar
-      </Button>
-
-      <Button variant="ghost" size="sm" onClick={shareWhatsApp}>
-        <span className="h-4 w-4 mr-1.5 flex items-center justify-center font-bold text-green-500">WA</span>
-        WhatsApp
-      </Button>
-
-      <Button variant="ghost" size="sm" onClick={copyLink}>
-        <LinkIcon className="h-4 w-4 mr-1.5" />
-        Copiar link
-      </Button>
-
-      <span className="flex items-center gap-1.5 text-xs">
-        <Eye className="h-3.5 w-3.5" />
-        {viewCount.toLocaleString("pt-BR")} leituras
-      </span>
-
-      <span className="flex items-center gap-1.5 text-xs">
-        <Clock className="h-3.5 w-3.5" />
-        ~{readingTime} min
-      </span>
-
-      <Button variant="ghost" size="sm" asChild>
-        <a href="#comments">
-          <MessageCircle className="h-4 w-4 mr-1.5" />
-          Comentários
-        </a>
-      </Button>
+      {!hidden ? (
+        <>
+          <button type="button" onClick={toggleLike} className={cn(actionClass, liked && "border-red-400/30 bg-red-500/15 text-red-300")} title={liked ? "Descurtir" : "Curtir"}>
+            <Heart className={cn("h-5 w-5", liked && "fill-current")} />
+          </button>
+          <button type="button" onClick={toggleBookmark} className={cn(actionClass, bookmarked && "border-amber-300/35 bg-amber-300/15 text-amber-200")} title={bookmarked ? "Remover salvo" : "Salvar capítulo"}>
+            {bookmarked ? <BookmarkCheck className="h-5 w-5" /> : <Bookmark className="h-5 w-5" />}
+          </button>
+          <a href="#comments" className={actionClass} title="Comentários">
+            <MessageCircle className="h-5 w-5" />
+          </a>
+          <button type="button" onClick={share} className={actionClass} title="Compartilhar">
+            <Share2 className="h-5 w-5" />
+          </button>
+          <button type="button" onClick={copyLink} className={actionClass} title="Copiar link">
+            <LinkIcon className="h-5 w-5" />
+          </button>
+          <div className="hidden w-10 rounded-xl border border-white/10 bg-black/45 px-1.5 py-2 text-center text-[10px] text-white/55 backdrop-blur-md sm:block" title={`${viewCount.toLocaleString("pt-BR")} leituras · ${readingTime} min`}>
+            <Eye className="mx-auto mb-1 h-3.5 w-3.5" />
+            <Clock className="mx-auto h-3.5 w-3.5" />
+            <span className="mt-1 block">{readingTime}m</span>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }
