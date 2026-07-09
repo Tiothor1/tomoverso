@@ -485,7 +485,19 @@ function createDb() {
     CREATE INDEX IF NOT EXISTS idx_store_collection_items_sort ON store_collection_items(collection_id, sort_order);
 
     -- Planos de assinatura
-    CREATE TABLE IF NOT EXISTS subscription_plans (
+    
+    -- Site launch / maintenance config
+    CREATE TABLE IF NOT EXISTS site_config (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL DEFAULT '',
+      updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    INSERT OR IGNORE INTO site_config (key, value) VALUES ('launch_released', '0');
+    INSERT OR IGNORE INTO site_config (key, value) VALUES ('site_title', 'Tomo Verso Editora');
+    INSERT OR IGNORE INTO site_config (key, value) VALUES ('launch_target_time', '2026-07-09T22:00:00-03:00');
+    INSERT OR IGNORE INTO site_config (key, value) VALUES ('promo_deadline', '2026-07-11T12:00:00-03:00');
+
+CREATE TABLE IF NOT EXISTS subscription_plans (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       description TEXT NOT NULL DEFAULT '',

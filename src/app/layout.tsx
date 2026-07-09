@@ -9,6 +9,7 @@ import { Footer } from "@/components/layout/footer";
 import { CookieConsent } from "@/components/layout/cookie-consent";
 import { TomoversoIntroSplash } from "@/components/layout/tomoverso-intro-splash";
 import { TomoversoRoutePreloader } from "@/components/layout/tomoverso-route-preloader";
+import { LaunchGate } from "@/components/launch/launch-gate";
 import { TomoMusicProvider } from "@/components/tomomusic/tomomusic-provider";
 import "./globals.css";
 
