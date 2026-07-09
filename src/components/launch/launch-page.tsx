@@ -105,7 +105,9 @@ export function LaunchPage() {
 
           {/* Countdown */}
           <div className="mt-8 w-full max-w-sm">
-            <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-amber-200/80">Lançamento em</p>
+            <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-amber-200/80">
+              📆 Site abre em
+            </p>
             <div className="flex items-center justify-center gap-3 sm:gap-5">
               <div className="flex flex-col items-center">
                 <span className="font-mono text-4xl font-black tabular-nums text-white sm:text-5xl">{pad(remaining.h)}</span>
