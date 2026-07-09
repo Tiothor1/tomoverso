@@ -233,7 +233,7 @@ function seedTomomusic(db: Db) {
 
   PLAYLISTS.forEach((playlist, idx) => {
     const matching = byMood.get(playlist.mood) || [];
-    const trackIds = Array.from(new Set([...matching, ...allIds])).slice(0, Math.min(8, allIds.length));
+    const trackIds = Array.from(new Set([...matching, ...allIds])).slice(0, Math.min(60, allIds.length));
     const cover = activeTrackIds.find((t) => trackIds.includes(t.id) && t.cover_url)?.cover_url || null;
     const id = `system-${playlist.slug}`;
     insertPlaylist.run({ ...playlist, id, cover_url: cover, sort_order: idx + 1 });
