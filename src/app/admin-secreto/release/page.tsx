@@ -115,7 +115,7 @@ export default function ReleaseAdminPage() {
         <section className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
           <h2 className="text-lg font-black">🎁 Conceder Plano Leitor (30 dias grátis)</h2>
           <p className="mt-2 text-sm text-slate-400">
-            Use para premiar usuários que postarem sobre o site no TikTok/Instagram marcando @wonner.
+            Use para premiar usuários que postarem sobre o site no TikTok/Instagram marcando @fb_fandub.
           </p>
           <div className="mt-4 flex flex-wrap items-end gap-3">
             <div className="flex-1">

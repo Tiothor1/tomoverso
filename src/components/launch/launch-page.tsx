@@ -53,7 +53,7 @@ export function LaunchPage() {
     {
       icon: "🏆",
       title: "Promoção de lançamento",
-      desc: "Poste sobre o site no TikTok/Instagram, marque @wonner e ganhe 30 dias grátis do Plano Leitor!",
+      desc: "Poste sobre o site no TikTok/Instagram, marque @fb_fandub e ganhe 30 dias grátis do Plano Leitor!",
     },
   ];
 
@@ -148,13 +148,28 @@ export function LaunchPage() {
           Poste sobre o Tomoverso no{" "}
           <strong className="text-white">TikTok</strong> ou{" "}
           <strong className="text-white">Instagram</strong>, marque{" "}
-          <strong className="text-amber-200">@wonner</strong> e crie sua conta no site.
+          <strong className="text-amber-200">@fb_fandub</strong> e crie sua conta no site.
           Você ganha <strong className="text-amber-200">30 dias grátis do Plano Leitor</strong>!
         </p>
         <p className="mt-2 text-xs text-slate-500">
           Prazo: até sábado (11/07) às 12h. Posts após esse horário não valem a promoção.
         </p>
-        <p className="mt-6 text-[10px] text-slate-600">
+
+        <div className="mt-5 flex items-center justify-center gap-4">
+          <a
+            href="https://t.me/tomoversoeditora"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-400/10 px-5 py-2.5 text-sm font-bold text-sky-200 transition hover:bg-sky-400/20"
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
+              <path d="M11.944 0A12 12 0 000 12a12 12 0 0012 12 12 12 0 0012-12A12 12 0 0012 0a12 12 0 00-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 01.171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+            </svg>
+            Entre no Telegram
+          </a>
+        </div>
+
+        <p className="mt-5 text-[10px] text-slate-600">
           Feito com ♥ no Brasil
         </p>
       </div>
