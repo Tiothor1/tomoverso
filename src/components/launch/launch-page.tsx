@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { LaunchSignup } from "@/components/launch/launch-signup";
 
 function getRemaining(target: string) {
   const diff = new Date(target).getTime() - Date.now();
@@ -206,6 +207,19 @@ export function LaunchPage() {
             <p className="mt-5 text-sm font-bold text-red-300">
               ⏳ Prazo: até sábado (11/07) às 12h. Posts após esse horário não valem a promoção.
             </p>
+
+            {/* Cadastro inline */}
+            <div className="mx-auto mt-10 max-w-md rounded-2xl border border-amber-300/15 bg-amber-300/[0.03] p-6 text-left backdrop-blur-sm">
+              <h3 className="text-center text-sm font-black uppercase tracking-[0.18em] text-amber-200/80">
+                🔐 Crie sua conta agora
+              </h3>
+              <p className="mt-2 text-center text-xs text-slate-400">
+                Já cadastre-se hoje. Quando o site for liberado, você já entra conectado.
+              </p>
+              <div className="mt-4">
+                <LaunchSignup />
+              </div>
+            </div>
 
             {/* Telegram CTA */}
             <div className="mt-8 flex items-center justify-center gap-4">
