@@ -1,6 +1,6 @@
 import { chromium } from 'playwright';
 
-const base = 'http://127.0.0.1:3000';
+const base = process.env.TOMOMUSIC_BASE || 'http://127.0.0.1:3000';
 const readerPath = '/manga/fui-jogado-em-um-manga-desconhecido/capitulo-1';
 const failures = [];
 function ok(name, cond, detail = '') { if (!cond) failures.push(`${name}${detail ? `: ${detail}` : ''}`); else console.log(`OK ${name}${detail ? ` — ${detail}` : ''}`); }
