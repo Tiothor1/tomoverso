@@ -20,7 +20,6 @@ function pad(n: number) {
 export function LaunchPage() {
   const [remaining, setRemaining] = useState({ h: 99, m: 99, s: 99 });
   const [currentInfo, setCurrentInfo] = useState(0);
-  const [activated, setActivated] = useState(false);
 
   useEffect(() => {
     const target = document.body.getAttribute("data-launch-target") || "2026-07-09T22:00:00-03:00";
@@ -45,31 +44,46 @@ export function LaunchPage() {
 
   return (
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#050806] text-white overflow-hidden">
-      {/* Background video — iframe com loop */}
-      <div className="absolute inset-0 z-0 opacity-[0.18] pointer-events-none overflow-hidden">
-        <iframe
-          src="https://www.youtube.com/embed/U6oxLf6D1us?autoplay=1&loop=1&playlist=U6oxLf6D1us&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0"
-          className="absolute inset-0 h-full w-full"
-          style={{ filter: "blur(4px) saturate(0.5)", transform: "scale(1.1)" }}
-          allow="autoplay; encrypted-media"
-          title="bg"
+      <style>{`
+        @keyframes ambient {
+          0% { transform: scale(1) rotate(0deg); }
+          100% { transform: scale(1.2) rotate(8deg); }
+        }
+        @keyframes drift {
+          0% { transform: translate(0, 0); opacity: 0; }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { transform: translate(120px, -180px); opacity: 0; }
+        }
+      `}</style>
+      {/* Background — animação CSS ambiente (sempre funciona, zero dependência) */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        {/* Gradiente animado */}
+        <div className="absolute inset-0 bg-[#050806]" />
+        <div
+          className="absolute inset-0 animate-[ambient_12s_ease_infinite_alternate] opacity-30"
+          style={{
+            backgroundImage:
+              "radial-gradient(ellipse 80% 60% at 20% 30%, rgba(219,172,85,0.3), transparent), radial-gradient(ellipse 60% 70% at 80% 70%, rgba(14,116,144,0.25), transparent), radial-gradient(ellipse 50% 50% at 50% 50%, rgba(168,85,247,0.08), transparent)",
+            filter: "blur(60px)",
+          }}
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#050806]/90 via-[#050806]/70 to-[#050806]/95" />
+        {/* Partículas simuladas */}
+        <div className="absolute inset-0 opacity-[0.08]">
+          <div className="absolute h-1 w-1 rounded-full bg-amber-200" style={{ top: "12%", left: "23%", animation: "drift 14s linear infinite" }} />
+          <div className="absolute h-1.5 w-1.5 rounded-full bg-amber-100" style={{ top: "45%", left: "78%", animation: "drift 18s linear infinite 3s" }} />
+          <div className="absolute h-1 w-1 rounded-full bg-cyan-200" style={{ top: "67%", left: "15%", animation: "drift 16s linear infinite 7s" }} />
+          <div className="absolute h-1 w-1 rounded-full bg-amber-200" style={{ top: "82%", left: "62%", animation: "drift 20s linear infinite 11s" }} />
+          <div className="absolute h-1.5 w-1.5 rounded-full bg-amber-100" style={{ top: "28%", left: "88%", animation: "drift 15s linear infinite 5s" }} />
+          <div className="absolute h-1 w-1 rounded-full bg-white" style={{ top: "55%", left: "45%", animation: "drift 22s linear infinite 2s" }} />
+          <div className="absolute h-1 w-1 rounded-full bg-amber-200" style={{ top: "8%", left: "70%", animation: "drift 17s linear infinite 9s" }} />
+          <div className="absolute h-1.5 w-1.5 rounded-full bg-cyan-200" style={{ top: "73%", left: "90%", animation: "drift 19s linear infinite 13s" }} />
+          <div className="absolute h-1 w-1 rounded-full bg-amber-100" style={{ top: "38%", left: "35%", animation: "drift 21s linear infinite 4s" }} />
+          <div className="absolute h-1 w-1 rounded-full bg-white" style={{ top: "91%", left: "40%", animation: "drift 13s linear infinite 8s" }} />
+        </div>
+        {/* Vigneta */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050806]/80 via-transparent to-[#050806]/90" />
       </div>
-
-      {/* Overlay de ativação — some ao clicar/tocar */}
-      {!activated ? (
-        <button
-          type="button"
-          onClick={() => setActivated(true)}
-          className="absolute inset-0 z-20 flex cursor-pointer flex-col items-center justify-center bg-black/40 backdrop-blur-sm transition-opacity duration-500 hover:bg-black/30"
-        >
-          <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-amber-300/50 bg-amber-300/10 text-amber-200 shadow-xl shadow-amber-950/30">
-            <svg className="ml-1 h-8 w-8" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-          </div>
-          <p className="mt-4 text-sm font-bold text-amber-100">Toque para ativar o Tomoverso</p>
-        </button>
-      ) : null}
 
       {/* Content */}
       <div className="relative z-10 flex h-full w-full flex-col overflow-y-auto">
