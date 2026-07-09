@@ -131,7 +131,6 @@ export function LaunchPage() {
             <p className="mt-2 text-sm leading-relaxed text-slate-400">{infos[currentInfo].desc}</p>
           </div>
         </div>
-
         {/* 🎁 PROMO SECTION — DESTAQUE GRANDE */}
         <div className="w-full border-t border-amber-300/20 bg-gradient-to-b from-amber-300/[0.03] to-transparent px-4 py-10 sm:py-14">
           <div className="mx-auto max-w-2xl text-center">
@@ -144,11 +143,53 @@ export function LaunchPage() {
             </h2>
 
             <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-slate-300">
-              Poste sobre o Tomoverso no <strong className="text-white">TikTok</strong> ou{" "}
-              <strong className="text-white">Instagram</strong>, marque{" "}
-              <strong className="text-amber-200 text-lg">@fb_fandub</strong>{" "}
-              e crie sua conta no site. Você ganha acesso completo por <strong className="text-amber-200">30 dias</strong>!
+              Poste sobre o Tomoverso, marque <strong className="text-amber-200">@fb_fandub</strong>{" "}
+              e ganhe acesso completo por <strong className="text-amber-200">30 dias</strong>!
             </p>
+
+            {/* Regras — passo a passo */}
+            <div className="mx-auto mt-8 max-w-lg rounded-2xl border border-amber-300/15 bg-amber-300/[0.04] p-6 text-left backdrop-blur-sm">
+              <h3 className="text-center text-sm font-black uppercase tracking-[0.18em] text-amber-200/80">
+                📋 Regras da promoção
+              </h3>
+              <ol className="mt-5 space-y-4">
+                <li className="flex gap-4">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-amber-300/30 bg-amber-300/10 text-sm font-black text-amber-200">1</span>
+                  <div>
+                    <p className="text-sm font-bold text-white">Crie sua conta no Tomoverso</p>
+                    <p className="mt-0.5 text-xs text-slate-400">Cadastre-se no site para ter um <strong className="text-amber-100">@username</strong>.</p>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-amber-300/30 bg-amber-300/10 text-sm font-black text-amber-200">2</span>
+                  <div>
+                    <p className="text-sm font-bold text-white">Publique no TikTok ou Instagram</p>
+                    <p className="mt-0.5 text-xs text-slate-400">Faça um post falando sobre o Tomoverso (pode ser vídeo, foto, stories — vale tudo).</p>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-amber-300/30 bg-amber-300/10 text-sm font-black text-amber-200">3</span>
+                  <div>
+                    <p className="text-sm font-bold text-white">Marque @fb_fandub</p>
+                    <p className="mt-0.5 text-xs text-slate-400">Me marque no post para eu ver sua publicação.</p>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-amber-300/30 bg-amber-300/10 text-sm font-black text-amber-200">4</span>
+                  <div>
+                    <p className="text-sm font-bold text-white">Escreva seu @ do Tomoverso na legenda</p>
+                    <p className="mt-0.5 text-xs text-slate-400">Coloque seu nome de usuário do site na descrição do post ou nos comentários. Ex: <strong className="text-amber-100">"Meu @ no Tomoverso é fulano123"</strong>. Assim eu consigo ativar seu plano.</p>
+                  </div>
+                </li>
+                <li className="flex gap-4">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-amber-300/30 bg-amber-300/10 text-sm font-black text-amber-200">5</span>
+                  <div>
+                    <p className="text-sm font-bold text-white">Pronto! 🎉</p>
+                    <p className="mt-0.5 text-xs text-slate-400">Eu vejo seu post, encontro sua conta no site e ativo <strong className="text-amber-100">30 dias de Plano Leitor</strong> para você.</p>
+                  </div>
+                </li>
+              </ol>
+            </div>
 
             <div className="mt-6 flex flex-wrap items-center justify-center gap-3 text-sm text-slate-400">
               <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
