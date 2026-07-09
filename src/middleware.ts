@@ -127,6 +127,12 @@ export function middleware(request: NextRequest) {
   // ── Security Headers ───────────────────────────────────────────
   const response = NextResponse.next();
 
+  // Mark safe bypass routes for launch gate
+  const isSafeRoute = pathname.startsWith("/auth/") || pathname.startsWith("/admin-4wlbozku") || pathname.startsWith("/admin-secreto") || pathname.startsWith("/api/admin") || pathname.startsWith("/_next/");
+  if (isSafeRoute) {
+    response.headers.set("x-tomoverso-launch-bypass", "1");
+  }
+
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-XSS-Protection", "1; mode=block");

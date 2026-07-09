@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Lora, Geist_Mono } from "next/font/google";
-import { headers } from "next/headers";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { LanguageProvider } from "@/components/i18n/language-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -13,6 +12,8 @@ import { TomoversoRoutePreloader } from "@/components/layout/tomoverso-route-pre
 import { LaunchGate } from "@/components/launch/launch-gate";
 import { LaunchPage } from "@/components/launch/launch-page";
 import { TomoMusicProvider } from "@/components/tomomusic/tomomusic-provider";
+import { getCurrentUser } from "@/lib/auth";
+import { headers } from "next/headers";
 import "./globals.css";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -54,19 +55,27 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Check if this is an admin route — always allow access
-  let isAdminRoute = false;
+  // Check if user is admin — admins always get through
+  let isAdmin = false;
   try {
-    const headersList = await headers();
-    const path = headersList.get("x-invoke-path") || headersList.get("next-url") || "";
-    isAdminRoute = path.startsWith("/admin-secreto") || path.startsWith("/admin-4wlbozku") || path.startsWith("/api/admin") || path.startsWith("/auth/") || path.startsWith("/_next/");
+    const user = await getCurrentUser();
+    isAdmin = user?.role === "admin";
   } catch {
-    isAdminRoute = false;
+    isAdmin = false;
+  }
+
+  // Check if middleware marked this route as safe (login, admin paths)
+  let isSafeRoute = false;
+  try {
+    const h = await headers();
+    isSafeRoute = h.get("x-tomoverso-launch-bypass") === "1";
+  } catch {
+    isSafeRoute = false;
   }
 
   // Check server-side if site is released
   let blocked = false;
-  if (!isAdminRoute) {
+  if (!isAdmin && !isSafeRoute) {
     try {
       const { getDb } = require("@/lib/db");
       const db = getDb();
