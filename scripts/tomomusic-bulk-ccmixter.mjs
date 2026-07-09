@@ -19,12 +19,15 @@ const MAX_DURATION = Number(process.env.TOMOMUSIC_MAX_SECONDS || 1800);
 const PAGE_LIMIT = Number(process.env.TOMOMUSIC_QUERY_LIMIT || 80);
 const PAGES_PER_TERM = Number(process.env.TOMOMUSIC_PAGES_PER_TERM || 4);
 
-const TERMS = (process.env.TOMOMUSIC_TERMS || [
+const DEFAULT_TERMS = [
   'lofi', 'ambient', 'piano', 'study', 'chill', 'fantasy', 'rain', 'sleep', 'reading', 'jazz',
   'calm', 'dream', 'dreamy', 'night', 'relax', 'relaxing', 'meditation', 'downtempo', 'lounge',
   'cinematic', 'soft', 'acoustic', 'coffee', 'nature', 'atmospheric', 'instrumental', 'melancholy',
   'mellow', 'smooth', 'quiet', 'beat', 'electronic', 'soundscape', 'peaceful', 'story', 'winter',
-]).split(',').map((x) => x.trim()).filter(Boolean);
+];
+const TERMS = (process.env.TOMOMUSIC_TERMS ? process.env.TOMOMUSIC_TERMS.split(',') : DEFAULT_TERMS)
+  .map((x) => x.trim())
+  .filter(Boolean);
 
 fs.mkdirSync(TRACK_DIR, { recursive: true });
 fs.mkdirSync(COVER_DIR, { recursive: true });
