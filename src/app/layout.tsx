@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Lora, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { LanguageProvider } from "@/components/i18n/language-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -48,21 +49,32 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Check if this is an admin route — always allow access
+  let isAdminRoute = false;
+  try {
+    const headersList = await headers();
+    const path = headersList.get("x-invoke-path") || headersList.get("next-url") || "";
+    isAdminRoute = path.startsWith("/admin-secreto") || path.startsWith("/api/admin");
+  } catch {
+    isAdminRoute = false;
+  }
+
   // Check server-side if site is released
   let blocked = false;
-  try {
-    const { getDb } = require("@/lib/db");
-    const db = getDb();
-    const row = db.prepare("SELECT value FROM site_config WHERE key = 'launch_released'").get() as { value: string } | undefined;
-    blocked = row?.value !== "1";
-  } catch {
-    // If DB fails, assume blocked (safe)
-    blocked = true;
+  if (!isAdminRoute) {
+    try {
+      const { getDb } = require("@/lib/db");
+      const db = getDb();
+      const row = db.prepare("SELECT value FROM site_config WHERE key = 'launch_released'").get() as { value: string } | undefined;
+      blocked = row?.value !== "1";
+    } catch {
+      blocked = true;
+    }
   }
 
   if (blocked) {
