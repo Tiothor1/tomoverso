@@ -10,6 +10,7 @@ import { CookieConsent } from "@/components/layout/cookie-consent";
 import { TomoversoIntroSplash } from "@/components/layout/tomoverso-intro-splash";
 import { TomoversoRoutePreloader } from "@/components/layout/tomoverso-route-preloader";
 import { LaunchGate } from "@/components/launch/launch-gate";
+import { LaunchPage } from "@/components/launch/launch-page";
 import { TomoMusicProvider } from "@/components/tomomusic/tomomusic-provider";
 import "./globals.css";
 
@@ -52,6 +53,28 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Check server-side if site is released
+  let blocked = false;
+  try {
+    const { getDb } = require("@/lib/db");
+    const db = getDb();
+    const row = db.prepare("SELECT value FROM site_config WHERE key = 'launch_released'").get() as { value: string } | undefined;
+    blocked = row?.value !== "1";
+  } catch {
+    // If DB fails, assume blocked (safe)
+    blocked = true;
+  }
+
+  if (blocked) {
+    return (
+      <html lang="pt-BR" className={`${jakarta.variable} ${lora.variable} ${geistMono.variable}`} suppressHydrationWarning>
+        <body className="antialiased min-h-screen flex flex-col overflow-x-hidden bg-[#050806]">
+          <LaunchPage />
+        </body>
+      </html>
+    );
+  }
+
   return (
     <html
       lang="pt-BR"
