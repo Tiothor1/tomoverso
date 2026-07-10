@@ -116,27 +116,23 @@ function composition(item) {
 function promptFor(item) {
   const synopsis = cleanText(item.synopsis, 900);
   const prompt = [
-    'Professional premium vertical cinematic story illustration for an original Brazilian web novel.',
-    'IMPORTANT: pure full-bleed character/scene illustration only. NOT a poster, NOT a book cover, NOT a magazine page, NOT a graphic design layout. Vertical 2:3 art, 1200x1800, cinematic semi-realistic anime style, polished editorial quality, sharp focus, beautiful composition, high detail, coherent anatomy.',
-    'ABSOLUTELY NO WRITING ANYWHERE IN THE IMAGE: no letters, no numbers, no title, no author, no captions, no fake small print, no signage, no poster typography, no watermark, no logo.',
-    `Story synopsis context: ${synopsis}.`,
-    `Genres and tags: ${genreBlob(item)}.`,
+    'Anime key visual / concept art painting for a Brazilian romantic fantasy story. Full-bleed vertical 2:3 scene, cinematic lighting, professional anime art style. NO TEXT ANYWHERE.',
+    `Story context: ${synopsis}.`,
+    `Genres/tags: ${genreBlob(item)}.`,
     `Visual motifs: ${motifWords(item)}.`,
-    `Character sheet: ${characterSheet(item)}.`,
-    `Composition: ${composition(item)}.`,
-    'Generate ART ONLY: no title text, no author name, no letters, no typography, no logo, no watermark, no signature.',
-    'Avoid: deformed hands, extra fingers, broken anatomy, crossed eyes, melted faces, fused objects, cropped head, generic AI face, random neon overload, unreadable fake text, copied famous cover, watermark.',
+    `Characters: ${characterSheet(item)}.`,
+    `Scene composition: ${composition(item)}.`,
+    'CRITICAL: pure artwork with absolutely zero letters, zero numbers, zero typography, zero logos, zero watermarks, zero speech bubbles, zero signs, zero labels. Not a poster. Not a book cover design. Not a comic page. Just a painting.',
   ].join(' ');
   return prompt.replace(/\s+/g, ' ').trim();
 }
 function shorterPrompt(item) {
   return [
-    'Premium professional vertical 2:3 cinematic character/scene illustration. Full-bleed art only, not a poster, not a book cover, not a layout. ABSOLUTELY NO TEXT, no letters, no numbers, no logo, no watermark, no fake typography anywhere.',
+    'Anime key visual painting. Vertical 2:3 cinematic scene. ABSOLUTELY NO TEXT.',
     `Story: ${cleanText(item.synopsis, 420)}`,
-    `Genres/tags: ${genreBlob(item)}.` ,
-    `Motifs: ${motifWords(item)}.` ,
-    `${characterSheet(item)} ${composition(item)}.`,
-    'Sharp, beautiful, coherent anatomy, original characters only, no deformed hands, no extra fingers, no weird eyes.'
+    `Genre/motifs: ${genreBlob(item)}; ${motifWords(item)}`,
+    `${characterSheet(item)}. ${composition(item)}.`,
+    'No letters, no numbers, no logos, no watermarks, no signs — pure art only.',
   ].join(' ').replace(/\s+/g, ' ').trim();
 }
 async function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
