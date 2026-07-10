@@ -99,6 +99,28 @@ export function TomoMusicLibrary({ initialPayload }: { initialPayload: TomoMusic
         </div>
       </section>
 
+      {/* Subscription upsell banner */}
+      {!initialPayload.subscription?.hasSubscription && initialPayload.subscription && initialPayload.subscription.totalTracks > initialPayload.subscription.freeLimit ? (
+        <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
+          <div className="rounded-2xl border border-amber-300/20 bg-gradient-to-r from-amber-300/[0.06] to-transparent px-5 py-4 sm:flex sm:items-center sm:justify-between sm:gap-4">
+            <div>
+              <p className="text-sm font-bold text-white">
+                🎵 Você está vendo {initialPayload.subscription.freeLimit} de {initialPayload.subscription.totalTracks} músicas
+              </p>
+              <p className="mt-1 text-xs text-slate-400">
+                Assine o <strong className="text-amber-200">Plano Leitor</strong> para escutar o catálogo completo sem limite.
+              </p>
+            </div>
+            <a
+              href="/store/plans"
+              className="mt-3 inline-flex shrink-0 items-center gap-2 rounded-xl bg-amber-300 px-5 py-2.5 text-sm font-black text-slate-950 transition hover:bg-amber-200 sm:mt-0"
+            >
+              Ver planos
+            </a>
+          </div>
+        </div>
+      ) : null}
+
       <section className="mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="space-y-8">
           <Shelf title="Catálogo" subtitle="Lista leve, sem capas pesadas. Clique e escute.">

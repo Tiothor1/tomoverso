@@ -49,4 +49,9 @@ export type TomoMusicPayload = {
     totalBytes: number;
     creditsRequired: number;
   };
+  subscription?: {
+    hasSubscription: boolean;
+    freeLimit: number;
+    totalTracks: number;
+  };
 };

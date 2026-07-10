@@ -10,6 +10,8 @@ type Db = {
   };
 };
 
+const FREE_LIMIT = 7;
+
 type TrackRow = Omit<TomoMusicTrack, "attribution_required" | "is_active" | "liked" | "favorited"> & {
   attribution_required: number;
   is_active: number;
@@ -244,6 +246,16 @@ function seedTomomusic(db: Db) {
 
 export function getTomomusicPayload(db: Db, userId?: string | null, options?: { q?: string; mood?: string; includeInactive?: boolean }): TomoMusicPayload {
   ensureTomomusicTables(db);
+
+  // Check subscription
+  let isSubscriber = false;
+  if (userId) {
+    const sub = db.prepare(
+      "SELECT 1 FROM user_subscriptions WHERE user_id = ? AND status IN ('active', 'trialing') AND current_period_end > datetime('now') LIMIT 1"
+    ).get(userId);
+    isSubscriber = !!sub;
+  }
+
   const q = options?.q?.trim();
   const mood = options?.mood?.trim();
   const where: string[] = [];
@@ -270,6 +282,9 @@ export function getTomomusicPayload(db: Db, userId?: string | null, options?: { 
   `).all(...(userId ? [userId, userId, ...params] : params)) as TrackRow[];
   const tracks = rows.map(normalizeTrack);
 
+  // Free users only get FREE_LIMIT tracks
+  const visibleTracks = isSubscriber ? tracks : tracks.slice(0, FREE_LIMIT);
+
   const playlists = (db.prepare(`
     SELECT p.*, GROUP_CONCAT(pt.track_id) AS track_ids
     FROM tomomusic_playlists p
@@ -289,14 +304,19 @@ export function getTomomusicPayload(db: Db, userId?: string | null, options?: { 
   `).get() as { totalTracks: number; totalSeconds: number; totalBytes: number; creditsRequired: number };
 
   return {
-    tracks,
+    tracks: visibleTracks,
     playlists,
-    moods: Array.from(new Set(tracks.map((t) => t.mood).filter(Boolean))).sort(),
+    moods: Array.from(new Set(visibleTracks.map((t) => t.mood).filter(Boolean))).sort(),
     stats: {
       totalTracks: Number(statsRow.totalTracks || 0),
       totalSeconds: Number(statsRow.totalSeconds || 0),
       totalBytes: Number(statsRow.totalBytes || 0),
       creditsRequired: Number(statsRow.creditsRequired || 0),
+    },
+    subscription: {
+      hasSubscription: isSubscriber,
+      freeLimit: FREE_LIMIT,
+      totalTracks: Number(statsRow.totalTracks || 0),
     },
   };
 }
