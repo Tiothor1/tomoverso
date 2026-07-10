@@ -18,6 +18,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Email já verificado" });
   }
 
-  const sent = await sendVerificationCode(email);
-  return NextResponse.json({ ok: sent });
+  const result = await sendVerificationCode(email);
+  return NextResponse.json(result);
 }
