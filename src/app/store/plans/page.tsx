@@ -21,6 +21,7 @@ const freeFeatures = [
   "Aparecer no catálogo normal",
   "Receber leitores e comentários",
   "Perfil básico de autor",
+  "TomoMusic: 7 músicas (catálogo limitado)",
 ];
 
 const readerFeatures = [
@@ -29,6 +30,7 @@ const readerFeatures = [
   "Download de capítulos",
   "Temas premium de leitura",
   "Suporte prioritário",
+  "TomoMusic completo (130+ músicas)",
 ];
 
 const comparison = [
