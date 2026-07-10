@@ -66,6 +66,8 @@ function removeForbidden(text) {
     .replace(/^\s*#{0,6}\s*P[áa]gina\s+\d+\s*$/gim, "")
     .replace(/^\s*#{0,6}\s*Cap[íi]tulo\s+\d+\s*$/gim, "")
     .replace(/^\s*(Sinopse|Subt[íi]tulo|Resumo|Continuaç[ãa]o|Continuacao|Texto gerado)\s*:.*$/gim, "")
+    .replace(/(^|\n\n)[^\n]*(?:Sinopse|Subt[íi]tulo|Subtitulo|Resumo|Continuaç[ãa]o|Continuacao|Texto gerado)\s*:[\s\S]*?(?=\n\n|$)/gi, "\n\n")
+    .replace(/(^|\n\n)[^\n]*(?:A cena principal deste trecho|A obra precisava de continuidade|O romance começava a existir|não era uma frase bonita para vender a história|não porque a história precisava)[^\n]*(?=\n\n|$)/gi, "\n\n")
     .replace(/A cena principal deste trecho[^\n.?!]*(?:[.?!]|\n)/gi, "")
     .replace(/A obra precisava de continuidade[^\n.?!]*(?:[.?!]|\n)/gi, "")
     .replace(/O romance começava a existir[^\n.?!]*(?:[.?!]|\n)/gi, "")
@@ -214,11 +216,18 @@ function applyNovelPass(db) {
       corrected += 1;
       rewrittenParagraphs += Math.max(1, clean.split(/\n{2,}/).filter(Boolean).length);
     }
-    const action = score.media >= MIN_SCORE ? "published_clean" : "needs_review";
-    if (score.media < MIN_SCORE && row.source === "tomoverso-original" && !hiddenNovels.has(row.novel_id)) {
-      hideNovel(db, row.novel_id);
-      hiddenNovels.add(row.novel_id);
-      hidden += 1;
+    const belowMinOriginal = row.source === "tomoverso-original" && score.word_count < MIN_LN_WORDS;
+    const action = score.media >= MIN_SCORE && !belowMinOriginal ? "published_clean" : "needs_review";
+    if (belowMinOriginal) {
+      score.media = Math.min(score.media, 7.9);
+      score.issue = "original_chapter_under_min_words";
+    }
+    if (score.media < MIN_SCORE || belowMinOriginal) {
+      if (row.source === "tomoverso-original" && !hiddenNovels.has(row.novel_id)) {
+        hideNovel(db, row.novel_id);
+        hiddenNovels.add(row.novel_id);
+        hidden += 1;
+      }
     }
     insertAudit(db, "novel", row.novel_id, row.id, `${row.novel_title} / ${row.title}: ${action}`, score, action);
   }

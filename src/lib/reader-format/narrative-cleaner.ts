@@ -14,7 +14,9 @@ function removeForbiddenMarkers(text: string): string {
     pattern.lastIndex = 0;
     result = result.replace(pattern, "");
   }
-  return result;
+  return result
+    .replace(/(^|\n\n)[^\n]*(?:Sinopse|Subt[íi]tulo|Resumo|Continuaç[ãa]o|Texto gerado)\s*:[\s\S]*?(?=\n\n|$)/gi, "\n\n")
+    .replace(/(^|\n\n)[^\n]*(?:A cena principal deste trecho|A obra precisava de continuidade|O romance começava a existir|não era uma frase bonita para vender a história|não porque a história precisava)[^\n]*(?=\n\n|$)/gi, "\n\n");
 }
 
 function normalizeSceneBreaks(text: string): string {

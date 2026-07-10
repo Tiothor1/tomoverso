@@ -62,4 +62,8 @@ assert(pages.pages.length > 1);
 assert(pages.pages.slice(0, -1).every((p) => p.length >= 3500 && p.length <= 6000));
 assert(!cleanBookContent("Página 1\n\nSubtítulo: teste\n\nNarrativa real.").includes("Subtítulo:"));
 
+const inlineMeta = normalizeNarrativeText("Narrativa antes.\n\nO conflito continuava no centro de tudo: Subtítulo: O jogo acabou. Sinopse: Isso é ficha, não narrativa.\n\n— Agora a cena continua — ela disse.");
+assert(!/Subtítulo:|Sinopse:|O conflito continuava no centro de tudo/i.test(inlineMeta));
+assert(inlineMeta.includes("— Agora a cena continua — ela disse."));
+
 console.log("reader-format standards tests passed");
