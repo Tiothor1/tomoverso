@@ -277,7 +277,7 @@ function auditInsert(db, itemType, itemId, chapterId, details, score, action) {
 }
 
 function setCatalogVisible(db, type, id) {
-  if (!tableExists(db, 'catalog_controls')) return;
+  if (!tableExists(db, 'catalog_controls') || !['novel', 'manga'].includes(type)) return;
   const existing = db.prepare(`SELECT id FROM catalog_controls WHERE item_type=? AND item_id=?`).get(type, id);
   if (existing) {
     db.prepare(`UPDATE catalog_controls SET is_hidden=0, show_on_home=1, storefront_enabled=1, is_original=1, curation_label=?, updated_at=datetime('now') WHERE item_type=? AND item_id=?`).run(RUN_ID, type, id);
