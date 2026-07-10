@@ -332,6 +332,31 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Sugestões da comunidade */}
+      <section className="container mx-auto max-w-4xl px-4 pb-16">
+        <div className="rounded-[2rem] border border-amber-300/15 bg-gradient-to-b from-amber-300/[0.04] to-transparent p-6 text-center sm:p-10">
+          <div className="mx-auto max-w-2xl space-y-5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/10 px-4 py-1.5 text-xs font-black uppercase tracking-[0.22em] text-amber-100">
+              💡 Sugestões
+            </div>
+            <h2 className="font-heading text-2xl font-black tracking-tight md:text-3xl">
+              Peça uma obra para o Tomoverso
+            </h2>
+            <p className="text-sm leading-6 text-muted-foreground">
+              Solicite um anime, novel, mangá ou manhwa que você quer ver aqui. Em até <strong className="text-amber-200">7 dias</strong> sua solicitação será aceita ou recusada pelos admins. Se for aceita, aparece na lista pública!
+            </p>
+            <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button size="default" asChild className="h-11 rounded-xl bg-amber-300 px-6 text-sm font-black text-slate-950 hover:bg-amber-200">
+                <Link href="/sugestoes">Fazer solicitação <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              </Button>
+              <Button size="default" variant="outline" asChild className="h-11 rounded-xl border-white/20 bg-white/5 px-6 text-sm text-white hover:bg-white/10">
+                <Link href="/sugestoes">Ver sugestões <Bookmark className="ml-2 h-4 w-4" /></Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

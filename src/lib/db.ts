@@ -497,6 +497,25 @@ function createDb() {
     INSERT OR IGNORE INTO site_config (key, value) VALUES ('launch_target_time', '2026-07-09T22:00:00-03:00');
     INSERT OR IGNORE INTO site_config (key, value) VALUES ('promo_deadline', '2026-07-11T12:00:00-03:00');
 
+
+    -- Content suggestions (anime/novel/manga/manhwa requests)
+    CREATE TABLE IF NOT EXISTS content_suggestions (
+      id TEXT PRIMARY KEY,
+      user_id TEXT,
+      title TEXT NOT NULL,
+      type TEXT NOT NULL DEFAULT 'manga' CHECK (type IN ('anime', 'novel', 'manga', 'manhwa', 'other')),
+      description TEXT NOT NULL DEFAULT '',
+      reason TEXT NOT NULL DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected')),
+      admin_notes TEXT DEFAULT '',
+      decided_by TEXT,
+      decided_at TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_suggestions_status ON content_suggestions(status);
+    CREATE INDEX IF NOT EXISTS idx_suggestions_user ON content_suggestions(user_id);
 CREATE TABLE IF NOT EXISTS subscription_plans (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
