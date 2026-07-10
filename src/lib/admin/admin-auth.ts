@@ -90,7 +90,7 @@ function validateCPF(cpf: string): boolean {
 // ── Secret Path ─────────────────────────────────────────────
 
 export function getAdminSecretPath(): string {
-  return process.env.ADMIN_SECRET_PATH;
+  return process.env.ADMIN_SECRET_PATH || "";
 }
 
 export function isAdminPath(pathname: string): boolean {
