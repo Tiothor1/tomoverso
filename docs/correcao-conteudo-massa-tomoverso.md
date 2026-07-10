@@ -92,3 +92,28 @@ As fichas estão em `content_continuity_docs`.
 ## Testes realizados
 
 Os testes técnicos finais devem ser anexados na entrega: build, PM2, nginx e rotas públicas/admin/leitor.
+
+
+---
+
+## Republicação corrigida imediata
+
+Data: 2026-07-10T03:17:53.424Z
+
+- Backup antes da republicação: `/var/www/tomoverso/backups/backup-before-content-republish-2026-07-10-0314.db`
+- Novas Light Novels reescritas e republicadas: **50**
+- Capítulos reescritos nas novas Light Novels: **250**
+- Posts de feed reativados/criados: **150**
+- Demon King: **20 capítulos reescritos/expandidos**
+- O Que Eu Desenhei, Existe: **5 capítulos de continuação corrigidos**
+- Books Tomoverso Originals reescritos e republicados: **50**
+- Palavras novas/regravadas aproximadas: **971920**
+
+### Auditoria pós-republicação
+
+- Capítulos públicos com Página X/Capítulo X/texto gerado/nota artificial: **0**
+- Capítulos originais públicos abaixo de 1500 palavras: **0**
+- Novels do lote massivo visíveis novamente: **50**
+- Posts ativos do lote massivo no feed: **150**
+- Books originais visíveis e limpos: **50**
+- SQLite integrity_check: **ok**
