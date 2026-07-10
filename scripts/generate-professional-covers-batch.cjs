@@ -116,8 +116,9 @@ function composition(item) {
 function promptFor(item) {
   const synopsis = cleanText(item.synopsis, 900);
   const prompt = [
-    'Professional premium cover illustration for an original Brazilian light novel / web novel.',
-    'Vertical 2:3 book cover art, 1200x1800, cinematic semi-realistic anime style, polished editorial quality, sharp focus, beautiful composition, high detail, coherent anatomy.',
+    'Professional premium vertical illustration for an original Brazilian light novel / web novel, intended to be used as cover art later.',
+    'IMPORTANT: pure full-bleed character/scene illustration only, NOT a graphic design poster, NOT a book-cover layout. Vertical 2:3 art, 1200x1800, cinematic semi-realistic anime style, polished editorial quality, sharp focus, beautiful composition, high detail, coherent anatomy.',
+    'ABSOLUTELY NO WRITING ANYWHERE IN THE IMAGE: no letters, no numbers, no title, no author, no captions, no fake small print, no signage, no poster typography, no watermark, no logo.',
     `Work title context: ${item.title}.`,
     `Synopsis context: ${synopsis}.`,
     `Genres and tags: ${genreBlob(item)}.`,
@@ -131,7 +132,7 @@ function promptFor(item) {
 }
 function shorterPrompt(item) {
   return [
-    'Premium professional vertical 2:3 light novel cover illustration, no text, no logo, no watermark.',
+    'Premium professional vertical 2:3 cinematic character/scene illustration for light novel cover use. Full-bleed art only, not a poster layout. ABSOLUTELY NO TEXT, no letters, no numbers, no logo, no watermark, no fake typography anywhere.',
     `${item.title}: ${cleanText(item.synopsis, 420)}`,
     `Genres/tags: ${genreBlob(item)}.` ,
     `Motifs: ${motifWords(item)}.` ,
