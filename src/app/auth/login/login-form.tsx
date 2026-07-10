@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { loginAction } from "@/lib/actions/auth-actions";
 import { useTranslate } from "@/components/i18n/language-provider";
-import { TurnstileWidget } from "@/components/security/turnstile-widget";
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -101,7 +100,6 @@ export function LoginForm() {
                 </div>
               </div>
 
-              <TurnstileWidget className="flex justify-center" />
 
               {error && (
                 <div className="text-sm text-red-500 bg-red-500/10 border border-red-500/30 rounded-md p-3">

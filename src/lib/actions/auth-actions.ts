@@ -28,7 +28,6 @@ import { cookies, headers } from "next/headers";
 import type { UserRecord } from "@/lib/auth";
 import { getSupabaseAdmin, getSupabaseAuthClient } from "@/lib/supabase/server";
 import type Database from "better-sqlite3";
-import { verifyTurnstileToken } from "@/lib/security/turnstile";
 
 const signupSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -154,11 +153,6 @@ export async function signupAction(formData: FormData): Promise<ActionResult> {
     password: formData.get("password") as string,
   };
 
-  const antiBot = await verifyTurnstileToken(formData.get("cf-turnstile-response"), await currentRequestIp());
-  if (!antiBot.ok) {
-    return { ok: false, error: antiBot.error };
-  }
-
   const parsed = signupSchema.safeParse(raw);
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0].message };
@@ -217,11 +211,6 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
     login: (formData.get("login") || formData.get("email")) as string,
     password: formData.get("password") as string,
   };
-
-  const antiBot = await verifyTurnstileToken(formData.get("cf-turnstile-response"), await currentRequestIp());
-  if (!antiBot.ok) {
-    return { ok: false, error: antiBot.error };
-  }
 
   const parsed = loginSchema.safeParse(raw);
   if (!parsed.success) {
