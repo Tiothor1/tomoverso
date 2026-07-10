@@ -51,4 +51,15 @@ assert(score.media >= 8, JSON.stringify(score));
 const badScore = scoreNarrativeQuality("Página 1\n\nSinopse: teste", { minChars: 3500, minWords: 500 });
 assert(badScore.media < 8, JSON.stringify(badScore));
 
+import { paginateText, cleanBookContent } from "../src/lib/books/cleaner";
+
+const bookText = Array.from({ length: 90 }, (_, i) =>
+  `Parágrafo ${i + 1}. Clara puxou a cadeira ao lado dele sem pedir permissão. Davi fingiu que não percebeu, mas seus dedos pararam sobre o teclado. O silêncio tinha peso de escolha.`
+).join("\n\n");
+
+const pages = paginateText(bookText);
+assert(pages.pages.length > 1);
+assert(pages.pages.slice(0, -1).every((p) => p.length >= 3500 && p.length <= 6000));
+assert(!cleanBookContent("Página 1\n\nSubtítulo: teste\n\nNarrativa real.").includes("Subtítulo:"));
+
 console.log("reader-format standards tests passed");

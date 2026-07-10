@@ -1,3 +1,10 @@
+import { normalizeNarrativeText } from "../reader-format/narrative-cleaner";
+import {
+  BOOK_PAGE_MIN_CHARS,
+  BOOK_PAGE_TARGET_CHARS,
+  BOOK_PAGE_MAX_CHARS,
+} from "../reader-format/standards";
+
 /**
  * Clean scraped book content: strip HTML/CSS/JS, extract meaningful text.
  */
@@ -33,7 +40,7 @@ export function cleanBookContent(raw: string): string {
     text = text.replace(/\n---\s*\n*$/, "");
     text = text.replace(/^\s*---\s*\n*/, "");
 
-    return text;
+    return normalizeNarrativeText(text);
   }
 
   // Remove scripts, style blocks, noscript
@@ -190,7 +197,7 @@ export function cleanBookContent(raw: string): string {
     }
   }
 
-  return joined;
+  return normalizeNarrativeText(joined);
 }
 
 /**
@@ -275,7 +282,7 @@ function extractSingleParagraph(raw: string): string {
   text = text.replace(/\d+\.?\d*\s*(MB|Kb|kb|GB)?\s*$/g, "").trim();
   text = text.replace(/^(?:[\s,;:.\-–—|]+|MB|Kb|kb)+/, "").trim();
 
-  return text;
+  return normalizeNarrativeText(text);
 }
 
 /**
@@ -283,9 +290,9 @@ function extractSingleParagraph(raw: string): string {
  */
 export function paginateText(
   text: string,
-  charsPerPage = 2500
+  charsPerPage = BOOK_PAGE_TARGET_CHARS
 ): { pages: string[]; pageCount: number } {
-  const paragraphs = text.split("\n\n").filter(Boolean);
+  const paragraphs = normalizeNarrativeText(text).split("\n\n").filter(Boolean);
   if (paragraphs.length === 0) {
     return { pages: [""], pageCount: 1 };
   }
@@ -295,17 +302,30 @@ export function paginateText(
   let currentLen = 0;
 
   for (const para of paragraphs) {
-    if (currentLen + para.length > charsPerPage && currentPage.length > 0) {
+    const nextLen = currentLen + para.length + (currentPage.length ? 2 : 0);
+    const shouldBreak =
+      currentPage.length > 0 &&
+      currentLen >= BOOK_PAGE_MIN_CHARS &&
+      (nextLen > BOOK_PAGE_MAX_CHARS || currentLen >= charsPerPage);
+
+    if (shouldBreak) {
       pages.push(currentPage.join("\n\n"));
       currentPage = [para];
       currentLen = para.length;
     } else {
       currentPage.push(para);
-      currentLen += para.length;
+      currentLen = nextLen;
     }
   }
+
   if (currentPage.length > 0) {
     pages.push(currentPage.join("\n\n"));
+  }
+
+  if (pages.length > 1 && pages[pages.length - 1].length < BOOK_PAGE_MIN_CHARS) {
+    const last = pages.pop()!;
+    const previous = pages.pop()!;
+    pages.push(`${previous}\n\n${last}`);
   }
 
   return { pages, pageCount: Math.max(1, pages.length) };
