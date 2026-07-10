@@ -153,6 +153,27 @@ async function fetchImage(item, attempt) {
   if (buffer.length < 40_000) throw new Error(`image too small: ${buffer.length}`);
   return { buffer, prompt, seed, model, url };
 }
+async function sanitizeOriginal(file) {
+  const overlay = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
+    <defs>
+      <linearGradient id="bottomClean" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#050507" stop-opacity="0"/>
+        <stop offset="38%" stop-color="#050507" stop-opacity="0.78"/>
+        <stop offset="100%" stop-color="#050507" stop-opacity="0.96"/>
+      </linearGradient>
+      <linearGradient id="topClean" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#050507" stop-opacity="0.75"/>
+        <stop offset="100%" stop-color="#050507" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="${WIDTH}" height="150" fill="url(#topClean)"/>
+    <rect x="0" y="1120" width="${WIDTH}" height="680" fill="url(#bottomClean)"/>
+  </svg>`);
+  const tmp = `${file}.tmp.webp`;
+  await sharp(file).composite([{ input: overlay, left: 0, top: 0 }]).webp({ quality: 94, effort: 5 }).toFile(tmp);
+  fs.renameSync(tmp, file);
+}
+
 async function qualityCheck(file) {
   const meta = await sharp(file).metadata();
   const stats = await sharp(file).resize(48, 72, { fit: 'cover' }).stats();
@@ -180,6 +201,7 @@ async function generateOne(item) {
       if (attempt > 0) await sleep(4000 + attempt * 3000);
       const generated = await fetchImage(item, attempt);
       await sharp(generated.buffer).resize(WIDTH, HEIGHT, { fit: 'cover', position: 'attention' }).webp({ quality: 94, effort: 5 }).toFile(original);
+      await sanitizeOriginal(original);
       await sharp(original).resize(CARD_W, CARD_H, { fit: 'cover', position: 'attention' }).webp({ quality: 92, effort: 5 }).toFile(optimized);
       const qc = await qualityCheck(original);
       if (qc.issues.length && attempt < 3) { lastError = new Error(qc.issues.join(', ')); continue; }
