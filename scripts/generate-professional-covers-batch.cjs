@@ -278,7 +278,7 @@ async function main() {
       console.log(`GENERATE ${item.type}/${item.slug} ${item.title}`);
       const result = await generateOne(item);
       results.push(result);
-      await sleep(18000);
+      await sleep(5000);
     } catch (error) {
       console.error(`ERROR ${item.type}/${item.slug}:`, error.message || error);
       errors.push(`${item.type}/${item.slug}: ${error.message || error}`);
