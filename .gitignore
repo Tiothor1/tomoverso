@@ -59,6 +59,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# ecosystem
+ecosystem.config.cjs
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
