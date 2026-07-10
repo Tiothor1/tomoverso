@@ -10,6 +10,33 @@ const cases = [
 
 const forbidden = /(^|\n)\s*(###\s*)?(Página\s+\d+|Capítulo\s+\d+)\s*($|\n)|Sinopse:|Subtítulo:|Subtitulo:|Texto gerado:|A cena principal deste trecho|A obra precisava de continuidade|O romance começava a existir|não era uma frase bonita para vender a história|não porque a história precisava/i;
 
+async function readPageData(page) {
+  let lastError;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      return await page.evaluate(() => {
+        const text = document.body?.innerText || "";
+        const reader = document.querySelector(".book-reader, .light-novel-reader");
+        const readerText = reader?.textContent || "";
+        const html = document.documentElement;
+        const paragraphs = Array.from(document.querySelectorAll(".book-reader p, .light-novel-reader p")).map((p) => p.textContent || "");
+        return {
+          text,
+          readerText,
+          overflow: Math.max(0, html.scrollWidth - html.clientWidth),
+          paragraphCount: paragraphs.length,
+          giantParagraphs: paragraphs.filter((p) => p.length > 1200).length,
+          classFound: !!reader,
+        };
+      });
+    } catch (error) {
+      lastError = error;
+      await page.waitForTimeout(500);
+    }
+  }
+  throw lastError;
+}
+
 const browser = await chromium.launch({ headless: true });
 let failed = false;
 
@@ -18,21 +45,7 @@ for (const viewport of [{ width: 1366, height: 900 }, { width: 360, height: 740 
     const page = await browser.newPage({ viewport });
     const response = await page.goto(testCase.url, { waitUntil: "domcontentloaded", timeout: 30000 });
     await page.waitForTimeout(1500);
-    const data = await page.evaluate(() => {
-      const text = document.body.innerText || "";
-      const reader = document.querySelector(".book-reader, .light-novel-reader");
-      const readerText = reader?.textContent || "";
-      const html = document.documentElement;
-      const paragraphs = Array.from(document.querySelectorAll(".book-reader p, .light-novel-reader p")).map((p) => p.textContent || "");
-      return {
-        text,
-        readerText,
-        overflow: Math.max(0, html.scrollWidth - html.clientWidth),
-        paragraphCount: paragraphs.length,
-        giantParagraphs: paragraphs.filter((p) => p.length > 1200).length,
-        classFound: !!reader,
-      };
-    });
+    const data = await readPageData(page);
 
     const checks = {
       status: response?.status() === 200,
