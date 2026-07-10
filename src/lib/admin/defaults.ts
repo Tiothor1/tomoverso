@@ -37,4 +37,5 @@ export const ADMIN_NAV_ITEMS = [
   { href: "/admin/integrations", label: "Integrações", section: "integrations" },
   { href: "/admin/imports", label: "Importações", section: "imports" },
   { href: "/admin/stats", label: "Estatísticas", section: "stats" },
+  { href: "/admin/security", label: "Segurança", section: "security" },
 ] as const;

@@ -7,6 +7,7 @@ import {
   ChartNoAxesCombined,
   Globe,
   LibraryBig,
+  Lock,
   Package2,
   PlugZap,
   Shield,
@@ -25,6 +26,7 @@ const iconMap = {
   integrations: PlugZap,
   imports: Boxes,
   stats: WandSparkles,
+  security: Lock,
 } as const;
 
 export function AdminSidebar() {
