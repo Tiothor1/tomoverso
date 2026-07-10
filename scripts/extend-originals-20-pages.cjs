@@ -325,10 +325,10 @@ function updateRatingFieldsForBook(db, row, ratingInfo) {
   setCatalogVisible(db, 'book', row.id);
 }
 
-function expandShortExistingNovelChapters(db, row, ratingInfo) {
-  const chapters = db.prepare(`SELECT id,title,chapter_number,content,word_count FROM chapters WHERE novel_id=? AND COALESCE(word_count,0) < ? ORDER BY chapter_number`).all(row.id, MIN_NOVEL_WORDS);
+function cleanAndRepairExistingNovelChapters(db, row, ratingInfo) {
+  const chapters = db.prepare(`SELECT id,title,chapter_number,content,word_count FROM chapters WHERE novel_id=? ORDER BY chapter_number`).all(row.id);
   const update = db.prepare(`UPDATE chapters SET content=?, word_count=?, updated_at=datetime('now') WHERE id=?`);
-  let expanded = 0;
+  let changed = 0;
   for (const ch of chapters) {
     let text = cleanNarrative(ch.content || '');
     let pageSeed = ch.chapter_number + 1000;
@@ -338,11 +338,13 @@ function expandShortExistingNovelChapters(db, row, ratingInfo) {
     }
     const score = scoreNovel(text);
     if (!score.ok) throw new Error(`existing chapter repair failed ${row.title} #${ch.chapter_number}: ${score.issues.join(',')}`);
-    update.run(text, score.words, ch.id);
-    auditInsert(db, 'novel', row.id, ch.id, `${row.title} / existing ${ch.chapter_number} expanded to ${score.words} words`, score, 'expanded_existing_chapter');
-    expanded += 1;
+    if (text !== (ch.content || '').trim() || ch.word_count !== score.words) {
+      update.run(text, score.words, ch.id);
+      auditInsert(db, 'novel', row.id, ch.id, `${row.title} / existing ${ch.chapter_number} cleaned to ${score.words} words`, score, 'cleaned_existing_chapter');
+      changed += 1;
+    }
   }
-  return expanded;
+  return changed;
 }
 
 function addNovelPages(db, row, ratingInfo) {
@@ -490,7 +492,7 @@ function main() {
       const ratingInfo = classify(row, 'novel', idx + 1);
       summary.ratings[ratingInfo.rating] += 1;
       updateRatingFieldsForNovel(db, row, ratingInfo);
-      summary.existingNovelChaptersExpanded += expandShortExistingNovelChapters(db, row, ratingInfo);
+      summary.existingNovelChaptersExpanded += cleanAndRepairExistingNovelChapters(db, row, ratingInfo);
       const res = addNovelPages(db, row, ratingInfo);
       if (res.added > 0) summary.novelsExpanded += 1;
       summary.novelPagesAdded += res.added;
