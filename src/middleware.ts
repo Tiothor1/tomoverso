@@ -128,7 +128,8 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
   // Mark safe bypass routes for launch gate
-  const isSafeRoute = pathname.startsWith("/auth/") || pathname.startsWith("/admin-4wlbozku") || pathname.startsWith("/admin-secreto") || pathname.startsWith("/api/admin") || pathname.startsWith("/_next/");
+  const adminPath = process.env.ADMIN_SECRET_PATH;
+  const isSafeRoute = pathname.startsWith("/auth/") || (adminPath && pathname.startsWith(`/${adminPath}`)) || pathname.startsWith("/_next/");
   if (isSafeRoute) {
     response.headers.set("x-tomoverso-launch-bypass", "1");
   }

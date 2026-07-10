@@ -89,10 +89,8 @@ function validateCPF(cpf: string): boolean {
 
 // ── Secret Path ─────────────────────────────────────────────
 
-const FALLBACK_PATH = "adm1n-c0ntr0l-40d9bd082a1266429a6f341f-c0ntr0l-2026";
-
 export function getAdminSecretPath(): string {
-  return process.env.ADMIN_SECRET_PATH || FALLBACK_PATH;
+  return process.env.ADMIN_SECRET_PATH;
 }
 
 export function isAdminPath(pathname: string): boolean {

@@ -2,10 +2,10 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/auth";
 
-export const ADMIN_SECRET_FALLBACK = "adm1n-c0ntr0l-40d9bd082a1266429a6f341f";
+export const ADMIN_SECRET_FALLBACK = "";
 
 export function getAdminSecretPath() {
-  return process.env.ADMIN_SECRET_PATH || ADMIN_SECRET_FALLBACK;
+  return process.env.ADMIN_SECRET_PATH || "";
 }
 
 export async function getSecretAdminOrRedirect(secretPath = getAdminSecretPath()) {

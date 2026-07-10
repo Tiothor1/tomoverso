@@ -49,5 +49,7 @@ export async function launchLoginAction(formData: FormData): Promise<{ ok: boole
   await setSessionCookie(sessionId);
   revalidatePath("/", "layout");
 
-  return { ok: true, redirect: "/admin-4wlbozku" };
+  // Redirect to admin dashboard
+  const adminPath = process.env.ADMIN_SECRET_PATH || "";
+  return { ok: true, redirect: adminPath ? `/${adminPath}` : "/" };
 }
