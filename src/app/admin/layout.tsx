@@ -3,23 +3,18 @@ import type { ReactNode } from "react";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { getCurrentUser } from "@/lib/auth";
 import { cookies } from "next/headers";
-import { getDb } from "@/lib/db";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const user = await getCurrentUser();
   if (!user) redirect("/auth/login");
   if (user.role !== "admin") redirect("/");
 
-  // 2FA enforcement — check if admin has 2FA enabled
-  const db = getDb();
-  const auth = db.prepare("SELECT twofa_secret FROM admin_auth WHERE user_id = ?").get(user.id) as any;
+  // 2FA enforcement — check if admin has validated OTP in this session
+  const cookieStore = await cookies();
+  const validated = cookieStore.get("admin_2fa_validated")?.value;
 
-  if (auth?.twofa_secret) {
-    const cookieStore = await cookies();
-    const validated = cookieStore.get("admin_2fa_validated")?.value;
-    if (validated !== "1") {
-      redirect("/admin/security?verify=1");
-    }
+  if (validated !== "1") {
+    redirect("/admin/security?verify=1");
   }
 
   return (
