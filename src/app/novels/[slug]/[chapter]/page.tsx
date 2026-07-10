@@ -14,42 +14,11 @@ import { ParagraphToggle } from "@/components/reader/paragraph-toggle";
 import { ChapterAd, InterChapterAd } from "@/components/ads/inline-ad";
 import { getDb } from "@/lib/db";
 import { publicReadableNovelSql, readableNovelChapterSql } from "@/lib/public-catalog";
+import { normalizeNarrativeText } from "@/lib/reader-format/narrative-cleaner";
 import { getCurrentUser } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 
 export const dynamic = "force-dynamic";
-
-/** Remove junk text de importação/paginação e notas técnicas do conteúdo */
-function cleanChapterContent(text: string): string {
-  return text
-    // Remove marcadores artificiais de geração/paginação que não pertencem ao leitor
-    .replace(/^\s*#{1,6}\s*P[áa]gina\s+\d+\s*$/gmi, "")
-    .replace(/^\s*P[áa]gina\s+\d+\s*$/gmi, "")
-    .replace(/^\s*#{1,6}\s*Cap[íi]tulo\s+\d+\s*$/gmi, "")
-    .replace(/^\s*Cap[íi]tulo\s+\d+\s*$/gmi, "")
-    .replace(/(^|\n)\s*Cap[íi]tulo\s+\d+\s*,?\s*p[áa]gina\s+\d+\.?\s*/gmi, "$1")
-    .replace(/^\s*(Continuaç[ãa]o|Texto gerado|Resumo|Sinopse)\s*:?.*$/gmi, "")
-    // Remove "CAPÍTULO MUITO LONGO" e avisos similares
-    .replace(/^\[CAPÍTULO MUITO LONGO.*?\]\s*/gmi, "")
-    .replace(/^\[.*?\d+(?:\.\d+)?[kK]?[bB].*?\]\s*/gmi, "")
-    // Remove "49.253 chars", "842+ linhas", etc.
-    .replace(/^\d+[+-]?\s*linhas?\s*.*$/gmi, "")
-    .replace(/^\d+(?:\.\d+)?\s*(?:chars|caracteres|palavras|words).*$/gmi, "")
-    // Remove "Nota do autor", "Mensagem do autor", "Author's Note"
-    .replace(/^Nota do autor:?.*$/gmi, "")
-    .replace(/^Mensagem do autor:?.*$/gmi, "")
-    .replace(/^Author'?s?\s*Note:?.*$/gmi, "")
-    // Remove linhas de asteriscos/separadores (***, ---, etc) — mas só linhas solitárias
-    .replace(/^\s*[\*\-_=]{3,}\s*$/gm, "")
-    // Remove linhas de "extraído via browser" etc
-    .replace(/^[-–—].*?(?:extraído|browser|via).*$/gmi, "")
-    // Remove metadados de tradução (Tradução: X, Revisão: Y)
-    .replace(/^Tradução:.*$/gmi, "")
-    .replace(/^Revisão:.*$/gmi, "")
-    // Limpa espaços extras
-    .replace(/\n{4,}/g, "\n\n")
-    .trim();
-}
 
 interface ChapterRow {
   id: string;
@@ -199,10 +168,13 @@ export default async function ChapterPage({ params }: { params: Promise<{ slug: 
 
         <ChapterAd chapterNumber={safeChapter.chapter_number} />
 
-        <div className="prose-ln mx-auto">
-          {cleanChapterContent(safeChapter.content).split(/\n\n+/).map((paragraph, i) => {
+        <div className="prose-ln reader-content light-novel-reader mx-auto">
+          {normalizeNarrativeText(safeChapter.content).split(/\n\n+/).map((paragraph, i) => {
             const trimmed = paragraph.trim();
             if (!trimmed) return null;
+            if (trimmed === "***") {
+              return <div key={i} className="reader-scene-break" aria-hidden="true">***</div>;
+            }
             const imageMatch = trimmed.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
             if (imageMatch) {
               const [, alt, src] = imageMatch;

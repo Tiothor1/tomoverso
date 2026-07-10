@@ -81,8 +81,8 @@ export default async function LerLivroPage({ params, searchParams }: Props) {
       </div>
 
       {/* Reader content */}
-      <article className="mx-auto py-10 md:py-14">
-        <div className="container mx-auto max-w-3xl px-4">
+      <article className="reader-shell mx-auto">
+        <div className="mx-auto w-full">
           {/* Header */}
           <header className="mb-8 md:mb-10 text-center">
             <div className="mx-auto w-16 h-24 rounded-lg overflow-hidden shadow-md mb-4">
@@ -100,10 +100,13 @@ export default async function LerLivroPage({ params, searchParams }: Props) {
 
           {/* Content */}
           {hasContent ? (
-            <div className="prose prose-lg max-w-none dark:prose-invert mx-auto leading-relaxed">
+            <div className="reader-content book-reader mx-auto">
               {currentPageContent.split("\n\n").map((paragraph, i) => {
                 const trimmed = paragraph.trim();
                 if (!trimmed) return null;
+                if (trimmed === "***") {
+                  return <div key={i} className="reader-scene-break" aria-hidden="true">***</div>;
+                }
                 return <p key={i}>{trimmed}</p>;
               })}
             </div>
