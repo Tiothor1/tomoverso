@@ -158,16 +158,17 @@ async function sanitizeOriginal(file) {
     <defs>
       <linearGradient id="bottomClean" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="#050507" stop-opacity="0"/>
-        <stop offset="38%" stop-color="#050507" stop-opacity="0.78"/>
-        <stop offset="100%" stop-color="#050507" stop-opacity="0.96"/>
+        <stop offset="22%" stop-color="#050507" stop-opacity="0.82"/>
+        <stop offset="58%" stop-color="#050507" stop-opacity="0.96"/>
+        <stop offset="100%" stop-color="#050507" stop-opacity="1"/>
       </linearGradient>
       <linearGradient id="topClean" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0%" stop-color="#050507" stop-opacity="0.75"/>
         <stop offset="100%" stop-color="#050507" stop-opacity="0"/>
       </linearGradient>
     </defs>
-    <rect x="0" y="0" width="${WIDTH}" height="150" fill="url(#topClean)"/>
-    <rect x="0" y="1120" width="${WIDTH}" height="680" fill="url(#bottomClean)"/>
+    <rect x="0" y="0" width="${WIDTH}" height="170" fill="url(#topClean)"/>
+    <rect x="0" y="900" width="${WIDTH}" height="900" fill="url(#bottomClean)"/>
   </svg>`);
   const tmp = `${file}.tmp.webp`;
   await sharp(file).composite([{ input: overlay, left: 0, top: 0 }]).webp({ quality: 94, effort: 5 }).toFile(tmp);
