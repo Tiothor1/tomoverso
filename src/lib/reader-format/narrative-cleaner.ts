@@ -15,6 +15,8 @@ function removeForbiddenMarkers(text: string): string {
     result = result.replace(pattern, "");
   }
   return result
+    .replace(/\bP[áa]gina\s+\d+\b\s*[:.,–—-]?\s*/gi, "")
+    .replace(/\bCap[íi]tulo\s+\d+\b\s*[:.,–—-]?\s*/gi, "")
     .replace(/(^|\n\n)[^\n]*(?:Sinopse|Subt[íi]tulo|Resumo|Continuaç[ãa]o|Texto gerado)\s*:[\s\S]*?(?=\n\n|$)/gi, "\n\n")
     .replace(/(^|\n\n)[^\n]*(?:A cena principal deste trecho|A obra precisava de continuidade|O romance começava a existir|não era uma frase bonita para vender a história|não porque a história precisava)[^\n]*(?=\n\n|$)/gi, "\n\n");
 }

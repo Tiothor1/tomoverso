@@ -77,6 +77,8 @@ function normalizeText(text) {
   return String(text || '')
     .replace(/\r\n/g, '\n')
     .replace(/\r/g, '\n')
+    .replace(/\bP[áa]gina\s+\d+\b\s*[:.,–—-]?\s*/gi, '')
+    .replace(/\bCap[íi]tulo\s+\d+\b\s*[:.,–—-]?\s*/gi, '')
     .replace(/^\s*#{0,6}\s*P[áa]gina\s+\d+\s*$/gim, '')
     .replace(/^\s*#{0,6}\s*Cap[íi]tulo\s+\d+\s*$/gim, '')
     .replace(/^\s*(Sinopse|Subt[íi]tulo|Resumo|Continuaç[ãa]o|Texto gerado)\s*:.*$/gim, '')

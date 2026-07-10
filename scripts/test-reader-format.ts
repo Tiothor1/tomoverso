@@ -66,4 +66,8 @@ const inlineMeta = normalizeNarrativeText("Narrativa antes.\n\nO conflito contin
 assert(!/Subtítulo:|Sinopse:|O conflito continuava no centro de tudo/i.test(inlineMeta));
 assert(inlineMeta.includes("— Agora a cena continua — ela disse."));
 
+const inlineChapterMeta = normalizeNarrativeText("Davi chegou na sala. Capítulo 12: esse marcador não deve ficar. Página 3 — outro marcador também precisa sair.\n\n— Agora sim — Clara disse.");
+assert(!/Capítulo\s+12|Página\s+3/i.test(inlineChapterMeta));
+assert(inlineChapterMeta.includes("— Agora sim — Clara disse."));
+
 console.log("reader-format standards tests passed");
