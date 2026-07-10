@@ -290,6 +290,16 @@ function setCatalogVisible(db, type, id) {
 function upsertFeed(db, type, workId, title, body) {
   if (!tableExists(db, 'feed_posts')) return false;
   const postTitle = `20 páginas novas: ${title}`;
+  if (!['novel', 'manga'].includes(type)) {
+    const existingTextPost = db.prepare(`SELECT id FROM feed_posts WHERE title=? AND type='author_update' LIMIT 1`).get(postTitle);
+    if (existingTextPost) {
+      db.prepare(`UPDATE feed_posts SET body=?, status='active', visibility='public', updated_at=datetime('now') WHERE id=?`).run(body, existingTextPost.id);
+    } else {
+      db.prepare(`INSERT INTO feed_posts (id,user_id,type,title,body,work_type,work_id,status,visibility,created_at,updated_at)
+        VALUES (?,?,?,?,?,NULL,NULL,'active','public',datetime('now'),datetime('now'))`).run(randomUUID(), AUTHOR_ID, 'author_update', postTitle, body);
+    }
+    return true;
+  }
   const existing = db.prepare(`SELECT id FROM feed_posts WHERE work_type=? AND work_id=? AND title=? LIMIT 1`).get(type, workId, postTitle);
   if (existing) {
     db.prepare(`UPDATE feed_posts SET body=?, status='active', visibility='public', updated_at=datetime('now') WHERE id=?`).run(body, existing.id);
