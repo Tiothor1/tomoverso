@@ -22,6 +22,13 @@ export const dynamic = "force-dynamic";
 /** Remove junk text de importação/paginação e notas técnicas do conteúdo */
 function cleanChapterContent(text: string): string {
   return text
+    // Remove marcadores artificiais de geração/paginação que não pertencem ao leitor
+    .replace(/^\s*#{1,6}\s*P[áa]gina\s+\d+\s*$/gmi, "")
+    .replace(/^\s*P[áa]gina\s+\d+\s*$/gmi, "")
+    .replace(/^\s*#{1,6}\s*Cap[íi]tulo\s+\d+\s*$/gmi, "")
+    .replace(/^\s*Cap[íi]tulo\s+\d+\s*$/gmi, "")
+    .replace(/(^|\n)\s*Cap[íi]tulo\s+\d+\s*,?\s*p[áa]gina\s+\d+\.?\s*/gmi, "$1")
+    .replace(/^\s*(Continuaç[ãa]o|Texto gerado|Resumo|Sinopse)\s*:?.*$/gmi, "")
     // Remove "CAPÍTULO MUITO LONGO" e avisos similares
     .replace(/^\[CAPÍTULO MUITO LONGO.*?\]\s*/gmi, "")
     .replace(/^\[.*?\d+(?:\.\d+)?[kK]?[bB].*?\]\s*/gmi, "")
