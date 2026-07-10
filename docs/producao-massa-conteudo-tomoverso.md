@@ -1113,6 +1113,7 @@ Mangás importados também foram ignorados por serem conteúdo de imagem/fonte e
 - Nenhuma tabela apagada.
 - Inserção idempotente por slug/chapter/post title para evitar duplicação.
 - Capas: sem upload de imagem nesta execução; o site usa fallback visual automático quando `cover_url` está vazio.
+- Correção feita após teste: o `/feed` filtrava posts textuais sem capa/mídia; ajustado para aceitar posts textuais com fallback visual em gradiente, garantindo que os 150 posts de divulgação apareçam.
 
 ## Pendências
 

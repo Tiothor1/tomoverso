@@ -676,6 +676,9 @@ function diversify(items: FeedItem[]): FeedItem[] {
 function isEligibleForShortsFeed(item: FeedItem): boolean {
   if (item.state.hidden || item.state.notInterested) return false;
   const hasVisual = !!(item.mediaUrl || item.mediaItems?.length || item.work?.coverUrl);
+  // Posts textuais ligados a novels originais usam o gradiente/fallback visual do card.
+  // Sem isso, divulgações de obras novas sem capa ficam salvas no banco, mas somem do /feed.
+  if (item.targetType === "post") return true;
   return hasVisual;
 }
 
