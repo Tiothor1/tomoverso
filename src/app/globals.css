@@ -422,65 +422,94 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading tracking-tight;
   }
-  .prose-ln {
-   text-align: justify !important;
-   text-justify: inter-word !important;
-   font-family: var(--font-lora), Georgia, serif !important;
-    font-size: 18px !important;
-    line-height: 1.8 !important;
-    width: min(100% - 48px, 860px) !important;
-    max-width: 860px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    padding: 0 24px !important;
-    hyphens: none !important;
-    word-break: normal !important;
-    overflow-wrap: normal !important;
-    text-align: left !important;
-  }
-  .prose-ln p {
-    margin-bottom: 1.8rem !important;
-    max-width: none !important;
-    width: 100% !important;
-    line-height: 1.8 !important;
-    font-size: 18px !important;
-    text-align: justify !important;
-    text-justify: inter-word !important;
-    hyphens: none !important;
-    word-break: normal !important;
-    overflow-wrap: normal !important;
-    text-indent: 1.5em;
-  }
-  .prose-ln p:first-child {
-    text-indent: 0;
-  }
-  .prose-ln p:first-child::first-letter {
-    float: left;
-    font-size: 4rem;
-    font-weight: 700;
-    margin-right: 0.75rem;
-    margin-top: 0.25rem;
-    line-height: 1;
-    font-family: var(--font-lora), Georgia, serif;
+  .reader-shell {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 20px;
   }
 
-@media (max-width: 768px) {
+  .reader-content {
+    font-family: var(--font-lora), Georgia, serif;
+    font-size: 18px;
+    letter-spacing: 0.01em;
+    color: hsl(var(--foreground));
+  }
+
+  .reader-content p {
+    margin: 0 0 1.15em;
+    overflow-wrap: anywhere;
+  }
+
+  .reader-content p + p {
+    margin-top: 0;
+  }
+
+  .light-novel-reader {
+    line-height: 1.75;
+  }
+
+  .light-novel-reader p {
+    text-align: justify;
+    text-justify: inter-word;
+    text-indent: 0;
+    margin-bottom: 1.2em;
+  }
+
+  .book-reader {
+    line-height: 1.8;
+  }
+
+  .book-reader p {
+    text-align: justify;
+    text-justify: inter-word;
+    text-indent: 1.5em;
+    margin-bottom: 1em;
+  }
+
+  .book-reader p:first-child,
+  .book-reader .reader-scene-break + p,
+  .light-novel-reader p:first-child,
+  .light-novel-reader .reader-scene-break + p {
+    text-indent: 0;
+  }
+
+  .reader-scene-break {
+    margin: 2.25rem auto;
+    text-align: center;
+    color: hsl(var(--muted-foreground));
+    letter-spacing: 0.35em;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    font-size: 0.9rem;
+  }
+
+  /* Compat: controles premium ainda procuram .prose-ln */
   .prose-ln {
-    width: calc(100% - 32px) !important;
-    max-width: 100% !important;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-    font-size: 17px !important;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 20px;
+    font-family: var(--font-lora), Georgia, serif;
+    font-size: 18px;
+    line-height: 1.75;
   }
-}
-     /* Capítulo com drop cap (heurística por primeira char) */
-  .prose-ln p:has(> em:first-child),
-  .prose-ln p > em:first-child {
-    @apply not-italic font-medium text-foreground;
-  }
-  /* Capítulo simples (sem drop cap, sem indent) */
-  .prose-ln-simple p {
-    @apply mb-6 indent-0 text-left;
+
+  @media (max-width: 640px) {
+    .reader-shell {
+      padding: 24px 16px;
+    }
+
+    .reader-content {
+      font-size: 17px;
+    }
+
+    .book-reader p,
+    .light-novel-reader p {
+      text-align: left;
+      text-justify: auto;
+    }
+
+    .book-reader p {
+      text-indent: 1em;
+    }
   }
 }
 
