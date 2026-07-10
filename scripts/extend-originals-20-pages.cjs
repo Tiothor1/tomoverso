@@ -295,7 +295,7 @@ function upsertFeed(db, type, workId, title, body) {
     db.prepare(`UPDATE feed_posts SET body=?, status='active', visibility='public', updated_at=datetime('now') WHERE id=?`).run(body, existing.id);
   } else {
     db.prepare(`INSERT INTO feed_posts (id,user_id,type,title,body,work_type,work_id,status,visibility,created_at,updated_at)
-      VALUES (?,?,?,?,?,?,?,'active','public',datetime('now'),datetime('now'))`).run(randomUUID(), AUTHOR_ID, 'update', postTitle, body, type, workId);
+      VALUES (?,?,?,?,?,?,?,'active','public',datetime('now'),datetime('now'))`).run(randomUUID(), AUTHOR_ID, 'author_update', postTitle, body, type, workId);
   }
   return true;
 }
