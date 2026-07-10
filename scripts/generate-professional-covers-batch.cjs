@@ -105,22 +105,21 @@ function characterSheet(item) {
 }
 function composition(item) {
   const kind = genreKind(item);
-  if (kind === 'romance bl') return 'two-character emotional composition, close but respectful, eye contact or shared object between them, elegant Brazilian light novel cover';
-  if (kind === 'romance') return 'romantic two-character composition with soft cinematic light, meaningful distance or touch, scene tied to the story';
-  if (kind === 'fantasia') return 'epic fantasy book-cover composition, protagonist foreground, magical environment, clear focal point, depth and atmosphere';
-  if (kind === 'ação') return 'dynamic action composition, diagonal motion, dramatic lighting, protagonist foreground, readable silhouette';
-  if (kind === 'drama') return 'melancholic dramatic composition, controlled colors, expressive face, symbolic environment';
-  if (kind === 'isekai') return 'isekai cover composition with protagonist crossing between mundane object and fantasy world, not generic anime';
-  return 'professional Brazilian light novel cover composition with strong focal point and unique atmosphere';
+  if (kind === 'romance bl') return 'two-character emotional scene, close but respectful, eye contact or a shared object between them, natural chemistry';
+  if (kind === 'romance') return 'romantic two-character scene with soft cinematic light, meaningful distance or touch, environment tied to the story';
+  if (kind === 'fantasia') return 'epic fantasy scene, protagonist foreground, magical environment, clear focal point, depth and atmosphere';
+  if (kind === 'ação') return 'dynamic action scene, diagonal motion, dramatic lighting, protagonist foreground, readable silhouette';
+  if (kind === 'drama') return 'melancholic dramatic scene, controlled colors, expressive face, symbolic environment';
+  if (kind === 'isekai') return 'protagonist crossing between mundane object and fantasy world, not generic anime';
+  return 'professional cinematic story illustration with strong focal point and unique atmosphere';
 }
 function promptFor(item) {
   const synopsis = cleanText(item.synopsis, 900);
   const prompt = [
-    'Professional premium vertical illustration for an original Brazilian light novel / web novel, intended to be used as cover art later.',
-    'IMPORTANT: pure full-bleed character/scene illustration only, NOT a graphic design poster, NOT a book-cover layout. Vertical 2:3 art, 1200x1800, cinematic semi-realistic anime style, polished editorial quality, sharp focus, beautiful composition, high detail, coherent anatomy.',
+    'Professional premium vertical cinematic story illustration for an original Brazilian web novel.',
+    'IMPORTANT: pure full-bleed character/scene illustration only. NOT a poster, NOT a book cover, NOT a magazine page, NOT a graphic design layout. Vertical 2:3 art, 1200x1800, cinematic semi-realistic anime style, polished editorial quality, sharp focus, beautiful composition, high detail, coherent anatomy.',
     'ABSOLUTELY NO WRITING ANYWHERE IN THE IMAGE: no letters, no numbers, no title, no author, no captions, no fake small print, no signage, no poster typography, no watermark, no logo.',
-    `Work title context: ${item.title}.`,
-    `Synopsis context: ${synopsis}.`,
+    `Story synopsis context: ${synopsis}.`,
     `Genres and tags: ${genreBlob(item)}.`,
     `Visual motifs: ${motifWords(item)}.`,
     `Character sheet: ${characterSheet(item)}.`,
@@ -132,8 +131,8 @@ function promptFor(item) {
 }
 function shorterPrompt(item) {
   return [
-    'Premium professional vertical 2:3 cinematic character/scene illustration for light novel cover use. Full-bleed art only, not a poster layout. ABSOLUTELY NO TEXT, no letters, no numbers, no logo, no watermark, no fake typography anywhere.',
-    `${item.title}: ${cleanText(item.synopsis, 420)}`,
+    'Premium professional vertical 2:3 cinematic character/scene illustration. Full-bleed art only, not a poster, not a book cover, not a layout. ABSOLUTELY NO TEXT, no letters, no numbers, no logo, no watermark, no fake typography anywhere.',
+    `Story: ${cleanText(item.synopsis, 420)}`,
     `Genres/tags: ${genreBlob(item)}.` ,
     `Motifs: ${motifWords(item)}.` ,
     `${characterSheet(item)} ${composition(item)}.`,
