@@ -13,14 +13,14 @@ export function AdminStatCard({
   hint?: string;
 }) {
   return (
-    <Card className="overflow-hidden rounded-3xl border-border/50 bg-card/85 shadow-lg shadow-black/5">
-      <CardContent className="p-5">
-        <div className="mb-3 flex items-center justify-between gap-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">{label}</p>
-          {icon ? <div className="rounded-2xl bg-primary/10 p-2 text-primary">{icon}</div> : null}
+    <Card className="overflow-hidden rounded-xl border-border/50 bg-card/85 shadow-sm">
+      <CardContent className="p-4">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-muted-foreground">{label}</p>
+          {icon ? <div className="rounded-lg bg-primary/10 p-1.5 text-primary">{icon}</div> : null}
         </div>
-        <div className="text-3xl font-black tracking-tight">{value}</div>
-        {hint ? <p className="mt-2 text-sm text-muted-foreground">{hint}</p> : null}
+        <div className="text-2xl font-black tracking-tight">{value}</div>
+        {hint ? <p className="mt-1 text-xs text-muted-foreground">{hint}</p> : null}
       </CardContent>
     </Card>
   );

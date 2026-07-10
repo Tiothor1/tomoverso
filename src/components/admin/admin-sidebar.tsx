@@ -2,7 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Boxes, ChartNoAxesCombined, Globe, LibraryBig, Package2, PlugZap, Shield, Users2, WandSparkles } from "lucide-react";
+import {
+  Boxes,
+  ChartNoAxesCombined,
+  Globe,
+  LibraryBig,
+  Package2,
+  PlugZap,
+  Shield,
+  Users2,
+  WandSparkles,
+} from "lucide-react";
 import { ADMIN_NAV_ITEMS } from "@/lib/admin/defaults";
 
 const iconMap = {
@@ -21,38 +31,43 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-24 space-y-4">
-      <div className="rounded-3xl border border-border/50 bg-card/80 p-4 shadow-xl shadow-black/5">
-        <div className="mb-4 flex items-center gap-3">
-          <div className="rounded-2xl bg-primary/12 p-2 text-primary">
-            <Shield className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="font-heading text-lg font-bold leading-none">Admin</p>
-            <p className="text-xs text-muted-foreground">Controle central do Tomo Verso Editora</p>
-          </div>
+    <aside className="sticky top-0 z-30 flex h-screen w-[240px] shrink-0 flex-col border-r border-border/50 bg-card/95">
+      {/* Header */}
+      <div className="flex items-center gap-3 border-b border-border/30 px-4 py-3.5">
+        <div className="rounded-lg bg-primary/12 p-1.5 text-primary">
+          <Shield className="h-4.5 w-4.5" />
         </div>
-        <nav className="space-y-1.5">
+        <div className="min-w-0">
+          <p className="font-heading text-sm font-bold leading-tight">Admin</p>
+          <p className="truncate text-[11px] text-muted-foreground">Tomo Verso Editora</p>
+        </div>
+      </div>
+
+      {/* Nav — scrollable */}
+      <nav className="flex-1 overflow-y-auto px-3 py-3">
+        <ul className="space-y-0.5">
           {ADMIN_NAV_ITEMS.map((item) => {
             const Icon = iconMap[item.section];
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            const active =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm transition ${
-                  active
-                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
-                    : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                <span className="font-medium">{item.label}</span>
-              </Link>
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition-colors ${
+                    active
+                      ? "bg-primary text-primary-foreground font-medium"
+                      : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
+                  }`}
+                >
+                  <Icon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{item.label}</span>
+                </Link>
+              </li>
             );
           })}
-        </nav>
-      </div>
+        </ul>
+      </nav>
     </aside>
   );
 }

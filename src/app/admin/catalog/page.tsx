@@ -14,8 +14,8 @@ export default async function AdminCatalogPage({ searchParams }: { searchParams:
       title="Controle editorial de novels e mangás"
       description="Defina o que aparece, o que ganha destaque, o que entra na home e o que já pode participar da futura loja."
     >
-      <form className="rounded-3xl border border-border/50 bg-card/70 p-4">
-        <input name="q" defaultValue={q} placeholder="Buscar por título, slug ou sinopse..." className="w-full rounded-2xl border border-border/60 bg-background px-4 py-3 text-sm" />
+      <form className="rounded-lg border border-border/50 bg-card/70 p-3">
+        <input name="q" defaultValue={q} placeholder="Buscar por título, slug ou sinopse..." className="w-full rounded-lg border border-border/60 bg-background px-3.5 py-2.5 text-sm" />
       </form>
       <CatalogTable rows={rows} />
     </AdminShell>

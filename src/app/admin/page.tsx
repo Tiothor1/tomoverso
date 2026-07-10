@@ -30,61 +30,70 @@ export default async function AdminOverviewPage() {
   return (
     <AdminShell
       eyebrow="controle central"
-      title="Painel administrativo do Tomo Verso Editora"
-      description="Um único lugar pra controlar o site público, o catálogo, usuários, operações de importação e a preparação da loja."
+      title="Painel do Tomo Verso"
+      description="Controle o site, catálogo, usuários, importações e loja."
       actions={
         <>
-          <Button asChild className="rounded-2xl"><Link href="/admin/site">Configurar site</Link></Button>
-          <Button variant="outline" asChild className="rounded-2xl"><Link href="/admin/commerce">Abrir commerce</Link></Button>
+          <Button asChild size="sm" className="rounded-lg"><Link href="/admin/site">Configurar site</Link></Button>
+          <Button variant="outline" size="sm" asChild className="rounded-lg"><Link href="/admin/commerce">Abrir commerce</Link></Button>
         </>
       }
     >
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {/* Stat cards — responsive auto-fit grid */}
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <AdminStatCard label="Novels" value={overview.novels} icon={<BookOpen className="h-4 w-4" />} hint={`${overview.featuredCatalogItems} itens em destaque`} />
         <AdminStatCard label="Mangás" value={overview.mangas} icon={<Boxes className="h-4 w-4" />} hint={`${overview.hiddenCatalogItems} itens ocultos`} />
         <AdminStatCard label="Usuários" value={overview.users} icon={<Users className="h-4 w-4" />} hint={`${overview.suspendedUsers} suspensos`} />
         <AdminStatCard label="Produtos" value={overview.storeProducts} icon={<Package2 className="h-4 w-4" />} hint={`${overview.activeProducts} ativos na loja`} />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <Card className="rounded-3xl border-border/50">
-          <CardHeader><CardTitle>Atividade recente</CardTitle></CardHeader>
-          <CardContent className="space-y-3">
+      {/* Bottom section — full width flexible */}
+      <section className="grid gap-5 lg:grid-cols-[1.5fr_1fr]">
+        <Card className="rounded-xl border-border/50">
+          <CardHeader className="pb-3"><CardTitle className="text-base">Atividade recente</CardTitle></CardHeader>
+          <CardContent className="space-y-2">
             {activity.map((row) => (
-              <div key={row.id} className="flex items-start justify-between gap-4 rounded-2xl border border-border/40 p-3">
-                <div>
-                  <p className="font-medium">{row.action}</p>
-                  <p className="text-sm text-muted-foreground">{row.display_name || row.username || "Sistema"} · {row.target_type || "geral"}</p>
+              <div key={row.id} className="flex items-start justify-between gap-3 rounded-lg border border-border/40 px-3.5 py-2.5">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{row.action}</p>
+                  <p className="text-xs text-muted-foreground">{row.display_name || row.username || "Sistema"} · {row.target_type || "geral"}</p>
                 </div>
-                <Badge variant="secondary">{String(row.created_at).replace("T", " ").slice(0, 16)}</Badge>
+                <Badge variant="secondary" className="shrink-0 text-[11px]">{String(row.created_at).replace("T", " ").slice(0, 16)}</Badge>
               </div>
             ))}
           </CardContent>
         </Card>
 
-        <div className="space-y-6">
-          <Card className="rounded-3xl border-border/50">
-            <CardHeader><CardTitle>Saúde operacional</CardTitle></CardHeader>
-            <CardContent className="space-y-3 text-sm text-muted-foreground">
-              <div className="flex items-center justify-between rounded-2xl bg-muted/60 p-3"><span>Capítulos de novel</span><strong className="text-foreground">{overview.chapters}</strong></div>
-              <div className="flex items-center justify-between rounded-2xl bg-muted/60 p-3"><span>Capítulos de mangá</span><strong className="text-foreground">{overview.mangaChapters}</strong></div>
-              <div className="flex items-center justify-between rounded-2xl bg-muted/60 p-3"><span>Comentários</span><strong className="text-foreground">{overview.comments}</strong></div>
-              <div className="flex items-center justify-between rounded-2xl bg-muted/60 p-3"><span>Relatórios pendentes</span><strong className="text-foreground">{overview.reports}</strong></div>
-              <div className="flex items-center justify-between rounded-2xl bg-muted/60 p-3"><span>Ativos na última hora</span><strong className="text-foreground">{overview.activeNow}</strong></div>
+        <div className="space-y-5">
+          <Card className="rounded-xl border-border/50">
+            <CardHeader className="pb-3"><CardTitle className="text-base">Saúde operacional</CardTitle></CardHeader>
+            <CardContent className="space-y-2 text-sm text-muted-foreground">
+              {[
+                ["Capítulos de novel", overview.chapters],
+                ["Capítulos de mangá", overview.mangaChapters],
+                ["Comentários", overview.comments],
+                ["Relatórios pendentes", overview.reports],
+                ["Ativos na última hora", overview.activeNow],
+              ].map(([label, value]) => (
+                <div key={String(label)} className="flex items-center justify-between rounded-lg bg-muted/60 px-3.5 py-2">
+                  <span>{label}</span>
+                  <strong className="text-foreground">{String(value)}</strong>
+                </div>
+              ))}
             </CardContent>
           </Card>
-          <Card className="rounded-3xl border-border/50">
-            <CardHeader><CardTitle>Integrações</CardTitle></CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              <div className="rounded-2xl bg-muted/60 p-3">
-                <p className="mb-1 flex items-center gap-2 font-medium"><PlugZap className="h-4 w-4 text-primary" /> Vercel</p>
-                <p className="text-muted-foreground">Projeto: {vercel?.project_name || "não configurado"}</p>
-                <p className="text-muted-foreground">URL: {vercel?.production_url || "—"}</p>
+          <Card className="rounded-xl border-border/50">
+            <CardHeader className="pb-3"><CardTitle className="text-base">Integrações</CardTitle></CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <div className="rounded-lg bg-muted/60 px-3.5 py-2.5">
+                <p className="mb-0.5 flex items-center gap-2 font-medium"><PlugZap className="h-3.5 w-3.5 text-primary" /> Vercel</p>
+                <p className="text-xs text-muted-foreground">Projeto: {vercel?.project_name || "não configurado"}</p>
+                <p className="text-xs text-muted-foreground">URL: {vercel?.production_url || "—"}</p>
               </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                <Button variant="outline" asChild className="rounded-2xl"><Link href="/admin/integrations"><Globe className="mr-2 h-4 w-4" /> Integrações</Link></Button>
-                <Button variant="outline" asChild className="rounded-2xl"><Link href="/admin/imports"><Activity className="mr-2 h-4 w-4" /> Importações</Link></Button>
-                <Button variant="outline" asChild className="rounded-2xl"><Link href="/admin/catalog/curation"><BadgeCheck className="mr-2 h-4 w-4" /> Curadoria</Link></Button>
+              <div className="grid gap-2 sm:grid-cols-3">
+                <Button variant="outline" size="sm" asChild className="rounded-lg"><Link href="/admin/integrations"><Globe className="mr-1.5 h-3.5 w-3.5" /> Integrações</Link></Button>
+                <Button variant="outline" size="sm" asChild className="rounded-lg"><Link href="/admin/imports"><Activity className="mr-1.5 h-3.5 w-3.5" /> Importações</Link></Button>
+                <Button variant="outline" size="sm" asChild className="rounded-lg"><Link href="/admin/catalog/curation"><BadgeCheck className="mr-1.5 h-3.5 w-3.5" /> Curadoria</Link></Button>
               </div>
             </CardContent>
           </Card>

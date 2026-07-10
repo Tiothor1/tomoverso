@@ -9,11 +9,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   if (user.role !== "admin") redirect("/");
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top,_hsl(var(--primary)/0.08),_transparent_36%),linear-gradient(to_bottom,_hsl(var(--background)),_hsl(var(--background)))]">
-      <div className="container mx-auto grid max-w-7xl gap-6 px-4 py-8 lg:grid-cols-[280px_minmax(0,1fr)]">
-        <AdminSidebar />
-        <div className="min-w-0">{children}</div>
-      </div>
+    <div className="flex min-h-screen bg-background">
+      <AdminSidebar />
+      <main className="flex-1 min-w-0 overflow-y-auto p-5 lg:p-6">
+        {children}
+      </main>
     </div>
   );
 }

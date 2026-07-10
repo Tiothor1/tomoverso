@@ -19,8 +19,8 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
       title="Papéis, acesso e moderação"
       description="Promova autores, mantenha leitores ativos e corte acesso quando precisar sem desmontar o resto do sistema."
     >
-      <form className="rounded-3xl border border-border/50 bg-card/70 p-4">
-        <input name="q" defaultValue={q} placeholder="Buscar por nome, @username ou email..." className="w-full rounded-2xl border border-border/60 bg-background px-4 py-3 text-sm" />
+      <form className="rounded-lg border border-border/50 bg-card/70 p-3">
+        <input name="q" defaultValue={q} placeholder="Buscar por nome, @username ou email..." className="w-full rounded-lg border border-border/60 bg-background px-3.5 py-2.5 text-sm" />
       </form>
       <UsersTable rows={rows} />
     </AdminShell>
