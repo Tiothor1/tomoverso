@@ -68,22 +68,36 @@ function paletteFor(book, index) {
 }
 
 function kindFor(book) {
-  const t = `${book.title} ${book.genres}`.toLowerCase();
-  if (/biblioteca|livro|papel|rodap[eé]/.test(t)) return 'library';
-  if (/bruxa|feiti|fantasma|sobrenatural|espelho/.test(t)) return 'moon';
+  const title = String(book.title || '').toLowerCase();
+  const t = `${title} ${book.genres}`.toLowerCase();
+
+  // Prefer title-specific motifs before broad genre words, otherwise everything supernatural becomes a moon.
+  if (/biblioteca|livro|papel|rodap[eé]/.test(title)) return 'library';
+  if (/flores|rosas/.test(title)) return 'flower';
+  if (/fogo|chama/.test(title)) return 'flame';
+  if (/espelho/.test(title)) return 'mirror';
+  if (/playlist|idol/.test(title)) return 'music';
+  if (/chefe final|torneio|guerra|guarda-costas/.test(title)) return 'sword';
+  if (/morto|fantasma/.test(title)) return 'ghost';
+  if (/finais felizes|di[aá]rio|manual/.test(title)) return 'quill';
+  if (/zero|vida extra|app/.test(title)) return 'game';
+  if (/anjos|jaqueta|cupido/.test(title)) return 'wings';
+  if (/beijo|namor|amor|coraç|match/.test(title)) return 'heart';
+  if (/coroa|princes|realeza|rainha|pr[ií]ncipe/.test(title)) return 'crown';
+  if (/apartamento|404|shopping|cidade/.test(title)) return 'city';
+  if (/telhado|janela/.test(title)) return 'rooftop';
+  if (/mensagem/.test(title)) return 'message';
+  if (/ver[aã]o|reinicia|tempo|rel[oó]gio|trem/.test(title)) return 'time';
+  if (/fim do mundo|estrela|lua|sol|céu|constela|aurora|astronomia/.test(title)) return 'cosmic';
+  if (/neve|cinza/.test(title)) return 'snow';
+  if (/monstro|drag/.test(title)) return 'beast';
+  if (/maldiç|exorcista|sombras/.test(title)) return 'sigil';
+  if (/café|23h59|chef|cozinha/.test(title)) return 'cup';
+  if (/bruxa|feiti/.test(title)) return 'moon';
+
   if (/escola|classe|colega|clube/.test(t)) return 'crest';
-  if (/ver[aã]o|reinicia|tempo|rel[oó]gio|trem/.test(t)) return 'time';
-  if (/monstro|drag/.test(t)) return 'beast';
-  if (/maldiç|exorcista|morto|sombras/.test(t)) return 'sigil';
-  if (/fim do mundo|estrela|lua|sol|céu|constela/.test(t)) return 'cosmic';
-  if (/apartamento|404|shopping|cidade/.test(t)) return 'city';
-  if (/telhado|janela/.test(t)) return 'rooftop';
-  if (/mensagem|app|playlist|di[aá]rio|likes/.test(t)) return 'message';
-  if (/anjos|jaqueta/.test(t)) return 'wings';
-  if (/neve|cinza/.test(t)) return 'snow';
-  if (/coroa|princes|realeza|rainha|pr[ií]ncipe/.test(t)) return 'crown';
-  if (/café|23h59|chef|cozinha/.test(t)) return 'cup';
-  if (/beijo|namor|amor|coraç/.test(t)) return 'heart';
+  if (/sobrenatural|mist[eé]rio/.test(t)) return 'sigil';
+  if (/fantasia|magia/.test(t)) return 'emblem';
   return 'emblem';
 }
 
@@ -109,6 +123,14 @@ function motif(kind, p, seed) {
     case 'crown': return `${glow}<path fill="${accent}" opacity=".88" d="M170 470l34-156 76 88 20-146 20 146 76-88 34 156z"/><path ${common} d="M170 470h260v78H170z"/><circle cx="204" cy="314" r="16" fill="${p.ink}"/><circle cx="300" cy="256" r="16" fill="${p.ink}"/><circle cx="396" cy="314" r="16" fill="${p.ink}"/>`;
     case 'cup': return `${glow}<path ${common} d="M218 344h154v94c0 58-35 97-77 97s-77-39-77-97z"/><path ${common} d="M372 374h36c35 0 35 64 0 64h-36"/><path ${accentLine} d="M250 296c-18-28 30-42 12-70M302 296c-18-28 30-42 12-70M354 296c-18-28 30-42 12-70"/><path ${common} d="M196 548h210"/>`;
     case 'heart': return `${glow}<path fill="${accent}" opacity=".86" d="M300 540s-132-76-132-176c0-49 38-86 83-86 27 0 42 12 49 24 7-12 22-24 49-24 45 0 83 37 83 86 0 100-132 176-132 176z"/><path ${common} d="M220 390h58l24-54 33 110 28-56h45"/>`;
+    case 'flower': return `${glow}<circle cx="300" cy="390" r="34" fill="${accent}" opacity=".9"/><path ${common} d="M300 356c-44-66-102-57-112-9-10 48 49 71 112 43 63 28 122 5 112-43-10-48-68-57-112 9zM300 424c-44 66-102 57-112 9-10-48 49-71 112-43 63-28 122-5 112 43-10 48-68 57-112-9z"/><path ${accentLine} d="M300 424v126M266 508c22-28 46-41 72-39"/>`;
+    case 'flame': return `${glow}<path fill="${accent}" opacity=".88" d="M306 548c-82-31-116-92-87-158 18-41 55-57 62-117 42 43 76 79 71 137 26-20 41-50 41-82 71 87 48 183-87 220z"/><path ${common} d="M302 508c-35-33-42-72-13-119 24 32 45 50 37 91 20-10 34-28 42-55 29 44 7 82-66 83z"/>`;
+    case 'mirror': return `${glow}<rect ${common} x="214" y="248" width="172" height="244" rx="42"/><path ${accentLine} d="M250 294c46 34 102 34 146 0M244 542h112M268 492v50M332 492v50"/><path fill="${accent}" opacity=".2" d="M244 286h112v168H244z"/>`;
+    case 'music': return `${glow}<path ${common} d="M246 296v178c0 32-27 58-60 58s-60-26-60-58 27-58 60-58c16 0 30 5 42 14V272l198-42v178c0 32-27 58-60 58s-60-26-60-58 27-58 60-58c16 0 30 5 42 14V254z"/><path ${accentLine} d="M246 334l180-38"/>`;
+    case 'sword': return `${glow}<path fill="${accent}" opacity=".78" d="M300 226l38 208-38 116-38-116z"/><path ${common} d="M300 226v324M218 444h164M244 496l-42 72M356 496l42 72"/><path ${accentLine} d="M250 314l100 128"/>`;
+    case 'ghost': return `${glow}<path fill="${accent}" opacity=".23" d="M202 548V360c0-76 44-128 98-128s98 52 98 128v188l-34-30-32 30-32-30-32 30-32-30z"/><path ${common} d="M202 548V360c0-76 44-128 98-128s98 52 98 128v188l-34-30-32 30-32-30-32 30-32-30z"/><circle cx="264" cy="363" r="12" fill="${p.ink}"/><circle cx="336" cy="363" r="12" fill="${p.ink}"/><path ${accentLine} d="M272 430c22 14 34 14 56 0"/>`;
+    case 'quill': return `${glow}<path fill="${accent}" opacity=".82" d="M408 228c-124 20-196 88-218 204l74-44-38 90 88-56c69-35 104-100 94-194z"/><path ${common} d="M208 538c56-109 119-189 200-310M192 586h216"/><path ${accentLine} d="M248 429l86-11M284 367l78-8"/>`;
+    case 'game': return `${glow}<rect ${common} x="176" y="312" width="248" height="148" rx="52"/><path ${accentLine} d="M232 386h70M267 351v70"/><circle cx="354" cy="371" r="13" fill="${accent}"/><circle cx="390" cy="407" r="13" fill="${p.ink}"/><text x="300" y="548" text-anchor="middle" font-size="54" font-family="Georgia" fill="${accent}" font-weight="800">1UP</text>`;
     default: return `${glow}<path ${common} d="M300 230l132 76v152L300 534l-132-76V306z"/><path ${accentLine} d="M300 230v304M168 306l132 76 132-76M168 458l132-76 132 76"/><circle cx="300" cy="382" r="42" fill="${accent}" opacity=".85"/>`;
   }
 }
