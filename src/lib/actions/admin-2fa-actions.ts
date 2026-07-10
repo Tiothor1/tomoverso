@@ -2,65 +2,75 @@
 
 import { getCurrentUser } from "@/lib/auth";
 import { cookies } from "next/headers";
-import { generate2FASecret, enable2FA, is2FAEnabled, verify2FAToken } from "@/lib/admin/admin-auth";
+import { sendAdminOTP, verifyAdminOTP, getOTPCooldownMinutes } from "@/lib/admin-otp";
 
-export async function setup2FAAction() {
+const ADMIN_EMAIL = "tomoversoeditora@gmail.com";
+
+/** Envia código OTP para o email do admin */
+export async function sendAdminOTPCodeAction(): Promise<{
+  ok: boolean;
+  error?: string;
+  cooldownMinutes?: number;
+}> {
   const user = await getCurrentUser();
   if (!user || user.role !== "admin") return { ok: false, error: "Não autorizado" };
 
-  const secret = generate2FASecret(user.id);
-  enable2FA(user.id, secret.base32);
-
-  return {
-    ok: true,
-    secret: secret.base32,
-    otpauth_url: secret.otpauth_url,
-  };
-}
-
-export async function disable2FAAction() {
-  const user = await getCurrentUser();
-  if (!user || user.role !== "admin") return { ok: false, error: "Não autorizado" };
-
-  const { getDb } = await import("@/lib/db");
-  const db = getDb();
-  db.prepare("UPDATE admin_auth SET twofa_secret = NULL, updated_at = datetime('now') WHERE user_id = ?").run(user.id);
-
-  return { ok: true };
-}
-
-export async function verify2FAAction(formData: FormData): Promise<{ ok: boolean; error?: string }> {
-  const user = await getCurrentUser();
-  if (!user || user.role !== "admin") return { ok: false, error: "Não autorizado" };
-
-  const token = formData.get("token") as string;
-  if (!token) return { ok: false, error: "Código obrigatório" };
-
-  const { getDb } = await import("@/lib/db");
-  const db = getDb();
-  const auth = db.prepare("SELECT twofa_secret FROM admin_auth WHERE user_id = ?").get(user.id) as any;
-
-  if (!auth?.twofa_secret) return { ok: false, error: "2FA não configurado" };
-
-  if (!verify2FAToken(auth.twofa_secret, token)) {
-    return { ok: false, error: "Código inválido ou expirado" };
+  // Verifica cooldown antes de tentar enviar
+  const cooldown = getOTPCooldownMinutes(ADMIN_EMAIL);
+  if (cooldown > 0) {
+    return { ok: false, error: `Aguarde ${cooldown} minuto(s) antes de solicitar outro código.`, cooldownMinutes: cooldown };
   }
 
-  // Set validated cookie - expires in 7 days (same session)
+  const result = await sendAdminOTP(ADMIN_EMAIL);
+  return result;
+}
+
+/** Verifica código OTP e libera acesso ao admin */
+export async function verifyAdminOTPCodeAction(
+  code: string
+): Promise<{ ok: boolean; error?: string }> {
+  const user = await getCurrentUser();
+  if (!user || user.role !== "admin") return { ok: false, error: "Não autorizado" };
+
+  if (!code || code.length !== 6) {
+    return { ok: false, error: "Código deve ter 6 dígitos" };
+  }
+
+  const valid = verifyAdminOTP(ADMIN_EMAIL, code);
+  if (!valid) {
+    return { ok: false, error: "Código inválido ou expirado. Solicite um novo." };
+  }
+
+  // Libera acesso — cookie válido por 7 dias
   const cookieStore = await cookies();
   cookieStore.set("admin_2fa_validated", "1", {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
     path: "/admin",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: 7 * 24 * 60 * 60,
   });
 
   return { ok: true };
 }
 
-export async function get2FAStatusAction(): Promise<{ enabled: boolean }> {
-  const user = await getCurrentUser();
-  if (!user || user.role !== "admin") return { enabled: false };
-  return { enabled: is2FAEnabled(user.id) };
+/** Verifica se o admin já validou 2FA nessa sessão */
+export async function getAdminOTPStatusAction(): Promise<{
+  validated: boolean;
+}> {
+  const cookieStore = await cookies();
+  const validated = cookieStore.get("admin_2fa_validated")?.value === "1";
+  return { validated };
+}
+
+/** Limpa validação (logout do admin) */
+export async function clearAdminOTPValidationAction(): Promise<void> {
+  const cookieStore = await cookies();
+  cookieStore.set("admin_2fa_validated", "", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax",
+    path: "/admin",
+    maxAge: 0,
+  });
 }
