@@ -37,4 +37,18 @@ assert(cleaned.includes("— Eu preciso ir embora — ele disse."));
 assert(cleaned.includes("***"));
 assert(splitNarrativeParagraphs(cleaned).every((p) => p.length < 1000 || p === "***"));
 
+import { scoreNarrativeQuality } from "../src/lib/reader-format/quality-score";
+
+const goodPage = Array.from({ length: 32 }, (_, i) =>
+  i % 4 === 0
+    ? "— Você também sentiu? — Clara perguntou. O corredor parecia prender a respiração junto com eles."
+    : "Davi percebeu que o corredor estava silencioso demais. A luz da manhã atravessava as janelas, mas nada parecia ocupar o mesmo lugar de antes, e cada passo empurrava os dois para uma escolha que nenhum deles queria nomear."
+).join("\n\n");
+
+const score = scoreNarrativeQuality(goodPage, { minChars: 3500, minWords: 500 });
+assert(score.media >= 8, JSON.stringify(score));
+
+const badScore = scoreNarrativeQuality("Página 1\n\nSinopse: teste", { minChars: 3500, minWords: 500 });
+assert(badScore.media < 8, JSON.stringify(badScore));
+
 console.log("reader-format standards tests passed");
