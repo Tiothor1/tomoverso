@@ -77,6 +77,18 @@ function compactNumber(value: number) {
   return new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 }).format(value || 0);
 }
 
+/** Trunca sinopse para exibição em cards — remove classificação indicativa e avisos */
+function cardSynopsis(text: string | null | undefined): string {
+  if (!text) return "";
+  // Pega só o primeiro parágrafo antes de classificação indicativa ou \n\n
+  const cleaned = text
+    .split(/\n\s*\n/)[0]
+    .split(/Classificação indicativa[:.]/i)[0]
+    .split(/Avisos? de conteúdo[:.]/i)[0]
+    .trim();
+  return cleaned || text.slice(0, 150);
+}
+
 type CurationLabel = "em_alta" | "novidade_br" | "autor_revelacao";
 
 function asCurationLabel(label: string | null | undefined): CurationLabel | null {
@@ -482,7 +494,7 @@ function FeaturedStory({ novel, t: tFn }: { novel?: NovelRow; t: (key: string, v
                 {asCurationLabel(novel.curation_label) ? <CurationBadge label={asCurationLabel(novel.curation_label)!} /> : novel.is_original ? <OriginalBadge /> : <Badge variant="secondary" className="rounded-full">Destaque editorial</Badge>}
               </div>
               <h3 className="font-heading text-2xl font-black tracking-tight md:text-3xl"><NovelTitle novel={novel as any} /></h3>
-              <p className="mt-3 line-clamp-4 text-sm leading-6 text-muted-foreground">{novel.synopsis}</p>
+              <p className="mt-3 line-clamp-4 text-sm leading-6 text-muted-foreground">{cardSynopsis(novel.synopsis)}</p>
             </div>
             <div className="mt-5 flex items-center justify-between border-t border-border/60 pt-4">
               <span className="text-sm text-muted-foreground">{novel.chapter_count || 0} capítulos</span>
@@ -505,7 +517,7 @@ function MiniNovel({ novel }: { novel: NovelRow }) {
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="line-clamp-2 font-heading text-sm font-black group-hover:text-violet-600 dark:group-hover:text-violet-300"><NovelTitle novel={novel as any} /></h3>
-            <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">{novel.synopsis}</p>
+            <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted-foreground">{cardSynopsis(novel.synopsis)}</p>
             <p className="mt-1.5 text-xs font-semibold text-muted-foreground">{novel.chapter_count || 0} capítulos</p>
           </div>
         </CardContent>
@@ -546,7 +558,7 @@ function RecentNovel({ novel }: { novel: NovelRow }) {
               {safeJsonArray(novel.genres).slice(0, 2).map((genre) => <Badge key={genre} variant="secondary" className="rounded-full text-[9px] px-1.5 py-0">{genre}</Badge>)}
             </div>
             <h3 className="line-clamp-2 font-heading text-xs font-black leading-tight group-hover:text-violet-600 dark:group-hover:text-violet-300"><NovelTitle novel={novel as any} /></h3>
-            <p className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-muted-foreground">{novel.synopsis}</p>
+            <p className="mt-0.5 line-clamp-2 text-[11px] leading-4 text-muted-foreground">{cardSynopsis(novel.synopsis)}</p>
           </div>
         </CardContent>
       </Card>
