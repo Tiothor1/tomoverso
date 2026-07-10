@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { normalizeLocale } from "@/lib/i18n/types";
 import { ensureTranslationsTable, hashText } from "@/lib/i18n/translation-cache";
+import { getCurrentUser } from "@/lib/auth";
 
 const LANG_NAME: Record<string, string> = {
   en: "English",
@@ -115,6 +116,12 @@ async function translateGooglePublic(texts: string[], targetLocale: string): Pro
 
 export async function POST(req: Request) {
   try {
+    // Require login to use translation (prevents API key abuse)
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ ok: false, error: "Login required" }, { status: 401 });
+    }
+
     const body = await req.json();
     const targetLocale = normalizeLocale(body.targetLocale || body.locale);
     const force = Boolean(body.force);

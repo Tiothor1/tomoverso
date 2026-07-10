@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import crypto from "crypto";
+import { requireAdmin } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
+    // Only admin can grant plans
+    await requireAdmin();
+
     const { username, days } = await request.json();
     if (!username || typeof username !== "string") {
       return NextResponse.json({ error: "Informe o username do usuário." }, { status: 400 });

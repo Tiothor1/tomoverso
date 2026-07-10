@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
+import { requireAdmin } from "@/lib/auth";
 
 export async function POST(request: Request) {
   try {
+    // Only admin can release/block the site
+    const user = await requireAdmin();
+
     const { action } = await request.json();
     const db = getDb();
     if (action === "release") {
