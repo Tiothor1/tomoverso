@@ -100,21 +100,37 @@ export async function sendVerificationCode(email: string): Promise<OTPResult> {
     to: email,
     subject: "Código de verificação — Tomo Verso Editora",
     html: `
-      <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:24px">
-        <h2 style="margin-top:0">Verifique seu email</h2>
-        <p>Use o código abaixo para confirmar seu email no Tomo Verso Editora:</p>
-        <div style="background:#f5f0e8;border-radius:12px;padding:24px;text-align:center;font-size:32px;letter-spacing:8px;font-weight:bold;margin:16px 0">
-          ${code}
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:520px;margin:0 auto;padding:32px 24px;background:#fafafa">
+        <div style="background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08)">
+          <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:28px 24px;text-align:center">
+            <h1 style="margin:0;color:#e8d5b7;font-size:20px;font-weight:500">📚 Tomo Verso Editora</h1>
+          </div>
+          <div style="padding:32px 24px">
+            <h2 style="margin:0 0 8px;font-size:18px;color:#1a1a2e">Código de verificação</h2>
+            <p style="margin:0 0 24px;color:#666;font-size:15px;line-height:1.5">
+              Seu código para acessar o Tomo Verso Editora chegou:
+            </p>
+            <div style="background:linear-gradient(135deg,#f5f0e8,#efe8dc);border-radius:12px;padding:24px;text-align:center;margin:0 0 24px;border:1px solid #e0d5c5">
+              <span style="font-family:monospace;font-size:40px;letter-spacing:10px;font-weight:700;color:#1a1a2e">${code}</span>
+            </div>
+            <div style="background:#f8f6f3;border-radius:8px;padding:16px;margin:0 0 24px">
+              <p style="margin:0 0 4px;color:#888;font-size:13px">⏱ <strong>${CODE_EXPIRY_MINUTES} minutos</strong> de validade · uso único</p>
+              <p style="margin:0;color:#888;font-size:13px">🔒 Não compartilhe este código com ninguém</p>
+            </div>
+            <p style="margin:0;color:#bbb;font-size:12px;text-align:center">
+              Se você não pediu este código, ignore este email.<br>
+              Nenhuma alteração foi feita na sua conta.
+            </p>
+          </div>
+          <div style="border-top:1px solid #eee;padding:16px 24px;text-align:center">
+            <p style="margin:0;color:#ccc;font-size:11px">
+              Tomo Verso Editora · Sua plataforma de histórias
+            </p>
+          </div>
         </div>
-        <p style="color:#666;font-size:14px">
-          Código válido por ${CODE_EXPIRY_MINUTES} minutos. Use uma única vez.
-        </p>
-        <p style="color:#999;font-size:12px">
-          Se você não pediu este código, ignore este email.
-        </p>
       </div>
     `,
-    text: `Seu código de verificação do Tomo Verso Editora é: ${code}. Válido por ${CODE_EXPIRY_MINUTES} minutos.`,
+    text: `Seu código de verificação do Tomo Verso Editora é: ${code}. Válido por ${CODE_EXPIRY_MINUTES} minutos. Não compartilhe este código.`,
   });
 
   if (!sent) return { ok: false, error: "Falha ao enviar email. Tente novamente." };
