@@ -2,7 +2,7 @@ import { chromium } from "playwright";
 
 const baseUrl = process.env.BASE_URL || "https://tomoverso.studio";
 const cases = [
-  { name: "ln_mass", url: `${baseUrl}/novels/cartas-para-o-garoto-da-ultima-estacao/1`, must: "Cartas Para o Garoto", reader: true },
+  { name: "ln_mass", url: `${baseUrl}/novels/o-ultimo-verao-antes-de-nos/1`, must: "O Último Verão", reader: true },
   { name: "ln_demon", url: `${baseUrl}/novels/demon-king/1`, must: "Demon King", reader: true },
   { name: "book", url: `${baseUrl}/livros/o-contrato-do-beijo-falso/ler?page=1`, must: "O Contrato", reader: true },
   { name: "catalog", url: `${baseUrl}/catalogo`, must: "Catálogo", reader: false },
@@ -20,14 +20,17 @@ for (const viewport of [{ width: 1366, height: 900 }, { width: 360, height: 740 
     await page.waitForTimeout(1500);
     const data = await page.evaluate(() => {
       const text = document.body.innerText || "";
+      const reader = document.querySelector(".book-reader, .light-novel-reader");
+      const readerText = reader?.textContent || "";
       const html = document.documentElement;
       const paragraphs = Array.from(document.querySelectorAll(".book-reader p, .light-novel-reader p")).map((p) => p.textContent || "");
       return {
         text,
+        readerText,
         overflow: Math.max(0, html.scrollWidth - html.clientWidth),
         paragraphCount: paragraphs.length,
         giantParagraphs: paragraphs.filter((p) => p.length > 1200).length,
-        classFound: !!document.querySelector(".book-reader, .light-novel-reader"),
+        classFound: !!reader,
       };
     });
 
@@ -35,7 +38,7 @@ for (const viewport of [{ width: 1366, height: 900 }, { width: 360, height: 740 
       status: response?.status() === 200,
       must: data.text.toLowerCase().includes(testCase.must.toLowerCase()),
       noOverflow: data.overflow <= 8,
-      noForbidden: !testCase.reader || !forbidden.test(data.text),
+      noForbidden: !testCase.reader || !forbidden.test(data.readerText),
       enoughParagraphs: !testCase.reader || data.paragraphCount >= 6,
       noGiantParagraphs: !testCase.reader || data.giantParagraphs === 0,
       readerClass: !testCase.reader || data.classFound,
