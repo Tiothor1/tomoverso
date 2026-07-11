@@ -1,0 +1,12 @@
+const s = require('better-sqlite3')('/var/www/tomoverso/data-runtime/tomoverso.db');
+const r = s.prepare("SELECT slug,title,synopsis FROM novels WHERE slug='demon-king'").get();
+console.log(r.title);
+console.log(r.synopsis.slice(0,400));
+console.log('---');
+const r2 = s.prepare("SELECT slug,title,synopsis FROM novels WHERE slug='o-que-eu-desenhei-existe'").get();
+console.log(r2.title);
+console.log(r2.synopsis.slice(0,400));
+console.log('---');
+const cnt = s.prepare("SELECT COUNT(*) as c FROM novels WHERE synopsis LIKE '%Classificação%' OR synopsis LIKE '%classificação%' OR synopsis LIKE '%Avisos%' OR synopsis LIKE '%avisos%'").get();
+console.log(`Still with classification: ${cnt.c}`);
+s.close();

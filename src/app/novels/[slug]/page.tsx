@@ -54,6 +54,11 @@ interface NovelRow {
   source: string | null;
   is_original: number | null;
   created_at: string;
+  tone: string | null;
+  subtitle: string | null;
+  tagline: string | null;
+  classification_rating: string | null;
+  content_warnings: string | null;
 }
 
 export const dynamic = "force-dynamic";
@@ -262,6 +267,35 @@ export default async function NovelPage({ params }: { params: Promise<{ slug: st
                     <p className="text-muted-foreground leading-relaxed text-lg whitespace-pre-line">{novelRow.synopsis}</p>
                   </CardContent>
                 </Card>
+
+                {/* Metadados: classificação, tom, avisos */}
+                <div className="flex flex-wrap gap-3 items-start">
+                  {novelRow.classification_rating && (
+                    <Badge className="bg-red-500/20 text-red-400 border-red-500/30 hover:bg-red-500/30 text-sm px-3 py-1">
+                      {novelRow.classification_rating}
+                    </Badge>
+                  )}
+                  {novelRow.tone && (
+                    <Badge variant="secondary" className="text-xs gap-1.5 px-3 py-1">
+                      <span className="text-muted-foreground">Tom:</span> {novelRow.tone}
+                    </Badge>
+                  )}
+                  {novelRow.subtitle && (
+                    <Badge variant="outline" className="text-xs px-3 py-1">
+                      {novelRow.subtitle}
+                    </Badge>
+                  )}
+                </div>
+
+                {novel.content_warnings && (
+                  <Card className="border-yellow-500/20 bg-yellow-500/5">
+                    <CardContent className="pt-4 pb-4">
+                      <p className="text-xs font-semibold text-yellow-400 uppercase tracking-wider mb-1">Avisos de conteúdo</p>
+                      <p className="text-sm text-muted-foreground">{novel.content_warnings}</p>
+                    </CardContent>
+                  </Card>
+                )}
+
                 {novel.tags.length > 0 && (
                   <div>
                     <h3 className="font-heading text-sm font-semibold mb-2 uppercase tracking-wider text-muted-foreground">Tags</h3>
