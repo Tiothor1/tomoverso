@@ -38,15 +38,23 @@ export const metadata: Metadata = {
   title: "Tomo Verso Editora — Onde histórias ganham vida",
   description:
     "A Tomo Verso Editora é uma editora digital dedicada a transformar histórias em experiências marcantes. Nosso objetivo é conectar leitores e autores através de obras envolventes, criativas e acessíveis, reunindo novels, light novels, mangás, manhwas, livros e narrativas originais em um só universo.",
-  keywords: ["light novel", "ln", "mangá", "editora", "tomoverso editora", "brasil", "leitura", "escrita"],
+  keywords: ["light novel", "ln", "mangá", "manhwa", "editora", "tomoverso editora", "brasil", "leitura", "escrita", "ler online", "mangá online", "novel brasileira", "histórias", "livros digitais", "publicar história"],
   icons: {
     icon: [{ url: "/favicon-20260706.ico", type: "image/x-icon" }, { url: "/favicon-20260706.png", type: "image/png" }],
   },
   openGraph: {
-    title: "Tomo Verso Editora",
-    description: "Editora digital de histórias — novels, mangás, light novels e mais.",
-    images: [{ url: "https://tomoverso.studio/logo-tomoverso-editora-20260706.png", width: 1254, height: 1254 }],
+    title: "Tomo Verso Editora — Leia mangás, manhwas e light novels em português",
+    description: "172+ mangás, 52+ novels, 20.500+ capítulos. Leitura grátis, sem enrolação. Descubra histórias que parecem feitas para virar vício.",
+    images: [{ url: "https://tomoverso.studio/og-image.svg", width: 1200, height: 630 }],
     siteName: "Tomo Verso Editora",
+    type: "website",
+    locale: "pt_BR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Tomo Verso Editora — Mangás, novels e light novels em português",
+    description: "172+ mangás, 52+ novels, 20.500+ capítulos grátis. Entre e comece a ler agora.",
+    images: ["https://tomoverso.studio/og-image.svg"],
   },
 };
 
@@ -110,11 +118,29 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{
           __html: `(function(){try{document.documentElement.setAttribute('data-intro-seen',sessionStorage.getItem('tomoverso_intro_seen')==='true'?'true':'false');}catch(e){document.documentElement.setAttribute('data-intro-seen','false');}})()`
         }} />
-        <meta property="og:image" content="https://tomoverso.studio/logo-tomoverso-editora-20260706.png" />
-        <meta property="og:image:width" content="1254" />
-        <meta property="og:image:height" content="1254" />
+        <meta property="og:image" content="https://tomoverso.studio/og-image.svg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
         <meta property="og:site_name" content="Tomo Verso Editora" />
         <meta name="google-adsense-account" content="ca-pub-2780687772948357" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "Tomo Verso Editora",
+              "url": "https://tomoverso.studio",
+              "description": "Editora digital brasileira de mangás, manhwas e light novels. Leia e publique histórias.",
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://tomoverso.studio/search?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+              },
+              "inLanguage": "pt-BR"
+            })
+          }}
+        />
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-R28LZTKXV6"></script>
         <script dangerouslySetInnerHTML={{__html:`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-R28LZTKXV6');`}} />
         <script

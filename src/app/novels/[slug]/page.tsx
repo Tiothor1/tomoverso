@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
-  ArrowLeft, BookOpen, Eye, Heart, MessageCircle, ListOrdered, Clock, DollarSign, Check,
+  ArrowLeft, BookOpen, Eye, Heart, MessageCircle, ListOrdered, Clock, DollarSign, Check, Share2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { NovelCover } from "@/components/novel/novel-cover";
 import { NovelCard } from "@/components/novel/novel-card";
 import { NovelTitle } from "@/components/novel/novel-title";
+import { ShareButton } from "@/components/ui/share-button";
 import { getDb } from "@/lib/db";
 import { publicReadableNovelSql, readableNovelChapterSql } from "@/lib/public-catalog";
 import { shouldShowAttribution } from "@/lib/work-attribution";
@@ -252,6 +253,9 @@ export default async function NovelPage({ params }: { params: Promise<{ slug: st
               {novel.alternative_titles.length > 0 && (
                 <p className="text-muted-foreground mt-2 text-sm">também: {novel.alternative_titles.join(", ")}</p>
               )}
+              <div className="mt-4">
+                <ShareButton title={novelRow.title} url={`/novels/${novelRow.slug}`} description={novelRow.synopsis?.substring(0, 120)} />
+              </div>
             </div>
 
             <Tabs defaultValue="sinopse" className="w-full">

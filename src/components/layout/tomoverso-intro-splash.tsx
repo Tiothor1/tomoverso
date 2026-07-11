@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 
 const INTRO_KEY = "tomoverso_intro_seen";
-const MINIMUM_VISIBLE_MS = 1600;
-const REDUCED_MOTION_MIN_MS = 800;
-const LEAVE_MS = 320;
+const MINIMUM_VISIBLE_MS = 500;
+const REDUCED_MOTION_MIN_MS = 200;
+const LEAVE_MS = 150;
 
 const LOADING_STAGES = [
   "Organizando a estante para a sua próxima leitura.",
