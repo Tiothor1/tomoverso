@@ -69,7 +69,6 @@ export default async function AdminSecretoSetupPage() {
                     <p className="text-[10px] text-slate-500 mb-1">Chave secreta (insira manualmente no app):</p>
                     <p className="font-mono text-xs text-slate-300 break-all select-all">{base32}</p>
                   </div>
-                </div>
                 <form action={async () => {
                   "use server";
                   const u = await getSecretAdminOrRedirect(SP).catch(() => null);
