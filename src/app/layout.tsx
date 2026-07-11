@@ -7,6 +7,7 @@ import { ContinueReadingBanner } from "@/components/reader/continue-reading-bann
 import { Navbar } from "@/components/layout/navbar";
 import { Footer } from "@/components/layout/footer";
 import { CookieConsent } from "@/components/layout/cookie-consent";
+import { SharePrompt } from "@/components/layout/share-prompt";
 import { TomoversoIntroSplash } from "@/components/layout/tomoverso-intro-splash";
 import { TomoversoRoutePreloader } from "@/components/layout/tomoverso-route-preloader";
 import { LaunchGate } from "@/components/launch/launch-gate";
@@ -162,6 +163,7 @@ export default async function RootLayout({
               <main className="flex-1">{children}</main>
               <Footer />
               <CookieConsent />
+              <SharePrompt />
               <TomoversoRoutePreloader />
               <Toaster position="top-center" richColors />
             </TomoMusicProvider>
