@@ -124,6 +124,7 @@ export default async function RootLayout({
         <meta property="og:image:height" content="630" />
         <meta property="og:site_name" content="Tomo Verso Editora" />
         <meta name="google-adsense-account" content="ca-pub-2780687772948357" />
+        <meta name="google-site-verification" content="O4P6bf9BGgDq6sBiqjsvKZ7Fa-PmH-ppHMwEIqpxHFc" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
