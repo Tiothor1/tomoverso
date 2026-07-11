@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f0c29"/>
+      <stop offset="50%" stop-color="#1a1a3e"/>
+      <stop offset="100%" stop-color="#24243e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="3">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1920" fill="url(#bg)"/>
+
+  <!-- Glow top -->
+  <ellipse cx="540" cy="0" rx="600" ry="400" fill="url(#glow)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="900" cy="300" r="200" fill="none" stroke="#f59e0b" stroke-opacity="0.05" stroke-width="1"/>
+  <circle cx="200" cy="500" r="300" fill="none" stroke="#f59e0b" stroke-opacity="0.03" stroke-width="1"/>
+
+  <!-- Top decorative line -->
+  <line x1="200" y1="100" x2="880" y2="100" stroke="url(#accent)" stroke-width="2" stroke-opacity="0.3"/>
+
+  <!-- Logo icon -->
+  <g transform="translate(540, 280)" text-anchor="middle">
+    <rect x="-60" y="-60" width="120" height="120" rx="24" fill="url(#accent)" opacity="0.15"/>
+    <text x="0" y="15" font-family="Georgia, serif" font-size="60" font-weight="bold" fill="url(#accent)" text-anchor="middle">T</text>
+  </g>
+
+  <!-- Site name -->
+  <text x="540" y="420" font-family="Georgia, serif" font-size="42" font-weight="bold" fill="#e4e4e7" text-anchor="middle" letter-spacing="4">TOMO VERSO</text>
+  <text x="540" y="465" font-family="Arial, sans-serif" font-size="18" fill="#71717a" text-anchor="middle" letter-spacing="8">EDITORA</text>
+
+  <!-- Stats -->
+  <g transform="translate(540, 580)" text-anchor="middle">
+    <!-- 172 -->
+    <text x="-180" y="0" font-family="Arial, sans-serif" font-size="64" font-weight="bold" fill="#f59e0b" text-anchor="middle">172</text>
+    <text x="-180" y="40" font-family="Arial, sans-serif" font-size="18" fill="#a1a1aa" text-anchor="middle">MANGÁS</text>
+
+    <line x1="-60" y1="-20" x2="-60" y2="40" stroke="#3f3f46" stroke-width="1"/>
+
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="64" font-weight="bold" fill="#f59e0b" text-anchor="middle">52</text>
+    <text x="0" y="40" font-family="Arial, sans-serif" font-size="18" fill="#a1a1aa" text-anchor="middle">NOVELS</text>
+
+    <line x1="60" y1="-20" x2="60" y2="40" stroke="#3f3f46" stroke-width="1"/>
+
+    <text x="180" y="0" font-family="Arial, sans-serif" font-size="38" font-weight="bold" fill="#f59e0b" text-anchor="middle">20.5K</text>
+    <text x="180" y="40" font-family="Arial, sans-serif" font-size="18" fill="#a1a1aa" text-anchor="middle">CAPÍTULOS</text>
+  </g>
+
+  <!-- Main CTA -->
+  <rect x="190" y="720" width="700" height="100" rx="50" fill="url(#accent)"/>
+  <text x="540" y="785" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#0f0c29" text-anchor="middle">LER GRÁTIS AGORA</text>
+
+  <!-- Features grid -->
+  <g transform="translate(540, 920)" text-anchor="middle">
+    <!-- Row 1 -->
+    <g transform="translate(-250, 0)">
+      <rect x="-40" y="-40" width="80" height="80" rx="16" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+      <text x="0" y="5" font-family="Arial, sans-serif" font-size="32">📱</text>
+      <text x="0" y="70" font-family="Arial, sans-serif" font-size="16" fill="#a1a1aa" text-anchor="middle">Leia no</text>
+      <text x="0" y="90" font-family="Arial, sans-serif" font-size="16" fill="#a1a1aa" text-anchor="middle">Celular</text>
+    </g>
+    <g transform="translate(0, 0)">
+      <rect x="-40" y="-40" width="80" height="80" rx="16" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+      <text x="0" y="5" font-family="Arial, sans-serif" font-size="32">📖</text>
+      <text x="0" y="70" font-family="Arial, sans-serif" font-size="16" fill="#a1a1aa" text-anchor="middle">Mangás</text>
+      <text x="0" y="90" font-family="Arial, sans-serif" font-size="16" fill="#a1a1aa" text-anchor="middle">e Manhwas</text>
+    </g>
+    <g transform="translate(250, 0)">
+      <rect x="-40" y="-40" width="80" height="80" rx="16" fill="#18181b" stroke="#27272a" stroke-width="1"/>
+      <text x="0" y="5" font-family="Arial, sans-serif" font-size="32">✍️</text>
+      <text x="0" y="70" font-family="Arial, sans-serif" font-size="16" fill="#a1a1aa" text-anchor="middle">Light</text>
+      <text x="0" y="90" font-family="Arial, sans-serif" font-size="16" fill="#a1a1aa" text-anchor="middle">Novels</text>
+    </g>
+  </g>
+
+  <!-- Bottom text -->
+  <text x="540" y="1200" font-family="Arial, sans-serif" font-size="22" fill="#71717a" text-anchor="middle">
+    <tspan x="540" dy="0">📚 Mais de 20 mil capítulos em português</tspan>
+    <tspan x="540" dy="45">🎯 Totalmente grátis, sem enrolação</tspan>
+  </text>
+
+  <!-- URL -->
+  <rect x="290" y="1330" width="500" height="60" rx="30" fill="#18181b" stroke="#f59e0b" stroke-opacity="0.3" stroke-width="1.5"/>
+  <text x="540" y="1368" font-family="monospace, Arial" font-size="26" font-weight="bold" fill="#f59e0b" text-anchor="middle">tomoverso.studio</text>
+
+  <!-- Bottom decorative line -->
+  <line x1="200" y1="1820" x2="880" y2="1820" stroke="url(#accent)" stroke-width="2" stroke-opacity="0.3"/>
+</svg>

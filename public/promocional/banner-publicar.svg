@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f0c29"/>
+      <stop offset="50%" stop-color="#1a1a3e"/>
+      <stop offset="100%" stop-color="#24243e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+  <ellipse cx="540" cy="1080" rx="600" ry="400" fill="#f59e0b" opacity="0.06"/>
+  
+  <g transform="translate(540, 220)" text-anchor="middle">
+    <rect x="-50" y="-50" width="100" height="100" rx="20" fill="url(#accent)" opacity="0.15"/>
+    <text x="0" y="15" font-family="Georgia,serif" font-size="50" font-weight="bold" fill="url(#accent)">T</text>
+  </g>
+  <text x="540" y="330" font-family="Georgia,serif" font-size="36" font-weight="bold" fill="#e4e4e7" text-anchor="middle" letter-spacing="3">TOMO VERSO</text>
+  <text x="540" y="365" font-family="Arial,sans-serif" font-size="15" fill="#71717a" text-anchor="middle" letter-spacing="6">EDITORA</text>
+  
+  <g transform="translate(540, 520)" text-anchor="middle">
+    <text font-family="Arial,sans-serif" font-size="28" fill="#f59e0b" font-weight="bold">✍️ SUA HISTÓRIA</text>
+    <text y="50" font-family="Arial,sans-serif" font-size="28" fill="#f59e0b" font-weight="bold">PODE ESTAR AQUI</text>
+  </g>
+  
+  <g transform="translate(540, 660)" text-anchor="middle">
+    <text font-family="Arial,sans-serif" font-size="18" fill="#a1a1aa">
+      <tspan x="540" dy="0">Publique sua light novel ou mangá</tspan>
+      <tspan x="540" dy="35">📈 Alcance milhares de leitores</tspan>
+      <tspan x="540" dy="35">💰 Monetize seu trabalho</tspan>
+      <tspan x="540" dy="35">🤝 Faça parte da comunidade</tspan>
+    </text>
+  </g>
+  
+  <rect x="240" y="830" width="600" height="80" rx="40" fill="url(#accent)"/>
+  <text x="540" y="883" font-family="Arial,sans-serif" font-size="30" font-weight="bold" fill="#0f0c29" text-anchor="middle">PUBLICAR AGORA →</text>
+  
+  <text x="540" y="1000" font-family="monospace,Arial" font-size="22" font-weight="bold" fill="#f59e0b" text-anchor="middle">tomoverso.studio</text>
+</svg>
