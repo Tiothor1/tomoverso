@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
-import { Shield, Smartphone, KeyRound, UserCheck } from "lucide-react";
-import { getCurrentUser } from "@/lib/auth";
+import { KeyRound, Shield, Smartphone, UserCheck } from "lucide-react";
+import { getAdminSecretPath, getSecretAdminOrRedirect } from "@/lib/admin/admin-v2-auth";
 import { ensureAdminAuthTable, generate2FASecret, is2FAEnabled, getAdminCPF, setAdminCPF, enable2FA } from "@/lib/admin/admin-auth";
+import { AdminHubShell } from "@/components/admin-v2/admin-hub-shell";
+import { AdminHubSection, AdminPanel } from "@/components/admin-v2/admin-hub-section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
 export const dynamic = "force-dynamic";
 
@@ -14,8 +14,8 @@ const SP = process.env.ADMIN_SECRET_PATH || "adm1n-c0ntr0l-40d9bd082a1266429a6f3
 
 async function setup2FAAction(formData: FormData) {
   "use server";
-  const user = await getCurrentUser();
-  if (!user || user.role !== "admin") return;
+  const user = await getSecretAdminOrRedirect(SP).catch(() => null);
+  if (!user) return;
   const cpf = (formData.get("cpf") as string)?.replace(/\D/g, "");
   if (cpf.length !== 11) return;
   setAdminCPF(user.id, cpf);
@@ -23,70 +23,59 @@ async function setup2FAAction(formData: FormData) {
 }
 
 export default async function AdminSecretoSetupPage() {
+  const secretPath = getAdminSecretPath();
+  const adminUser = await getSecretAdminOrRedirect(secretPath);
+
   try {
-  const cookieStore = await cookies();
-  const validated = cookieStore.get("admin_validated");
-  if (!validated || validated.value !== "1") redirect(`/${SP}`);
-  const user = await getCurrentUser().catch(() => null);
-  if (!user || user.role !== "admin") redirect(`/${SP}`);
+    ensureAdminAuthTable();
+    const has2FA = is2FAEnabled(adminUser.id);
+    const cpf = getAdminCPF(adminUser.id);
+    const { base32, otpauth_url } = generate2FASecret(adminUser.id);
 
-  ensureAdminAuthTable();
-  const has2FA = is2FAEnabled(user.id);
-  const cpf = getAdminCPF(user.id);
-  const { base32, otpauth_url } = generate2FASecret(user.id);
-
-  return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <Card className="w-full max-w-lg border-red-900/30 bg-gray-950/90 shadow-2xl shadow-red-900/20">
-        <CardHeader className="text-center">
-          <Shield className="h-10 w-10 text-red-400 mx-auto mb-2" />
-          <CardTitle className="text-xl text-red-100">Configuração de Segurança</CardTitle>
-          <p className="text-xs text-red-400/60 mt-1">2FA + CPF — totalmente opcional</p>
-        </CardHeader>
-        <CardContent className="space-y-6">
+    return (
+      <AdminHubShell secretPath={secretPath} active="setup" title="Configuração de Segurança" subtitle="2FA + CPF — totalmente opcional" user={adminUser}>
+        <AdminHubSection
+          title="Configuração de Segurança"
+          subtitle="2FA + CPF — totalmente opcional"
+          icon={<Shield className="h-5 w-5 text-red-400" />}
+        >
           {/* CPF */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-red-200 flex items-center gap-2">
-              <UserCheck className="h-4 w-4" /> CPF do administrador
-            </h3>
+          <AdminPanel title="CPF do administrador" icon={<UserCheck className="h-4 w-4" />}>
             {cpf ? (
               <div className="rounded-lg bg-green-950/30 border border-green-800/30 p-3 text-sm text-green-300">
                 CPF registrado: <strong className="font-mono">{cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")}</strong>
               </div>
             ) : (
-              <form action={setup2FAAction} className="flex gap-2">
-                <Input name="cpf" placeholder="000.000.000-00" maxLength={14} required className="bg-gray-900 border-red-900/40 text-red-100 font-mono" />
+              <form action={setup2FAAction} className="flex gap-2 max-w-md">
+                <Input name="cpf" placeholder="000.000.000-00" maxLength={14} required className="bg-zinc-900 border-white/10 text-slate-200 font-mono" />
                 <Button type="submit" className="bg-red-900 hover:bg-red-800 text-red-100 shrink-0">Salvar</Button>
               </form>
             )}
-          </div>
+          </AdminPanel>
 
           {/* 2FA */}
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold text-red-200 flex items-center gap-2">
-              <Smartphone className="h-4 w-4" /> Autenticação de dois fatores
-            </h3>
+          <AdminPanel title="Autenticação de dois fatores" icon={<Smartphone className="h-4 w-4" />}>
             {has2FA ? (
               <div className="rounded-lg bg-green-950/30 border border-green-800/30 p-3 text-sm text-green-300">
                 2FA ativo via Google Authenticator / Authy
               </div>
             ) : (
-              <div className="space-y-3">
-                <div className="rounded-lg bg-gray-950 border border-red-900/30 p-4 space-y-3">
-                  <p className="text-xs text-red-300">Escaneie o QR Code ou insira a chave manualmente no seu app de autenticação:</p>
+              <div className="space-y-3 max-w-md">
+                <div className="rounded-lg bg-zinc-900 border border-white/10 p-4 space-y-3">
+                  <p className="text-xs text-slate-400">Escaneie o QR Code ou insira a chave manualmente no seu app de autenticação:</p>
                   <div className="bg-white rounded-lg p-2 inline-block mx-auto">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={otpauth_url} alt="QR Code 2FA" className="w-48 h-48" />
                   </div>
-                  <div className="bg-gray-950 rounded-lg p-3">
-                    <p className="text-[10px] text-red-400/60 mb-1">Ou insira manualmente:</p>
-                    <p className="font-mono text-xs text-red-200 break-all select-all">{base32}</p>
+                  <div className="bg-zinc-950 rounded-lg p-3">
+                    <p className="text-[10px] text-slate-500 mb-1">Ou insira manualmente:</p>
+                    <p className="font-mono text-xs text-slate-300 break-all select-all">{base32}</p>
                   </div>
                 </div>
                 <form action={async () => {
                   "use server";
-                  const u = await getCurrentUser();
-                  if (!u || u.role !== "admin") return;
+                  const u = await getSecretAdminOrRedirect(SP).catch(() => null);
+                  if (!u) return;
                   enable2FA(u.id, base32);
                   redirect(`/${SP}`);
                 }}>
@@ -96,12 +85,17 @@ export default async function AdminSecretoSetupPage() {
                 </form>
               </div>
             )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+          </AdminPanel>
+        </AdminHubSection>
+      </AdminHubShell>
+    );
   } catch (e) {
-    return <div className="min-h-screen bg-gray-950 flex items-center justify-center text-red-400 text-sm">Erro no setup. <a href={`/${SP}`} className="underline ml-2">Voltar</a></div>;
+    return (
+      <AdminHubShell secretPath={secretPath} active="setup" title="Configuração de Segurança" subtitle="2FA + CPF" user={adminUser}>
+        <div className="p-6 text-sm">
+          <a href={`/${secretPath}`} className="underline ml-2 text-cyan-400">Voltar ao painel</a>
+        </div>
+      </AdminHubShell>
+    );
   }
 }
