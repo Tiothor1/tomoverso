@@ -5,7 +5,6 @@ import { ensureAdminAuthTable, generate2FASecret, is2FAEnabled, getAdminCPF, set
 import { AdminHubShell } from "@/components/admin-v2/admin-hub-shell";
 import { AdminHubSection, AdminPanel } from "@/components/admin-v2/admin-hub-section";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 export const dynamic = "force-dynamic";
@@ -35,9 +34,9 @@ export default async function AdminSecretoSetupPage() {
     return (
       <AdminHubShell secretPath={secretPath} active="setup" title="Configuração de Segurança" subtitle="2FA + CPF — totalmente opcional" user={adminUser}>
         <AdminHubSection
-          title="Configuração de Segurança"
-          subtitle="2FA + CPF — totalmente opcional"
-          icon={<Shield className="h-5 w-5 text-red-400" />}
+          title="Segurança"
+          description="2FA + CPF — totalmente opcional"
+          eyebrow="Proteção"
         >
           {/* CPF */}
           <AdminPanel title="CPF do administrador" icon={<UserCheck className="h-4 w-4" />}>
