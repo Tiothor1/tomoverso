@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <linearGradient id="bt68" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1920" fill="url(#bt68)"/>
+  <circle cx="540" cy="960" r="600" fill="#38bdf8" opacity="0.03"/>
+
+  <text x="540" y="700" font-family="Arial,sans-serif" font-size="100" font-weight="bold" fill="#38bdf8" text-anchor="middle" letter-spacing="8">MILHARES</text>
+  <text x="540" y="820" font-family="Arial,sans-serif" font-size="100" font-weight="bold" fill="#ffffff" text-anchor="middle" letter-spacing="8">DE OBRAS</text>
+
+  <text x="540" y="1100" font-family="Arial,sans-serif" font-size="22" fill="#a1a1aa" text-anchor="middle">
+    <tspan x="540" dy="0">tomoverso.studio</tspan>
+  </text>
+
+  <line x1="390" y1="1200" x2="690" y2="1200" stroke="#38bdf8" stroke-width="3" stroke-opacity="0.5"/>
+</svg>

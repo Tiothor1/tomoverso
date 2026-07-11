@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <linearGradient id="bs7" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="as7" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="1080" fill="url(#bs7)"/>
+  <ellipse cx="540" cy="0" rx="500" ry="300" fill="#38bdf8" opacity="0.06"/>
+
+  <g transform="translate(540, 180)" text-anchor="middle">
+    <rect x="-45" y="-45" width="90" height="90" rx="18" fill="url(#as7)" opacity="0.15"/>
+    <text x="0" y="12" font-family="Georgia,serif" font-size="44" font-weight="bold" fill="url(#as7)">T</text>
+  </g>
+  <text x="540" y="295" font-family="Georgia,serif" font-size="32" font-weight="bold" fill="#e4e4e7" text-anchor="middle" letter-spacing="3">TOMO VERSO</text>
+  <text x="540" y="325" font-family="Arial,sans-serif" font-size="14" fill="#71717a" text-anchor="middle" letter-spacing="5">EDITORA</text>
+
+  <g transform="translate(540, 480)" text-anchor="middle">
+    <text font-family="Arial,sans-serif" font-size="56" font-weight="bold" fill="url(#as7)">20 MIL</text>
+    <text y="60" font-family="Arial,sans-serif" font-size="22" font-weight="bold" fill="#e4e4e7" letter-spacing="2">CAPÍTULOS DISPONÍVEIS</text>
+  </g>
+
+  <rect x="290" y="680" width="500" height="70" rx="35" fill="url(#as7)"/>
+  <text x="540" y="726" font-family="Arial,sans-serif" font-size="24" font-weight="bold" fill="#0f0c29" text-anchor="middle">LER GRÁTIS</text>
+
+  <text x="540" y="880" font-family="monospace,Arial" font-size="20" font-weight="bold" fill="#38bdf8" text-anchor="middle">tomoverso.studio</text>
+</svg>
