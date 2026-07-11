@@ -29,7 +29,7 @@ export default async function AdminSecretoSetupPage() {
     ensureAdminAuthTable();
     const has2FA = is2FAEnabled(adminUser.id);
     const cpf = getAdminCPF(adminUser.id);
-    const { base32, otpauth_url } = generate2FASecret(adminUser.id);
+    const { base32 } = generate2FASecret(adminUser.id);
 
     return (
       <AdminHubShell secretPath={secretPath} active="setup" title="Configuração de Segurança" subtitle="2FA + CPF — totalmente opcional" user={adminUser}>
@@ -64,14 +64,9 @@ export default async function AdminSecretoSetupPage() {
               </div>
             ) : (
               <div className="space-y-3 max-w-md">
-                <div className="rounded-lg bg-zinc-900 border border-white/10 p-4 space-y-3">
-                  <p className="text-xs text-slate-400">Escaneie o QR Code ou insira a chave manualmente no seu app de autenticação:</p>
-                  <div className="bg-white rounded-lg p-2 inline-block mx-auto">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={otpauth_url} alt="QR Code 2FA" className="w-48 h-48" />
-                  </div>
-                  <div className="bg-zinc-950 rounded-lg p-3">
-                    <p className="text-[10px] text-slate-500 mb-1">Ou insira manualmente:</p>
+                <p className="text-xs text-slate-400">Use um app de autenticação (Google Authenticator, Authy) e insira a chave abaixo manualmente:</p>
+                <div className="bg-zinc-950 rounded-lg p-3">
+                    <p className="text-[10px] text-slate-500 mb-1">Chave secreta (insira manualmente no app):</p>
                     <p className="font-mono text-xs text-slate-300 break-all select-all">{base32}</p>
                   </div>
                 </div>
