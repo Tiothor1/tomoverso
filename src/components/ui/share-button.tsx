@@ -53,7 +53,7 @@ export function ShareButton({ title, url, description }: ShareButtonProps) {
   };
 
   const shareNative = async () => {
-    if (typeof navigator !== "undefined" && navigator.share) {
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
       try {
         await navigator.share({ title: text, text: description ? `${text}\n\n${description}` : text, url: fullUrl });
       } catch { /* user cancelled */ }
@@ -97,7 +97,7 @@ export function ShareButton({ title, url, description }: ShareButtonProps) {
           <button onClick={copyLink} className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-zinc-200 hover:bg-zinc-800 transition-colors">
             <Copy className="h-4 w-4 text-zinc-400" /> Copiar link
           </button>
-          {typeof navigator !== "undefined" && navigator.share && (
+          {typeof navigator !== "undefined" && typeof navigator.share === "function" && (
             <button onClick={shareNative} className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-zinc-200 hover:bg-zinc-800 transition-colors">
               <Share2 className="h-4 w-4 text-zinc-400" /> Mais opções
             </button>
