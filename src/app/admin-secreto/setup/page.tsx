@@ -3,7 +3,7 @@ import { KeyRound, Shield, Smartphone, UserCheck } from "lucide-react";
 import { getAdminSecretPath, getSecretAdminOrRedirect } from "@/lib/admin/admin-v2-auth";
 import { ensureAdminAuthTable, generate2FASecret, is2FAEnabled, getAdminCPF, setAdminCPF, enable2FA } from "@/lib/admin/admin-auth";
 import { AdminHubShell } from "@/components/admin-v2/admin-hub-shell";
-import { AdminHubSection, AdminPanel } from "@/components/admin-v2/admin-hub-section";
+import { AdminPanel } from "@/components/admin-v2/admin-hub-section";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -33,13 +33,13 @@ export default async function AdminSecretoSetupPage() {
 
     return (
       <AdminHubShell secretPath={secretPath} active="setup" title="Configuração de Segurança" subtitle="2FA + CPF — totalmente opcional" user={adminUser}>
-        <AdminHubSection
-          title="Segurança"
-          description="2FA + CPF — totalmente opcional"
-          eyebrow="Proteção"
-        >
+        <div className="max-w-2xl space-y-6">
           {/* CPF */}
-          <AdminPanel title="CPF do administrador" icon={<UserCheck className="h-4 w-4" />}>
+          <AdminPanel>
+            <div className="flex items-center gap-2 mb-4">
+              <UserCheck className="h-5 w-5 text-red-400" />
+              <h3 className="text-lg font-semibold text-slate-100">CPF do administrador</h3>
+            </div>
             {cpf ? (
               <div className="rounded-lg bg-green-950/30 border border-green-800/30 p-3 text-sm text-green-300">
                 CPF registrado: <strong className="font-mono">{cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4")}</strong>
@@ -53,7 +53,11 @@ export default async function AdminSecretoSetupPage() {
           </AdminPanel>
 
           {/* 2FA */}
-          <AdminPanel title="Autenticação de dois fatores" icon={<Smartphone className="h-4 w-4" />}>
+          <AdminPanel>
+            <div className="flex items-center gap-2 mb-4">
+              <Smartphone className="h-5 w-5 text-red-400" />
+              <h3 className="text-lg font-semibold text-slate-100">Autenticação de dois fatores</h3>
+            </div>
             {has2FA ? (
               <div className="rounded-lg bg-green-950/30 border border-green-800/30 p-3 text-sm text-green-300">
                 2FA ativo via Google Authenticator / Authy
@@ -85,14 +89,14 @@ export default async function AdminSecretoSetupPage() {
               </div>
             )}
           </AdminPanel>
-        </AdminHubSection>
+        </div>
       </AdminHubShell>
     );
   } catch (e) {
     return (
       <AdminHubShell secretPath={secretPath} active="setup" title="Configuração de Segurança" subtitle="2FA + CPF" user={adminUser}>
-        <div className="p-6 text-sm">
-          <a href={`/${secretPath}`} className="underline ml-2 text-cyan-400">Voltar ao painel</a>
+        <div className="p-6 text-sm text-red-400">
+          Erro no setup. <a href={`/${secretPath}`} className="underline ml-2 text-cyan-400">Voltar ao painel</a>
         </div>
       </AdminHubShell>
     );
