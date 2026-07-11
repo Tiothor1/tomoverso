@@ -2,7 +2,8 @@
 
 **Data:** 2026-07-11  
 **Status:** ✅ Concluído  
-**DB:** 237 obras no total (50 originais TomoVerso + 187 importadas)
+**DB inicial:** 237 obras em `novels` (50 originais TomoVerso + 187 importadas)  
+**DB após correção:** 237 `novels` + 50 `books` + 172 `mangas` = **459 obras verificadas**
 
 ---
 
@@ -92,18 +93,50 @@ SELECT COUNT(*) FROM novels WHERE synopsis LIKE '%O diferencial%';            --
 SELECT COUNT(*) FROM novels WHERE synopsis LIKE '%[From%';                    -- 0
 SELECT COUNT(*) FROM novels WHERE synopsis LIKE '%[Edited%';                  -- 0
 ```
+## Escopo expandido
 
-## Exemplo
+Após o usuário reportar que o problema persistia, a correção foi expandida para **todas as tabelas**:
+
+| Tabela | Obras | Contaminação | Status |
+|---|---|---|---|
+| `novels` | 237 | Boilerplate + classificação + avisos + fontes | ✅ Limpo |
+| `books` | 50 | Subtítulo + Sinopse + Tom + Público + Tags + Classificação | ✅ Limpo |
+| `mangas` | 172 | Nenhuma contaminação detectada | ✅ OK |
+
+### Tabela `books` — Correção adicional
+
+As obras em `books` tinham um formato diferente: **todos os metadados embutidos no campo `synopsis`** com labels explícitos:
+
+```
+Subtítulo: ... Sinopse: ... Frase de impacto: ... Público: ... Tom: ... Tags: ... Classificação: ...
+```
+
+Foram adicionadas as mesmas 7 colunas da `novels` e cada metadado extraído para seu campo. As sinopses ficaram apenas com o texto narrativo, e o público-alvo (target_audience) foi populado com base em padrões como "Leitores de..." e "Fãs de...".
+
+## Quantidade total de alterações
+
+```
+Total obras auditadas: 459 (237 novels + 50 books + 172 mangas)
+Sinopses reescritas: 50 (obras originais TomoVerso)
+Notas de fonte removidas: 39 (obras importadas)
+Metadados extraídos: 50 books (subtítulo, tagline, tom, público)
+Classificação extraída: 2 obras (novels)
+Avisos extraídos: 52 obras (2 novels + 50 books)
+Tones extraídos: 100 obras (50 novels + 50 books)
+Sinopses mantidas intactas: 318 obras (já estavam limpas)
+```
+
+## Exemplo (books)
 
 **Antes:**
-> A Chef e o Crítico Desastrado é uma obra original Tomo Verso sobre Catarina Alves, cuja rotina muda em um restaurante familiar recém-reaberto. Catarina precisa de uma crítica boa e Otto é o crítico sincero que derruba molho em tudo. Ao lado de Otto Brandão, a história desenvolve um comédia romântica com conflito emocional claro, aproximação gradual e escolhas que mudam a vida dos personagens. O diferencial da obra é comédia romântica gastronômica com rivalidade leve e família. Status: Em andamento. +. Classificação indicativa: +18. Avisos de conteúdo: romance adulto consensual; tensão sensual.
+> Subtítulo: O jogo acabou. A escola começou. Sinopse: Depois de zerar o RPG mais difícil do mundo, Theo acorda na segunda-feira e encontra o chefe final sentado na carteira ao lado... Frase de impacto: "Ele derrotou o chefão. Agora precisa dividir lanche com ele." Público: Leitores gamers... Tom: Caótico... Tags: #chefefinal... Status: conceito · Classificação: 12+
 
 **Depois (sinopse limpa):**
-> Em um restaurante familiar recém-reaberto, a vida de Catarina Alves está prestes a mudar.
-> 
-> Catarina precisa de uma crítica boa e Otto é o crítico sincero que derruba molho em tudo.
+> Depois de zerar o RPG mais difícil do mundo, Theo acorda na segunda-feira e encontra o chefe final sentado na carteira ao lado, usando uniforme e tentando entender matemática. Ninguém mais parece notar que o aluno novo já destruiu continentes digitais. Para impedir que a realidade vire uma fase secreta, Theo terá que ensinar o vilão a sobreviver ao ensino médio — e descobrir por que o jogo escolheu justamente sua vida para continuar.
 
 **Metadados separados:**
-- Tone: comédia romântica
-- Classificação: +18
-- Tags: comédia romântica, romance leve, química...
+- Subtítulo: O jogo acabou. A escola começou.
+- Tagline: "Ele derrotou o chefão. Agora precisa dividir lanche com ele."
+- Tom: Caótico, engraçado, cheio de ação e amizade improvável
+- Público: Leitores gamers, fãs de fantasia moderna, comédia escolar
+
