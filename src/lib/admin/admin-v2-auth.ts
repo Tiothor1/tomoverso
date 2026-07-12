@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/auth";
 
 export const ADMIN_SECRET_FALLBACK = "";
@@ -9,11 +8,6 @@ export function getAdminSecretPath() {
 }
 
 export async function getSecretAdminOrRedirect(secretPath = getAdminSecretPath()) {
-  const cookieStore = await cookies();
-  if (cookieStore.get("admin_validated")?.value !== "1") {
-    redirect(`/${secretPath}`);
-  }
-
   const user = await getCurrentUser().catch(() => null);
   if (!user || user.role !== "admin") {
     redirect(`/${secretPath}`);
@@ -23,9 +17,6 @@ export async function getSecretAdminOrRedirect(secretPath = getAdminSecretPath()
 }
 
 export async function requireSecretAdminAction() {
-  const cookieStore = await cookies();
-  if (cookieStore.get("admin_validated")?.value !== "1") return null;
-
   const user = await getCurrentUser().catch(() => null);
   if (!user || user.role !== "admin") return null;
 

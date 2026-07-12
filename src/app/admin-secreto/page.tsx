@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import {
   Activity,
   AlertTriangle,
@@ -42,12 +41,8 @@ export default async function AdminSecretoPage() {
 
   try {
     ensureAdminAuthTable();
-    const cookieStore = await cookies();
-    const adminValidated = cookieStore.get("admin_validated");
-    if (!adminValidated || adminValidated.value !== "1") return <AdminSecretoLogin />;
-
-    const user = await getCurrentUser().catch(() => null);
-    if (!user || user.role !== "admin") return <AdminSecretoLogin />;
+    const adminUser = await getCurrentUser().catch(() => null);
+    if (!adminUser || adminUser.role !== "admin") return <AdminSecretoLogin />;
 
     const db = getDb();
     const novels = safeCount(db, "SELECT COUNT(*) AS c FROM novels");
@@ -106,7 +101,7 @@ export default async function AdminSecretoPage() {
         active="overview"
         title="Central Tomo Verso"
         subtitle="Controle editorial, comunidade, conteúdo, importações e financeiro em um único hub."
-        user={user}
+        user={adminUser}
       >
         <section className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-slate-950 via-slate-950/95 to-cyan-950/30 p-6 shadow-2xl shadow-black/30 sm:p-8">
           <div className="absolute right-0 top-0 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl" />
