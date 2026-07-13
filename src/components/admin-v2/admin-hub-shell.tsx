@@ -4,11 +4,9 @@ import { cookies } from "next/headers";
 import {
   Activity,
   BookOpen,
-  BarChart3,
   ChevronRight,
   DollarSign,
   FileSearch,
-  FileText,
   Headphones,
   Home,
   Layers3,
@@ -18,7 +16,6 @@ import {
   MessageCircle,
   Search,
   Shield,
-  Sparkles,
   UploadCloud,
   Users,
   X,
@@ -40,7 +37,6 @@ type NavItem = {
   icon: LucideIcon;
   key: string;
 };
-
 type NavGroup = { label: string; items: NavItem[] };
 
 function navGroups(secretPath: string): NavGroup[] {
@@ -57,7 +53,6 @@ function navGroups(secretPath: string): NavGroup[] {
       items: [
         { label: "Novels", href: `${root}/novels`, icon: BookOpen, key: "novels" },
         { label: "Mangás", href: `${root}/mangas`, icon: Layers3, key: "mangas" },
-        { label: "Curadoria", href: "/admin/catalog/curation", icon: Sparkles, key: "curation" },
       ],
     },
     {
@@ -86,7 +81,6 @@ function navGroups(secretPath: string): NavGroup[] {
         { label: "Feed admin", href: `${root}/feed`, icon: Activity, key: "feed" },
         { label: "TomoMusic", href: `${root}/tomomusic`, icon: Headphones, key: "tomomusic" },
         { label: "Segurança", href: `${root}/setup`, icon: LockKeyhole, key: "setup" },
-        { label: "Desempenho", href: "/admin/stats", icon: BarChart3, key: "stats" },
       ],
     },
   ];
