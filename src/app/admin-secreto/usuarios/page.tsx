@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Ban, Calendar, ExternalLink, Mail, Search, Shield, Trash2, UserCheck, Users } from "lucide-react";
 import { getDb } from "@/lib/db";
-import { deleteUserV2Action, toggleUserBanV2Action, updateUserEmailV2Action } from "@/lib/admin/admin-v2-actions";
+import { deleteUserV2Action, toggleUserBanV2Action, updateUserEmailV2Action, updateUserRoleV2Action } from "@/lib/admin/admin-v2-actions";
 import { getAdminSecretPath, getSecretAdminOrRedirect } from "@/lib/admin/admin-v2-auth";
 import { formatInteger, normalizeStatusLabel, readSearchParams, safeAll, safeCount, statusTone } from "@/lib/admin/admin-v2-data";
 import { AdminHubShell } from "@/components/admin-v2/admin-hub-shell";
@@ -95,6 +95,7 @@ export default async function AdminUsuariosPage(props: { searchParams?: Promise<
               <select name="role" defaultValue={role} className="h-11 rounded-2xl border border-white/10 bg-slate-950 px-3 text-sm text-slate-100 outline-none focus:border-cyan-300/40">
                 <option value="">Todas roles</option>
                 <option value="admin">Admin</option>
+                <option value="reader">Leitor</option>
                 <option value="user">Usuário</option>
                 <option value="author">Autor</option>
                 <option value="banned">Banido</option>
@@ -150,6 +151,7 @@ export default async function AdminUsuariosPage(props: { searchParams?: Promise<
                           <td className="px-5 py-4">
                             <div className="flex justify-end gap-2">
                               {user.username ? <Link href={`/authors/${user.username}`} target="_blank" className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-200 hover:bg-white/[0.07]"><ExternalLink className="h-3.5 w-3.5" /> Perfil</Link> : null}
+                              {!isProtected && <form action={updateUserRoleV2Action} className="inline-flex items-center gap-1"><input type="hidden" name="user_id" value={user.id} /><select name="role" defaultValue={user.role || "user"} className="rounded-xl border border-white/10 bg-slate-950 px-2 py-2 text-xs text-slate-200 outline-none focus:border-cyan-300/40"><option value="user">Normal</option><option value="reader">Leitor</option><option value="author">Autor</option></select><button type="submit" className="rounded-xl border border-cyan-300/20 bg-cyan-300/10 px-2 py-2 text-xs text-cyan-100 hover:bg-cyan-300/15">Salvar</button></form>}
                               {!isProtected && <form action={toggleUserBanV2Action}><input type="hidden" name="user_id" value={user.id} /><ConfirmSubmitButton variant={statusValue === "banned" ? "success" : "warning"} message={statusValue === "banned" ? `Desbanir ${user.display_name || user.email}?` : `Banir ${user.display_name || user.email} e encerrar sessões?`}><Ban className="h-3.5 w-3.5" /> {statusValue === "banned" ? "Desbanir" : "Banir"}</ConfirmSubmitButton></form>}
                               {!isProtected && <form action={deleteUserV2Action}><input type="hidden" name="user_id" value={user.id} /><ConfirmSubmitButton variant="danger" message={`Excluir permanentemente o usuário ${user.display_name || user.email}?`}><Trash2 className="h-3.5 w-3.5" /> Excluir</ConfirmSubmitButton></form>}
                               {isProtected && <AdminStatusBadge tone="violet"><Shield className="mr-1 h-3 w-3" /> protegido</AdminStatusBadge>}
@@ -175,6 +177,7 @@ export default async function AdminUsuariosPage(props: { searchParams?: Promise<
                       <form action={updateUserEmailV2Action} className="mt-4 flex gap-2"><input type="hidden" name="user_id" value={user.id} /><input name="email" type="email" defaultValue={user.email} className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-200 outline-none" /><button type="submit" className="rounded-xl border border-cyan-300/20 bg-cyan-300/10 px-3 py-2 text-xs text-cyan-100">Salvar</button></form>
                       <div className="mt-4 flex flex-wrap gap-2">
                         {user.username ? <Link href={`/authors/${user.username}`} target="_blank" className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-xs text-slate-200">Perfil</Link> : null}
+                        {!isProtected && <form action={updateUserRoleV2Action} className="inline-flex items-center gap-1"><input type="hidden" name="user_id" value={user.id} /><select name="role" defaultValue={user.role || "user"} className="rounded-xl border border-white/10 bg-slate-950 px-2 py-2 text-xs text-slate-200 outline-none"><option value="user">Normal</option><option value="reader">Leitor</option><option value="author">Autor</option></select><button type="submit" className="rounded-xl border border-cyan-300/20 bg-cyan-300/10 px-2 py-2 text-xs text-cyan-100">Salvar</button></form>}
                         {!isProtected && <form action={toggleUserBanV2Action}><input type="hidden" name="user_id" value={user.id} /><ConfirmSubmitButton variant={statusValue === "banned" ? "success" : "warning"} message={statusValue === "banned" ? `Desbanir ${user.display_name || user.email}?` : `Banir ${user.display_name || user.email}?`}><Ban className="h-3.5 w-3.5" /> {statusValue === "banned" ? "Desbanir" : "Banir"}</ConfirmSubmitButton></form>}
                         {!isProtected && <form action={deleteUserV2Action}><input type="hidden" name="user_id" value={user.id} /><ConfirmSubmitButton variant="danger" message={`Excluir permanentemente o usuário ${user.display_name || user.email}?`}><Trash2 className="h-3.5 w-3.5" /> Excluir</ConfirmSubmitButton></form>}
                       </div>

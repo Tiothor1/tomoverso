@@ -63,6 +63,22 @@ export async function updateUserEmailV2Action(formData: FormData) {
   revalidatePath(`/${getAdminSecretPath()}/usuarios`);
 }
 
+export async function updateUserRoleV2Action(formData: FormData) {
+  const admin = await requireSecretAdminAction();
+  if (!admin) return;
+  const userId = cleanId(formData.get("user_id"));
+  const newRole = typeof formData.get("role") === "string" ? String(formData.get("role")).trim() : "";
+  if (!userId || !["user", "reader", "author"].includes(newRole)) return;
+
+  const db = getDb();
+  const user = db.prepare("SELECT id, role FROM users WHERE id = ?").get(userId) as any;
+  if (!user || user.role === "admin") return;
+  if (user.role === newRole) return; // no-op
+
+  safeRun(db, "UPDATE users SET role = ?, updated_at = datetime('now') WHERE id = ?", newRole, userId);
+  revalidatePath(`/${getAdminSecretPath()}/usuarios`);
+}
+
 export async function toggleUserBanV2Action(formData: FormData) {
   const admin = await requireSecretAdminAction();
   if (!admin) return;

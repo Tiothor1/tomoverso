@@ -122,6 +122,7 @@ export function normalizeStatusLabel(status?: string | null): string {
     paid: "Pago",
     draft: "Rascunho",
     user: "Usuário",
+    reader: "Leitor",
     admin: "Admin",
     author: "Autor",
     banned: "Banido",
