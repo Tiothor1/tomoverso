@@ -63,6 +63,22 @@ export default async function AdminSecretoPage() {
     const hiddenCatalog = safeCount(db, "SELECT COUNT(*) AS c FROM catalog_controls WHERE is_hidden = 1");
     const featuredCatalog = safeCount(db, "SELECT COUNT(*) AS c FROM catalog_controls WHERE is_featured = 1 OR show_on_home = 1");
 
+    // ── Controle do Site: queries extras ──
+    const novelByStatus = safeAll<{status:string; count:number}>(db, "SELECT status, COUNT(*) as count FROM novels GROUP BY status ORDER BY count DESC");
+    const novelByType = safeAll<{type:string; count:number}>(db, "SELECT type, COUNT(*) as count FROM novels GROUP BY type");
+    const novelOriginalCount = safeCount(db, "SELECT COUNT(*) AS c FROM novels WHERE COALESCE(source,'') = ''");
+    const novelImportedCount = safeCount(db, "SELECT COUNT(*) AS c FROM novels WHERE COALESCE(source,'') != ''");
+    const mangaByStatus = safeAll<{status:string; count:number}>(db, "SELECT status, COUNT(*) as count FROM mangas GROUP BY status ORDER BY count DESC");
+    const userByRole = safeAll<{role:string; count:number}>(db, "SELECT role, COUNT(*) as count FROM users WHERE email NOT LIKE '%@external.author' GROUP BY role");
+    const totalWorks = novels + mangas;
+    const totalChapters = novelChapters + mangaChapters;
+    let dbSizeMB = 0;
+    try {
+      const pc = (db.prepare("PRAGMA page_count").get() as any)?.page_count || 0;
+      const ps = (db.prepare("PRAGMA page_size").get() as any)?.page_size || 4096;
+      dbSizeMB = Math.round(pc * ps / 1024 / 1024 * 10) / 10;
+    } catch {}
+
     const recentActivity = safeAll<ActivityRow>(db, `
       SELECT al.action, al.target_type, al.created_at, u.display_name, u.username
       FROM activity_log al
@@ -245,6 +261,120 @@ export default async function AdminSecretoPage() {
             </AdminPanel>
           </AdminHubSection>
         </div>
+
+        {/* ═══════════════ Controle do Site ═══════════════ */}
+        <AdminHubSection eyebrow="Diagnóstico" title="Controle do site" description="Capacidade, composição do acervo, engajamento e saúde do servidor em tempo real.">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+
+            <AdminPanel className="p-5">
+              <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-100 text-nowrap">
+                <BookOpen className="h-4 w-4 text-cyan-300" /> Composição do acervo
+              </h3>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Obras totais</span>
+                  <span className="text-sm font-semibold text-slate-50">{formatCompact(totalWorks)}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Capítulos totais</span>
+                  <span className="text-sm font-semibold text-slate-50">{formatCompact(totalChapters)}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Novels (originais)</span>
+                  <span className="text-sm font-semibold text-slate-50">{formatCompact(novels)} <span className="text-xs font-normal text-slate-500">({novelOriginalCount} originais)</span></span>
+                </div>
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Mangás</span>
+                  <span className="text-sm font-semibold text-slate-50">{formatCompact(mangas)}</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {novelByStatus.map((s) => (
+                    <span key={s.status} className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-slate-300">
+                      {s.status} {s.count}
+                    </span>
+                  ))}
+                  {mangaByStatus.map((s) => (
+                    <span key={s.status} className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-slate-300">
+                      {s.status} {s.count}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </AdminPanel>
+
+            <AdminPanel className="p-5">
+              <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-100 text-nowrap">
+                <Users className="h-4 w-4 text-violet-300" /> Engajamento & usuários
+              </h3>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Usuários reais</span>
+                  <span className="text-sm font-semibold text-slate-50">{formatCompact(users)}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Sessões ativas</span>
+                  <span className="text-sm font-semibold text-slate-50">{formatCompact(sessions)}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Visualizações (novels)</span>
+                  <span className="text-sm font-semibold text-slate-50">{formatCompact(totalViews)}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Comentários</span>
+                  <span className="text-sm font-semibold text-slate-50">{formatCompact(comments)}</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {userByRole.map((r) => (
+                    <span key={r.role} className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-slate-300">
+                      {r.role}{r.role === "user" ? "s" : r.role === "admin" ? "ns" : "es"} {r.count}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </AdminPanel>
+
+            <AdminPanel className="p-5">
+              <h3 className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-100 text-nowrap">
+                <Activity className="h-4 w-4 text-emerald-300" /> Servidor & sistema
+              </h3>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Banco de dados</span>
+                  <span className="text-sm font-semibold text-slate-50">{dbSizeMB > 0 ? `${dbSizeMB} MB` : "—"}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Tabelas</span>
+                  <span className="text-sm font-semibold text-slate-50">—</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Importações pendentes</span>
+                  <span className="text-sm font-semibold text-slate-50">{formatCompact(pendingImports)}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Importações com erro</span>
+                  <span className="text-sm font-semibold text-slate-50">{formatCompact(errorImports)}</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-slate-300">
+                    {novels} novels
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-slate-300">
+                    {mangas} mangás
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-slate-300">
+                    {novelImportedCount} importados
+                  </span>
+                  {novelOriginalCount > 0 && (
+                    <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-slate-300">
+                      {novelOriginalCount} originais
+                    </span>
+                  )}
+                </div>
+              </div>
+            </AdminPanel>
+
+          </div>
+        </AdminHubSection>
       </AdminHubShell>
     );
   } catch (error) {
