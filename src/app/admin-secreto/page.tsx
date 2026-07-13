@@ -121,8 +121,8 @@ export default async function AdminSecretoPage() {
                 <Link href={`/${secretPath}/upload`} className="rounded-2xl border border-cyan-300/20 bg-cyan-300/10 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-300/15">
                   Importar conteúdo
                 </Link>
-                <Link href="/admin/catalog/curation" className="rounded-2xl border border-violet-300/20 bg-violet-300/10 px-4 py-2 text-sm font-semibold text-violet-100 transition hover:bg-violet-300/15">
-                  Curadoria do site
+                <Link href={`/${secretPath}/novels`} className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.07]">
+                  Gerenciar novels
                 </Link>
                 <Link href="/" className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/[0.07]">
                   Abrir site público
@@ -152,9 +152,9 @@ export default async function AdminSecretoPage() {
           <AdminStatCard label="Mangás" value={formatCompact(mangas)} description={`${formatCompact(mangaChapters)} capítulos de mangá`} icon={Layers3} tone="blue" href={`/${secretPath}/mangas`} />
           <AdminStatCard label="Receita" value={formatBRL(totalSales)} description={`${pendingWithdrawals} saques pendentes · ${formatBRL(pendingWithdrawalValue)}`} icon={DollarSign} tone={pendingWithdrawals ? "amber" : "emerald"} href={`/${secretPath}/finance`} />
           <AdminStatCard label="Comentários" value={formatCompact(comments)} description="moderação e interação em obras" icon={MessageCircle} tone="cyan" href={`/${secretPath}/comentarios`} />
-          <AdminStatCard label="Visualizações" value={formatCompact(totalViews)} description="soma de leituras em novels" icon={Eye} tone="blue" href="/admin/stats" />
+          <AdminStatCard label="Visualizações" value={formatCompact(totalViews)} description="soma de leituras em novels" icon={Eye} tone="blue" href={`/${secretPath}/novels`} />
           <AdminStatCard label="Importações" value={formatCompact(pendingImports)} description={`${errorImports} erro(s) na fila`} icon={UploadCloud} tone={errorImports ? "rose" : "amber"} href={`/${secretPath}/analise`} />
-          <AdminStatCard label="Sessões" value={formatCompact(sessions)} description={`${sellers} autores/vendedores aprovados`} icon={Activity} tone="emerald" href="/admin/users" />
+          <AdminStatCard label="Sessões" value={formatCompact(sessions)} description={`${sellers} autores/vendedores aprovados`} icon={Activity} tone="emerald" href={`/${secretPath}/usuarios`} />
         </div>
 
         <AdminHubSection eyebrow="Acesso rápido" title="Operações principais" description="Atalhos organizados por impacto direto no site principal.">
@@ -166,7 +166,6 @@ export default async function AdminSecretoPage() {
               { title: "Financeiro", href: `/${secretPath}/finance`, icon: WalletCards, tone: "amber" as const, text: "Receita, saldo, saques pendentes e confirmação de pagamento." },
               { title: "Upload", href: `/${secretPath}/upload`, icon: UploadCloud, tone: "emerald" as const, text: "Drag and drop para PDF, TXT, EPUB, DOCX e MD." },
               { title: "Análise", href: `/${secretPath}/analise`, icon: FileSearch, tone: "violet" as const, text: "Fila com pendente, processando, concluído, erro e revisão." },
-              { title: "Curadoria", href: "/admin/catalog/curation", icon: Sparkles, tone: "cyan" as const, text: "Destaques, original/importado, home, catálogo e storefront." },
               { title: "Feed/Admin", href: `/${secretPath}/feed`, icon: Globe2, tone: "blue" as const, text: "Posts recentes, engajamento e conteúdo problemático." },
             ].map((item) => (
               <Link key={item.title} href={item.href} className="group rounded-3xl border border-white/10 bg-slate-950/60 p-5 transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/[0.05]">
@@ -188,8 +187,6 @@ export default async function AdminSecretoPage() {
                 { label: "Saques pendentes", value: pendingWithdrawals, href: `/${secretPath}/finance`, icon: DollarSign, tone: pendingWithdrawals ? "amber" : "emerald" as const },
                 { label: "Denúncias/moderação", value: pendingReports, href: `/${secretPath}/moderacao`, icon: Shield, tone: pendingReports ? "rose" : "emerald" as const },
                 { label: "Importações com erro", value: errorImports, href: `/${secretPath}/analise`, icon: AlertTriangle, tone: errorImports ? "rose" : "emerald" as const },
-                { label: "Itens ocultos no catálogo", value: hiddenCatalog, href: "/admin/catalog/curation", icon: Eye, tone: hiddenCatalog ? "amber" : "slate" as const },
-                { label: "Destaques/home", value: featuredCatalog, href: "/admin/catalog/curation", icon: Sparkles, tone: "cyan" as const },
               ].map((item) => (
                 <Link key={item.label} href={item.href} className="flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 transition hover:bg-white/[0.06]">
                   <div className="flex items-center gap-3">
