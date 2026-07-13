@@ -928,6 +928,26 @@ CREATE TABLE IF NOT EXISTS subscription_plans (
     CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, is_read, created_at);
   `);
 
+  // ── Tabela de tracking anônimo (page views) ──
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS page_views (
+      id TEXT PRIMARY KEY,
+      visitor_id TEXT NOT NULL,
+      page_type TEXT NOT NULL,
+      page_id TEXT,
+      page_url TEXT NOT NULL,
+      referrer TEXT,
+      user_agent TEXT,
+      screen_width INTEGER,
+      screen_height INTEGER,
+      time_on_page INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_pv_visitor ON page_views(visitor_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_pv_type ON page_views(page_type, page_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_pv_created ON page_views(created_at);
+  `);
+
   migrateUserSubscriptionsPendingStatus(db);
   applyBundledCentralNovelCovers(db);
   applyBundledVndbVisualNovels(db);

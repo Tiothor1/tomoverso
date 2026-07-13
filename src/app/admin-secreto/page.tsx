@@ -79,6 +79,17 @@ export default async function AdminSecretoPage() {
       dbSizeMB = Math.round(pc * ps / 1024 / 1024 * 10) / 10;
     } catch {}
 
+    // ── Page views (tracking anônimo) ──
+    let visitorsToday = 0, visitorsWeek = 0, viewsToday = 0, viewsWeek = 0;
+    const topPages: {page_type:string; page_id:string; count:number}[] = [];
+    try {
+      visitorsToday = safeCount(db, "SELECT COUNT(DISTINCT visitor_id) AS c FROM page_views WHERE created_at >= datetime('now', '-24 hours')");
+      visitorsWeek = safeCount(db, "SELECT COUNT(DISTINCT visitor_id) AS c FROM page_views WHERE created_at >= datetime('now', '-7 days')");
+      viewsToday = safeCount(db, "SELECT COUNT(*) AS c FROM page_views WHERE created_at >= datetime('now', '-24 hours')");
+      viewsWeek = safeCount(db, "SELECT COUNT(*) AS c FROM page_views WHERE created_at >= datetime('now', '-7 days')");
+      topPages.push(...safeAll<{page_type:string; page_id:string; count:number}>(db, "SELECT page_type, page_id, COUNT(*) as count FROM page_views WHERE created_at >= datetime('now', '-7 days') AND page_id IS NOT NULL AND page_id != '' GROUP BY page_type, page_id ORDER BY count DESC LIMIT 5"));
+    } catch {}
+
     const recentActivity = safeAll<ActivityRow>(db, `
       SELECT al.action, al.target_type, al.created_at, u.display_name, u.username
       FROM activity_log al
@@ -320,6 +331,18 @@ export default async function AdminSecretoPage() {
                   <span className="text-sm font-semibold text-slate-50">{formatCompact(totalViews)}</span>
                 </div>
                 <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Visitantes únicos (hoje)</span>
+                  <span className="text-sm font-semibold text-slate-50">{visitorsToday}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Visitantes únicos (7 dias)</span>
+                  <span className="text-sm font-semibold text-slate-50">{visitorsWeek}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+                  <span className="text-xs text-slate-400">Páginas vistas (7 dias)</span>
+                  <span className="text-sm font-semibold text-slate-50">{formatCompact(viewsWeek)}</span>
+                </div>
+                <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
                   <span className="text-xs text-slate-400">Comentários</span>
                   <span className="text-sm font-semibold text-slate-50">{formatCompact(comments)}</span>
                 </div>
@@ -330,6 +353,19 @@ export default async function AdminSecretoPage() {
                     </span>
                   ))}
                 </div>
+                {topPages.length > 0 && (
+                  <div className="mt-3 border-t border-white/5 pt-3">
+                    <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-slate-500">Páginas mais vistas (7d)</p>
+                    <div className="space-y-1.5">
+                      {topPages.map((p, i) => (
+                        <div key={`${p.page_type}-${p.page_id}`} className="flex items-center justify-between text-xs">
+                          <span className="truncate text-slate-300">{i + 1}. {p.page_id}</span>
+                          <span className="ml-2 shrink-0 text-slate-500">{p.count} views</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </AdminPanel>
 

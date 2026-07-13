@@ -13,6 +13,7 @@ import { TomoversoRoutePreloader } from "@/components/layout/tomoverso-route-pre
 import { LaunchGate } from "@/components/launch/launch-gate";
 import { LaunchPage } from "@/components/launch/launch-page";
 import { TomoMusicProvider } from "@/components/tomomusic/tomomusic-provider";
+import { PageTracker } from "@/components/tracking/page-tracker";
 import { getCurrentUser } from "@/lib/auth";
 import { headers } from "next/headers";
 import "./globals.css";
@@ -158,6 +159,7 @@ export default async function RootLayout({
         <LanguageProvider>
           <ThemeProvider defaultTheme="dark" defaultColor="sepia">
             <TomoMusicProvider>
+              <PageTracker>
               <TomoversoIntroSplash />
               <Navbar />
               <ContinueReadingBanner />
@@ -167,6 +169,7 @@ export default async function RootLayout({
               <SharePrompt />
               <TomoversoRoutePreloader />
               <Toaster position="top-center" richColors />
+            </PageTracker>
             </TomoMusicProvider>
           </ThemeProvider>
         </LanguageProvider>
