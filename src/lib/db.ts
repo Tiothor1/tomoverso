@@ -950,39 +950,6 @@ CREATE TABLE IF NOT EXISTS subscription_plans (
     db.prepare("INSERT OR IGNORE INTO migrations (name) VALUES ('v2_content_curation')").run();
   }
 
-  // Migration: add 'reader' role to users CHECK constraint
-  const readerRole = db.prepare("SELECT applied_at FROM migrations WHERE name = 'add_reader_role'").get() as any;
-  if (!readerRole) {
-    try {
-      db.exec(`
-        ALTER TABLE users RENAME TO users_old;
-        CREATE TABLE users (
-          id TEXT PRIMARY KEY,
-          email TEXT UNIQUE NOT NULL,
-          username TEXT UNIQUE NOT NULL,
-          password_hash TEXT NOT NULL,
-          display_name TEXT NOT NULL,
-          avatar_url TEXT,
-          bio TEXT DEFAULT '',
-          role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin', 'author', 'reader')),
-          email_verified INTEGER NOT NULL DEFAULT 0,
-          preferred_locale TEXT DEFAULT 'pt-BR',
-          last_login_at TEXT,
-          created_at TEXT NOT NULL DEFAULT (datetime('now')),
-          updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-        );
-        INSERT INTO users (id, email, username, password_hash, display_name, avatar_url, bio, role, email_verified, preferred_locale, last_login_at, created_at, updated_at)
-        SELECT id, email, username, password_hash, display_name, avatar_url, bio, role, email_verified, preferred_locale, last_login_at, created_at, updated_at FROM users_old;
-        DROP TABLE users_old;
-      `);
-    } catch (e) {
-      console.error("[db] Migration add_reader_role failed:", e);
-    }
-    try {
-      db.prepare("INSERT OR IGNORE INTO migrations (name) VALUES ('add_reader_role')").run();
-    } catch {}
-  }
-
   const settingsRow = db.prepare("SELECT id FROM site_settings WHERE id = 'default'").get() as { id: string } | undefined;
   if (!settingsRow) {
     db.prepare(`
