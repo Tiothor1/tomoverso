@@ -3,29 +3,24 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import {
   Activity,
-  BarChart3,
   BookOpen,
-  Boxes,
+  BarChart3,
   ChevronRight,
   DollarSign,
   FileSearch,
   FileText,
-  Globe2,
   Headphones,
   Home,
   Layers3,
   LockKeyhole,
   LogOut,
-  MessageCircle,
   Menu,
+  MessageCircle,
   Search,
-  Settings,
   Shield,
-  ShoppingCart,
   Sparkles,
   UploadCloud,
   Users,
-  WalletCards,
   X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -44,7 +39,6 @@ type NavItem = {
   href: string;
   icon: LucideIcon;
   key: string;
-  hint?: string;
 };
 
 type NavGroup = { label: string; items: NavItem[] };
@@ -63,7 +57,6 @@ function navGroups(secretPath: string): NavGroup[] {
       items: [
         { label: "Novels", href: `${root}/novels`, icon: BookOpen, key: "novels" },
         { label: "Mangás", href: `${root}/mangas`, icon: Layers3, key: "mangas" },
-        { label: "Capítulos", href: `${root}/novels`, icon: FileText, key: "chapters" },
         { label: "Curadoria", href: "/admin/catalog/curation", icon: Sparkles, key: "curation" },
       ],
     },
@@ -72,7 +65,6 @@ function navGroups(secretPath: string): NavGroup[] {
       items: [
         { label: "Usuários", href: `${root}/usuarios`, icon: Users, key: "usuarios" },
         { label: "Comentários", href: `${root}/comentarios`, icon: MessageCircle, key: "comentarios" },
-        { label: "Denúncias", href: `${root}/moderacao`, icon: Shield, key: "moderacao" },
       ],
     },
     {
@@ -100,12 +92,12 @@ function navGroups(secretPath: string): NavGroup[] {
   ];
 }
 
-function SidebarNav({ secretPath, active, onClose }: { secretPath: string; active: string; onClose?: () => void }) {
+function SidebarNav({ secretPath, active }: { secretPath: string; active: string }) {
   const groups = navGroups(secretPath);
   return (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <Link href={`/${secretPath}`} onClick={onClose} className="mb-6 flex items-center gap-3 px-2">
+      <Link href={`/${secretPath}`} className="mb-6 flex items-center gap-3 px-2">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-300/20 bg-cyan-300/10 text-cyan-200">
           <Shield className="h-[18px] w-[18px]" />
         </div>
@@ -116,10 +108,12 @@ function SidebarNav({ secretPath, active, onClose }: { secretPath: string; activ
       </Link>
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-5 overflow-y-auto scrollbar-thin">
+      <nav className="flex-1 space-y-5 overflow-y-auto">
         {groups.map((group) => (
           <div key={group.label}>
-            <p className="mb-1.5 px-2 text-[11px] font-medium uppercase tracking-[0.15em] text-slate-500">{group.label}</p>
+            <p className="mb-1.5 px-2 text-[11px] font-medium uppercase tracking-[0.15em] text-slate-500">
+              {group.label}
+            </p>
             <div className="space-y-0.5">
               {group.items.map((item) => {
                 const isActive = active === item.key;
@@ -128,7 +122,6 @@ function SidebarNav({ secretPath, active, onClose }: { secretPath: string; activ
                   <Link
                     key={item.key}
                     href={item.href}
-                    onClick={onClose}
                     className={cn(
                       "group flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-all",
                       isActive
@@ -138,12 +131,7 @@ function SidebarNav({ secretPath, active, onClose }: { secretPath: string; activ
                   >
                     <Icon className={cn("h-[18px] w-[18px]", isActive ? "text-cyan-200" : "text-slate-500")} />
                     <span className="flex-1">{item.label}</span>
-                    {item.hint && (
-                      <span className="rounded-md bg-white/[0.05] px-2 py-0.5 text-[10px] text-slate-500">
-                        {item.hint}
-                      </span>
-                    )}
-                    {isActive && <ChevronRight className="h-3 w-3 text-cyan-300" />}
+                    {isActive && <ChevronRight className="h-3 w-3 shrink-0 text-cyan-300" />}
                   </Link>
                 );
               })}
@@ -182,30 +170,44 @@ export function AdminHubShell({
 
   return (
     <div className="min-h-screen bg-[#070812] text-slate-100">
-      {/* Background */}
+      {/* Background glow */}
       <div className="fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute left-[-8%] top-[-15%] h-[500px] w-[500px] rounded-full bg-cyan-500/8 blur-3xl" />
         <div className="absolute right-[-10%] bottom-[-10%] h-[400px] w-[400px] rounded-full bg-violet-600/8 blur-3xl" />
       </div>
 
-      {/* Mobile sidebar toggle */}
-      <MobileSidebarDrawer secretPath={secretPath} active={active} />
+      {/* Mobile drawer (checkbox hack) */}
+      <input type="checkbox" id="admin-drawer" className="peer fixed left-[-9999px]" />
+      <label
+        htmlFor="admin-drawer"
+        className="fixed inset-0 z-40 hidden bg-black/60 backdrop-blur-sm peer-checked:block lg:hidden"
+      />
+      <aside className="fixed inset-y-0 left-0 z-50 w-[280px] -translate-x-full border-r border-white/[0.06] bg-slate-950/95 p-4 backdrop-blur-2xl transition-transform peer-checked:translate-x-0 lg:hidden">
+        <div className="mb-4 flex justify-end">
+          <label
+            htmlFor="admin-drawer"
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-400"
+          >
+            <X className="h-4 w-4" />
+          </label>
+        </div>
+        <SidebarNav secretPath={secretPath} active={active} />
+      </aside>
 
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[240px] border-r border-white/[0.06] bg-slate-950/90 p-4 lg:flex lg:flex-col">
         <SidebarNav secretPath={secretPath} active={active} />
       </aside>
 
-      {/* Main content area */}
+      {/* Main */}
       <div className="lg:ml-[240px]">
-        {/* Header bar */}
+        {/* Header */}
         <header className="sticky top-0 z-20 border-b border-white/[0.06] bg-[#070812]/85 backdrop-blur-xl">
           <div className="flex h-14 items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
-            {/* Left side: mobile menu + title */}
             <div className="flex min-w-0 flex-1 items-center gap-3">
               <label
-                htmlFor="admin-mobile-drawer"
-                className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-400 lg:hidden"
+                htmlFor="admin-drawer"
+                className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-400 lg:hidden"
               >
                 <Menu className="h-4 w-4" />
               </label>
@@ -227,7 +229,6 @@ export function AdminHubShell({
               </div>
             </div>
 
-            {/* Right side: search + actions + user */}
             <div className="flex shrink-0 items-center gap-2">
               <form action={`/${secretPath}/novels`} className="relative hidden sm:block">
                 <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
@@ -262,43 +263,10 @@ export function AdminHubShell({
           </div>
         </header>
 
-        {/* Page content */}
         <main className="px-4 py-6 sm:px-6 lg:px-8">
           <div className="mx-auto w-full max-w-[1400px]">{children}</div>
         </main>
       </div>
     </div>
-  );
-}
-
-/** Mobile sidebar drawer (controlled via checkbox hack — no JS needed) */
-function MobileSidebarDrawer({ secretPath, active }: { secretPath: string; active: string }) {
-  return (
-    <>
-      <input type="checkbox" id="admin-mobile-drawer" className="peer fixed left-[-9999px]" />
-      {/* Overlay */}
-      <label
-        htmlFor="admin-mobile-drawer"
-        className="fixed inset-0 z-40 hidden bg-black/60 backdrop-blur-sm peer-checked:block lg:hidden"
-      />
-      {/* Drawer */}
-      <aside className="fixed inset-y-0 left-0 z-50 w-[280px] -translate-x-full border-r border-white/[0.06] bg-slate-950 p-4 transition-transform peer-checked:translate-x-0 lg:hidden">
-        <div className="mb-4 flex justify-end">
-          <label
-            htmlFor="admin-mobile-drawer"
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg border border-white/10 bg-white/[0.04] text-slate-400"
-          >
-            <X className="h-4 w-4" />
-          </label>
-        </div>
-        <SidebarNav
-          secretPath={secretPath}
-          active={active}
-          onClose={() => {
-            /* uncheck the checkbox — the label click toggles it off */
-          }}
-        />
-      </aside>
-    </>
   );
 }
