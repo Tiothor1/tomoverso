@@ -1,6 +1,42 @@
 # Capítulo 1 — A pior ideia da noite
 
-Caio clicou na margem oposta do rio uma vez. Depois outra.
+Às onze e dezessete da noite, Caio Vilar deveria estar fazendo matemática.
+
+A folha de exercícios estava aberta havia quase uma hora na mesa, ao lado do caderno, de um copo d’água e da prova de física que ele ainda não tinha mostrado para a mãe. **3,5** em vermelho ocupava o alto da página como se gritasse por conta própria.
+
+Caio tinha quinze anos e morava com a mãe num apartamento pequeno demais para guardar segredos por muito tempo. Ela estava no turno da noite e, antes de sair, tinha apontado para a pilha de tarefas com o queixo.
+
+— Faz pelo menos metade. Amanhã eu confiro.
+
+Ele tinha dito que faria.
+
+Então Davi apareceu meia hora depois, com um pacote de salgadinho amassado debaixo do braço e a mesma cara de quem já tinha decidido que não aceitaria um não.
+
+— Uma partida só — ele disse, largando-se no colchão encostado à parede. — Eu preciso de alguém que saiba usar o cérebro no meu time.
+
+— Você está pedindo isso para a pessoa que tirou três e meio em física.
+
+— Justamente. Hoje você tem alguma coisa para provar.
+
+Era uma provocação idiota. Funcionou mesmo assim.
+
+League of Legends era o jogo que os dois usavam para fazer o tempo desaparecer. De um lado da tela havia a base do time deles; do outro, a base inimiga. No meio, cinco jogadores de cada lado tentavam abrir caminho pelo mapa antes que o outro time destruísse tudo. Caio jogava havia tempo suficiente para saber o que cada erro custava e para nunca admitir que levava aquilo a sério.
+
+Naquela noite, ele escolheu Ryze.
+
+Não porque fosse o campeão mais fácil. Ryze exigia atenção, tempo e uma sequência de teclas que Caio sempre errava quando Davi começava a gritar atrás dele. Mas ele gostava do personagem: um mago azul carregando nas costas um pergaminho grande demais, correndo pelo mapa como alguém que tinha pressa de chegar a um lugar que não queria encontrar.
+
+Vinte e sete minutos de partida depois, o time deles estava perdendo. Davi tinha parado de fingir que só assistia e comentava cada movimento por cima do ombro de Caio.
+
+— Se você morrer agora, eu vou embora e conto para sua mãe que você largou a lição por causa de uma ranqueada.
+
+— Você não sabe nem onde ela trabalha.
+
+— Eu descubro. Aperta R quando aparecer chance.
+
+Caio revirou os olhos, sem tirar a mão do mouse. A chuva batia no vidro da janela. Na cozinha escura, a geladeira ligou com um estalo baixo. Por alguns minutos, tudo ainda era normal: Davi reclamando, o fone apertando suas orelhas, a prova escondida sob o caderno e dez personagens minúsculos correndo numa guerra que não tinha importância nenhuma.
+
+Então Caio clicou na margem oposta do rio uma vez. Depois outra.
 
 Ryze não se moveu.
 
@@ -8,11 +44,9 @@ Na primeira tentativa, ele pensou que o mouse tinha falhado. Na segunda, culpou 
 
 Caio conhecia bem demais aquela tela para achar normal. Sabia a diferença entre lag, travamento e um campeão preso numa parede. Nada tinha prendido Ryze. O círculo do comando aparecia onde Caio clicava, desaparecia e voltava a aparecer. Ryze simplesmente ignorava cada ordem.
 
-— Você morreu de novo? — Davi perguntou, largado no colchão encostado na parede. A camisa vermelha de time estava amarrotada e uma lata vazia rolava perto do pé dele. — Caio, pelo amor de Deus, aperta R. É só apertar R.
+— Você morreu de novo? — Davi perguntou.
 
 Caio não respondeu.
-
-A chuva batia no vidro da janela com uma insistência cansada. O apartamento inteiro parecia úmido: o sofá coberto por uma manta, a cozinha escura, o cheiro de café requentado vindo de algum lugar. Na tela, o cursor piscava ao lado de Ryze. O jogo continuava. Só ele não obedecia.
 
 — Você está vendo isso? — Caio perguntou.
 
