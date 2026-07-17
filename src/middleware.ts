@@ -129,8 +129,7 @@ export function middleware(request: NextRequest) {
 
   // Mark safe bypass routes for launch gate
   const adminPath = process.env.ADMIN_SECRET_PATH;
-  // Preview editorial do prólogo liberado mesmo enquanto o lançamento geral permanece fechado.
-  const isSafeRoute = pathname.startsWith("/auth/") || pathname === "/runa-partida" || (adminPath && pathname.startsWith(`/${adminPath}`)) || pathname.startsWith("/_next/");
+  const isSafeRoute = pathname.startsWith("/auth/") || (adminPath && pathname.startsWith(`/${adminPath}`)) || pathname.startsWith("/_next/");
   if (isSafeRoute) {
     response.headers.set("x-tomoverso-launch-bypass", "1");
   }
