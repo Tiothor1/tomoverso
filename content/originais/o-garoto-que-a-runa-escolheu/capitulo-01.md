@@ -10,7 +10,7 @@ Caio tinha quinze anos e morava com a mãe num apartamento pequeno demais para g
 
 Ele tinha dito que faria.
 
-Então Davi apareceu meia hora depois, com um pacote de salgadinho amassado debaixo do braço e a mesma cara de quem já tinha decidido que não aceitaria um não.
+Então Davi, seu primo, apareceu meia hora depois, com um pacote de salgadinho amassado debaixo do braço e a mesma cara de quem já tinha decidido que não aceitaria um não.
 
 — Uma partida só — ele disse, largando-se no colchão encostado à parede. — Eu preciso de alguém que saiba usar o cérebro no meu time.
 
@@ -154,7 +154,6 @@ E uma voz que não saiu da boca dele.
 
 A luz se apagou.
 
-![Caio toca a runa rachada entre as ruínas de Ionia.](/uploads/novels/original/o-garoto-que-a-runa-escolheu-capitulo-01-ilustracao-01.png)
 
 Caio ficou imóvel, tentando respirar devagar. Seu peito subia e descia rápido demais. A marca no tornozelo ainda ardia sob a meia rasgada.
 

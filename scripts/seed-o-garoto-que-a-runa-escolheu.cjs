@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-/* Creates the illustrated novel in the standard Tomoverso novels/chapters flow.
+/* Creates or updates the serial novel in the standard Tomoverso novels/chapters flow.
+ * Every content/originais/o-garoto-que-a-runa-escolheu/capitulo-NN.md file is imported.
  * Default target is the local ignored runtime DB. Pass DB_PATH to target another DB.
  */
 const fs = require("fs");
@@ -13,24 +14,35 @@ const novelId = "original-o-garoto-que-a-runa-escolheu";
 const slug = "o-garoto-que-a-runa-escolheu";
 const authorId = "fabio-texeira-2026";
 
-const chapters = [
-  [1, "A pior ideia da noite", "capitulo-01.md"],
-  [2, "A floresta que escuta", "capitulo-02.md"],
-  [3, "O homem que coleciona ruínas", "capitulo-03.md"],
-  [4, "A dívida de Luan", "capitulo-04.md"],
-  [5, "O caminho que Luan escondeu", "capitulo-05.md"],
-].map(([number, title, file]) => {
-  const raw = fs.readFileSync(path.join(contentDir, file), "utf8");
-  const content = raw.replace(/^#\s+[^\n]+\n\n/, "").trim();
-  const wordCount = (content.match(/[\p{L}\p{N}’'-]+/gu) || []).length;
-  const images = [...content.matchAll(/!\[[^\]]*\]\((\/uploads\/[^)]+)\)/g)].map((m) => m[1]);
-  for (const image of images) {
-    if (!fs.existsSync(path.join(root, "public", image))) {
-      throw new Error(`Missing chapter image: ${image}`);
+const chapters = fs.readdirSync(contentDir)
+  .map((file) => {
+    const match = /^capitulo-(\d+)\.md$/i.exec(file);
+    return match ? { file, number: Number(match[1]) } : null;
+  })
+  .filter(Boolean)
+  .sort((a, b) => a.number - b.number)
+  .map(({ number, file }) => {
+    const raw = fs.readFileSync(path.join(contentDir, file), "utf8");
+    const heading = new RegExp(`^#\\s+Capítulo\\s+${number}\\s+[—-]\\s+(.+?)\\s*$`, "m").exec(raw);
+    if (!heading) throw new Error(`Expected a '# Capítulo ${number} — Título' heading in ${file}`);
+    const content = raw.replace(/^#\s+[^\n]+\n\n/, "").trim();
+    const wordCount = (content.match(/[\p{L}\p{N}’'-]+/gu) || []).length;
+    const images = [...content.matchAll(/!\[[^\]]*\]\((\/uploads\/[^)]+)\)/g)].map((m) => m[1]);
+    for (const image of images) {
+      if (!fs.existsSync(path.join(root, "public", image))) {
+        throw new Error(`Missing chapter image: ${image}`);
+      }
     }
+    return { number, title: heading[1].trim(), content, wordCount };
+  });
+
+if (!chapters.length) throw new Error(`No chapter files found in ${contentDir}`);
+for (let index = 0; index < chapters.length; index += 1) {
+  const expected = index + 1;
+  if (chapters[index].number !== expected) {
+    throw new Error(`Chapter sequence must be contiguous; expected ${expected}, found ${chapters[index].number}`);
   }
-  return { number, title, content, wordCount };
-});
+}
 
 const db = new Database(dbPath);
 db.pragma("foreign_keys = ON");

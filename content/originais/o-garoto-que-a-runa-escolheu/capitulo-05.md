@@ -102,7 +102,6 @@ Caio avançou sem pensar.
 
 A imagem se fechou.
 
-![Caio e Luan diante do marco de pedra, com uma janela de luz se fechando sobre o vale.](/uploads/novels/original/o-garoto-que-a-runa-escolheu-capitulo-05-ilustracao-05.png)
 
 Ele bateu a mão na pedra do marco e sentiu a pele abrir. O sangue caiu entre as inscrições antigas.
 

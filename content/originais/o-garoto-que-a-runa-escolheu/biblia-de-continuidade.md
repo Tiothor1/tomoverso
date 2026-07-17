@@ -2,44 +2,64 @@
 
 ## Obra
 - **Título:** O Garoto Que a Runa Escolheu
-- **Formato:** light novel ilustrada; obra será publicada pela rota normal `/novels/o-garoto-que-a-runa-escolheu`.
-- **Estado atual:** rascunho editorial. Não publicar até que todas as ilustrações iniciais sejam recebidas e integradas.
-- **Mundo:** Runeterra, chegada inicial em Ionia.
-- **Tom:** isekai de aventura, mistério rúnico, tensão emocional e descoberta gradual.
+- **Formato:** light novel seriada em prosa, publicada exclusivamente no fluxo normal `/novels/[slug]` e `/novels/[slug]/[chapter]`.
+- **Extensão:** planejamento fechado para os Capítulos 1–120; a história continua depois do Capítulo 120 e não trata o Capítulo 100 como final.
+- **Estado editorial:** cinco capítulos publicados; cada próximo capítulo é escrito, revisado por continuidade e gramática, e só então publicado individualmente.
+- **Mundo:** Runeterra. A chegada acontece em Ionia, mas a história pode atravessar outras regiões somente quando a trama exigir.
+- **Tom:** isekai de aventura e mistério rúnico; perigo concreto, vínculos graduais, humor pontual e consequências emocionais.
+- **Arte:** não usar ilustrações internas, imagens de exemplo, prompts de arte ou inserções Markdown nos capítulos. A capa oficial permanece como imagem de catálogo.
 
-## Trava visual — Caio Vilar
-- 15 anos; magro; pele oliva clara.
-- Cabelo castanho-escuro, curto, desarrumado, franja irregular; olhos castanho-âmbar grandes e expressivos.
-- Roupa de chegada: moletom grafite com capuz, aberto; camiseta branca úmida e suja; calça preta rasgada nos joelhos; tênis cinza/preto urbano; lama e chuva nas roupas.
-- Estado no fim do capítulo 1: molhado, lama até os joelhos, pequeno arranhão no rosto, cotovelo esquerdo dolorido, meia rasgada e marca rúnica azul fraca no tornozelo esquerdo.
-- Nunca colocar espada, armadura, poderes dominados ou postura heroica nele neste arco inicial.
+## Regra de produção serial
+1. Não gerar capítulos em lote nem preencher número de capítulos com texto apressado.
+2. Para cada capítulo: conferir estado anterior → definir conflito próprio → escrever cena a cena → revisar gramática, causalidade e continuidade → atualizar o estado para o próximo capítulo.
+3. Meta editorial para os capítulos novos: 2.500–4.000 palavras, com começo situacional, conflito, mudança concreta e gancho honesto.
+4. Um capítulo não existe apenas para levar personagens de A a B; cada um precisa alterar informação, relação, risco ou decisão.
+5. O Capítulo 100 abre uma fase nova. A primeira estrutura cobre até o Capítulo 120, sem encerrar a série.
 
-## Trava visual — Luan Salles
-- 17 anos; magro e ágil; pele morena clara; cabelo preto liso, curto nas laterais e franja caída sobre a testa; olhos escuros e atentos.
-- Roupa de viagem: jaqueta curta azul-marinho muito gasta sobre túnica cinza simples, calça escura, botas de couro enlameadas e uma bolsa transversal pequena. Carrega uma espada curta embainhada nas costas.
-- Não é um herói perfeito: expressão calculista, postura defensiva e olhar de quem sempre mede uma oportunidade.
+## Protagonista — Caio Vilar
+- 15 anos, brasileiro, magro, pele oliva clara, cabelo castanho-escuro curto e desarrumado, olhos castanho-âmbar.
+- Antes da travessia, mora com a mãe em um apartamento pequeno no Brasil. É estudante e esconde uma nota ruim de física; joga League of Legends com o primo Davi para adiar problemas reais, não por ser um prodígio ou "escolhido" confiante.
+- Chegou a Ionia após uma anomalia na partida com Ryze. Carrega uma marca rúnica azul fraca no tornozelo esquerdo.
+- Estado físico no fim do Capítulo 5: molhado e enlameado; arranhão no rosto, cotovelo esquerdo dolorido, meia rasgada; pequeno corte na palma direita feito no marco de pedra.
+- Estado emocional: assustado, com saudade da mãe e de Davi; quer voltar, mas começa a aceitar que precisará agir para entender a própria marca.
+- Limites: não recebe espada, armadura, domínio mágico, título heroico ou solução fácil no arco inicial. A marca reage sem obedecer a ele.
 
-## Trava visual — Ryze
-- Homem alto, musculoso, pele azul; cabeça raspada; barba curta e escura; olhos azul-violeta brilhantes.
-- Manto e vestes de viajante azul-escuro, pergaminho grande preso às costas.
-- Presença séria e cansada; não sorridente, não salvador idealizado.
-- No início, Ryze não cura, toca ou tutela Caio; ele trata a marca como uma ameaça e mantém distância física.
+## Davi
+- Primo de Caio, adolescente, impulsivo, provocador e leal. Estava no quarto durante a partida e viu Caio ser levado.
+- No Brasil, torna-se a âncora humana do mistério: busca entender o que ocorreu sem saber como alcançar Caio.
+- Não desaparece da trama nem vira mero dispositivo de portal; as escolhas dele no Brasil terão consequência direta a partir dos arcos centrais.
 
-## Limites narrativos obrigatórios
-- Nenhum monstro, criatura tentacular ou ameaça visual entra na cena sem função narrativa previamente estabelecida no texto.
-- Ilustrações devem mostrar apenas a ação definida no capítulo; não adicionar curas, salvamentos, ataques ou poderes que não aconteceram.
+## Luan Salles
+- 17 anos; magro e ágil; pele morena clara; cabelo preto liso, curto nas laterais, com franja; olhos escuros e atentos.
+- Brasileiro de Juiz de Fora; está em Runeterra há cerca de um ano e oito meses, com percepção instável do tempo.
+- Veste jaqueta curta azul-marinho gasta sobre túnica cinza, calça escura, botas enlameadas e bolsa transversal. Carrega espada curta, mas não é lutador invencível.
+- Carrega clandestinamente uma lasca de runa de eco, usada na própria travessia. O fragmento pode abrir janelas instáveis entre mundos, mas cobra um preço e deixa rastros.
+- É competente, ambicioso, falho e calculista. Ajuda Caio porque precisa dele, e só lentamente passa a escolhê-lo como parceiro.
 
-## Trava visual — Ionia inicial
-- Clareira de ruínas antigas após chuva; chão com poças e raízes; árvores colossais; pedras cobertas de musgo; monólitos com inscrições luminosas em azul-ciano; fitas cerimoniais desbotadas entre os galhos; névoa violeta suave.
-- Luz: noite se abrindo para amanhecer frio; fonte mágica azul no chão.
+## Ryze
+- Homem alto, musculoso, pele azul, cabeça raspada, barba curta, olhos azul-violeta e um pergaminho grande preso às costas.
+- Está perseguindo fragmentos e rastros de Runas Mundiais. Não é curador, tutor ou salvador de Caio.
+- Trata Caio como uma possível porta para uma catástrofe, não como aliado automático. Ajuda apenas quando contenção e sobrevivência coincidem.
+- Sua culpa vem de escolhas antigas que serão reveladas aos poucos, sem transformar qualquer fala dele numa exposição de lore.
 
-## Trava de estilo
-- Ilustração vertical 2:3 para leitura no celular e desktop.
-- Arte de página ilustrada de mangá/light novel: desenho preto e branco em nanquim, lineart limpo, hachuras, retículas/screentones, áreas pretas sólidas e cenário detalhado desenhado.
-- A pose é determinada pelo acontecimento de cada cena; Caio não deve aparecer repetidamente ajoelhado, agachado ou na mesma composição.
-- Não usar cor, pintura digital colorida, ultrarrealismo, 3D, foto, estilo chibi, geometria abstrata, texto, logos, marca d’água, UI de jogo ou cópia de splash art.
+## Mistério central
+- A marca de Caio não foi criada por Ryze nem por Luan. Uma inteligência humana ainda desconhecida usou a partida como experimento para testar uma passagem entre mundos.
+- A lasca de runa de eco de Luan tornou a abertura possível, mas não foi sua origem.
+- Davi viu a travessia e deixou uma âncora emocional no Brasil. Isso permite vislumbres, não conversas fáceis nem portais sob controle.
+- O antagonista central será apresentado primeiro por efeitos e escolhas: pessoas usando marcas, rotas fechadas, memórias alteradas e portas que cobram algo de quem passa.
 
-## Ordem de ilustrações iniciais
-1. **ILUSTRAÇÃO 01:** Caio sozinho nas ruínas, após a luz rúnica tocá-lo; entra no Capítulo 1 logo depois da frase “A luz se apagou.”
-2. **ILUSTRAÇÃO 02:** primeiro encontro entre Caio e o garoto desconhecido; será inserida no Capítulo 2.
-3. **ILUSTRAÇÃO 03:** visão rúnica de Ryze e a Runa Mundial; será inserida no Capítulo 3.
+## Estado ao fim do Capítulo 5
+- Local: encosta ao norte da clareira de ruínas, em Ionia, depois de uma noite de chuva.
+- Objetivo imediato: alcançar o antigo posto de vigia indicado por Ryze.
+- Caio e Luan fizeram uma aliança provisória para encontrar quem gravou a marca e descobrir um caminho seguro de volta.
+- Ryze ficou para apagar o rastro do santuário; não prometeu reencontrá-los.
+- Luan ainda esconde o fragmento de runa de eco e informações sobre sua travessia.
+- Davi foi visto no quarto de Caio através de uma janela que se fechou em segundos.
+
+## Guardrails narrativos
+- Nenhuma criatura, ameaça, poder ou artefato aparece sem função causal clara e consequência posterior.
+- Não criar monstros apenas para ação; cada perigo deve revelar algo sobre uma região, uma regra de magia ou uma escolha de personagem.
+- Explicar Runeterra pelo ponto de vista de Caio, em linguagem legível para quem nunca jogou League of Legends.
+- Cada referência canônica deve servir à cena; não usar lore como lista ou fanservice.
+- Caio, Luan e Ryze podem discordar sem que a narrativa escolha imediatamente um "certo".
+- Não criar final no Capítulo 100. Os capítulos 101–120 aprofundam a consequência do grande confronto e abrem a próxima era da série.

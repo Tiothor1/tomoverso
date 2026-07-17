@@ -110,7 +110,6 @@ Apesar do pânico, Caio quase riu. O som saiu pequeno e quebrado.
 
 Eles atravessaram uma ponte estreita feita de raízes entrelaçadas.
 
-![Caio e Luan correm sobre uma ponte de raízes enquanto uma presença os segue na floresta.](/uploads/novels/original/o-garoto-que-a-runa-escolheu-capitulo-02-ilustracao-02.png)
 
 Lá embaixo, um riacho corria escuro, cheio de reflexos que não pertenciam ao céu. Quando Caio olhou para a água, viu por meio segundo o quarto dele no Brasil. A tela do computador continuava ligada. Davi batia nas próprias mãos contra a mesa, chamando por ele através de uma distância impossível.
 

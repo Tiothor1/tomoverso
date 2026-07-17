@@ -84,7 +84,6 @@ A pele dele era azul. A cabeça raspada refletia uma luz pálida. Um pergaminho 
 
 Ryze.
 
-![Ryze tenta conter uma Runa Mundial rachada em meio às ruínas.](/uploads/novels/original/o-garoto-que-a-runa-escolheu-capitulo-03-ilustracao-03.png)
 
 Caio soube o nome sem pensar.
 

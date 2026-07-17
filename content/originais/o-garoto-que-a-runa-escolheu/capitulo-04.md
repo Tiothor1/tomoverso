@@ -84,7 +84,6 @@ O santuário inteiro gemeu.
 
 Não foi uma criatura do lado de fora. Foram os sinos de pedra escondidos sob o telhado, despertando um após o outro conforme as runas antigas nas colunas acendiam. A barreira do lugar estava falhando porque a ligação de Caio chamava atenção para a clareira.
 
-![Caio, Luan e Ryze se encaram no santuário enquanto os sinos rúnicos despertam.](/uploads/novels/original/o-garoto-que-a-runa-escolheu-capitulo-04-ilustracao-04.png)
 
 Ryze não tentou apagar a marca. Não poderia sem descobrir primeiro quem a tinha gravado.
 
