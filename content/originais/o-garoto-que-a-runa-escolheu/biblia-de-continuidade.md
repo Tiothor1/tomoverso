@@ -4,7 +4,7 @@
 - **Título:** O Garoto Que a Runa Escolheu
 - **Formato:** light novel seriada em prosa, publicada exclusivamente no fluxo normal `/novels/[slug]` e `/novels/[slug]/[chapter]`.
 - **Extensão:** planejamento fechado para os Capítulos 1–120; a história continua depois do Capítulo 120 e não trata o Capítulo 100 como final.
-- **Estado editorial:** cinco capítulos publicados; cada próximo capítulo é escrito, revisado por continuidade e gramática, e só então publicado individualmente.
+- **Estado editorial:** seis capítulos publicados. Os Capítulos 7–100 serão escritos e revisados localmente, um por vez, e receberão uma única publicação depois de a sequência completa passar pela validação final.
 - **Mundo:** Runeterra. A chegada acontece em Ionia, mas a história pode atravessar outras regiões somente quando a trama exigir.
 - **Tom:** isekai de aventura e mistério rúnico; perigo concreto, vínculos graduais, humor pontual e consequências emocionais.
 - **Arte:** não usar ilustrações internas, imagens de exemplo, prompts de arte ou inserções Markdown nos capítulos. A capa oficial permanece como imagem de catálogo.
