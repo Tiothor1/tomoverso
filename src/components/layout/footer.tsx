@@ -61,7 +61,7 @@ export async function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/sobre" className="hover:text-primary transition-colors">Quem somos</Link></li>
               {config.storefront_enabled ? <li><Link href={config.storefront_href} className="hover:text-primary transition-colors"><Store className="mr-1 inline h-3 w-3" /> {t("nav.store")}</Link></li> : null}
-              <li><a href={`mailto:${config.support_email}`} className="hover:text-primary transition-colors">{config.support_email}</a></li>
+              <li><a href={`mailto:${config.support_email}`} className="break-all hover:text-primary transition-colors">{config.support_email}</a></li>
               <li><Link href="/termos" className="hover:text-primary transition-colors">Termos</Link></li>
             </ul>
           </div>

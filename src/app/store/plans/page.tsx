@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Brain, CalendarDays, Check, Crown, Download, PenTool, ShieldCheck, Sparkles, Wand2, X } from "lucide-react";
+import { ArrowRight, BadgeCheck, Brain, CalendarDays, Check, Crown, PenTool, ShieldCheck, Sparkles, Wand2, X } from "lucide-react";
 import { getDb } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
-import { getActivePlans, getUserActiveSubscription, formatBRL, formatInterval } from "@/lib/subscriptions";
+import { getActivePlans, getUserActiveSubscription, formatBRL } from "@/lib/subscriptions";
 import { authorPlusBenefits, isAuthorPlusSubscription } from "@/lib/author-plus";
 import { PixPaymentButton } from "@/components/payments/pix-payment-button";
+import { PlanFaq } from "@/components/plans/plan-faq";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,7 +45,9 @@ const comparison = [
   { label: "Sem anúncios", free: false, pro: true, author: true },
 ];
 
-function parseFeatures(plan: any): string[] {
+type ActionTone = "primary" | "amber" | "emerald";
+
+function parseFeatures(plan: { features?: unknown }): string[] {
   try {
     const value = typeof plan.features === "string" ? JSON.parse(plan.features) : plan.features;
     return Array.isArray(value) ? value : [];
@@ -60,6 +63,58 @@ function Cell({ value }: { value: boolean | string }) {
   return <span className="text-xs font-medium text-muted-foreground">{value}</span>;
 }
 
+function PaidPlanActions({
+  planId,
+  signedIn,
+  signedInLabel,
+  signedOutLabel,
+  tone = "primary",
+}: {
+  planId?: string;
+  signedIn: boolean;
+  signedInLabel: string;
+  signedOutLabel: string;
+  tone?: ActionTone;
+}) {
+  const primaryClasses = {
+    primary: "bg-primary text-primary-foreground hover:bg-primary/90",
+    amber: "bg-amber-400 text-amber-950 hover:bg-amber-300",
+    emerald: "bg-emerald-400 text-emerald-950 hover:bg-emerald-300",
+  }[tone];
+
+  if (!planId) {
+    return (
+      <div className="plan-actions mt-auto pt-6">
+        <Button disabled className="h-10 w-full rounded-xl">Em breve</Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="plan-actions mt-auto pt-6">
+      <form action="/api/payments/checkout" method="POST">
+        <input type="hidden" name="plan_id" value={planId} />
+        <Button type="submit" className={`h-10 w-full rounded-xl ${primaryClasses}`}>
+          {signedIn ? signedInLabel : signedOutLabel}
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </form>
+
+      {signedIn && (
+        <div className="mt-2 grid grid-cols-2 gap-2 max-[520px]:grid-cols-1">
+          <PixPaymentButton planId={planId} />
+          <form action="/api/payments/preapproval" method="POST" className="min-w-0">
+            <input type="hidden" name="plan_id" value={planId} />
+            <Button type="submit" variant="outline" className="h-10 w-full rounded-xl px-2 text-xs">
+              Recorrente no cartão
+            </Button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default async function PlansPage({ searchParams }: { searchParams?: Promise<{ error?: string; mp_failure?: string }> }) {
   const db = getDb();
   const user = await getCurrentUser().catch(() => null);
@@ -71,6 +126,7 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
   const proPlan = plans.find((plan) => plan.id === "pro-monthly") || plans.find((plan) => String(plan.name).toLowerCase().includes("pro"));
   const authorPlan = plans.find((plan) => plan.id === "author-monthly") || plans.find((plan) => String(plan.role_granted).toLowerCase() === "author" && plan.interval === "month");
   const authorYearlyPlan = plans.find((plan) => plan.id === "author-yearly") || plans.find((plan) => String(plan.role_granted).toLowerCase() === "author" && plan.interval === "year");
+  const annualMonthlyEquivalent = authorYearlyPlan ? Math.round(Number(authorYearlyPlan.price_cents) / 12) : null;
 
   return (
     <main className="container mx-auto max-w-7xl px-4 py-10">
@@ -98,50 +154,96 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
         </section>
       )}
 
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <Card className="border-border/70">
-          <CardHeader><CardTitle>Gratuito</CardTitle><p className="text-sm text-muted-foreground">Para todo autor começar sem barreira.</p></CardHeader>
-          <CardContent className="flex h-full flex-col">
-            <div className="mb-5 text-3xl font-black">R$ 0</div>
-            <ul className="mb-6 flex-1 space-y-3">{freeFeatures.map((f)=><li key={f} className="flex gap-3 text-sm"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{f}</li>)}</ul>
-            <Button asChild variant="outline" className="rounded-xl"><Link href={user ? "/dashboard/novels/new" : "/auth/signup"}><PenTool className="mr-2 h-4 w-4" />Publicar grátis</Link></Button>
+      <div className="grid auto-rows-fr items-stretch gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <Card className="plan-card h-full min-w-0 border-border/70">
+          <CardHeader className="min-h-[9.5rem]">
+            <CardTitle>Gratuito</CardTitle>
+            <p className="text-sm text-muted-foreground">Para todo autor começar sem barreira.</p>
+          </CardHeader>
+          <CardContent className="flex flex-1 flex-col">
+            <div className="mb-5 min-h-[5.25rem]">
+              <span className="text-3xl font-black">R$ 0</span>
+              <p className="mt-1 text-sm text-muted-foreground">Para publicar sem custo.</p>
+            </div>
+            <ul className="plan-benefits mb-6 flex-1 space-y-3">
+              {freeFeatures.map((feature) => (
+                <li key={feature} className="flex gap-3 text-sm"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{feature}</li>
+              ))}
+            </ul>
+            <div className="plan-actions mt-auto pt-6">
+              <Button asChild variant="outline" className="h-10 w-full rounded-xl">
+                <Link href={user ? "/dashboard/novels/new" : "/auth/signup"}><PenTool className="mr-2 h-4 w-4" />Publicar grátis</Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-primary/25">
-          <CardHeader><CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" /> Pro Leitor</CardTitle><p className="text-sm text-muted-foreground">Experiência premium para ler melhor.</p></CardHeader>
-          <CardContent>
-            <div className="mb-5">{proPlan ? <><span className="text-3xl font-black">{formatBRL(proPlan.price_cents)}</span><span className="text-muted-foreground">/{formatInterval(proPlan.interval)}</span></> : <span className="text-xl font-bold text-muted-foreground">Em breve</span>}</div>
-            <ul className="mb-6 space-y-3">{(proPlan ? parseFeatures(proPlan) : readerFeatures).slice(0, 7).map((f)=><li key={f} className="flex gap-3 text-sm"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{f}</li>)}</ul>
-            {proPlan ? <><form action="/api/payments/checkout" method="POST"><input type="hidden" name="plan_id" value={proPlan.id} /><Button type="submit" className="w-full rounded-xl">{user ? "Assinar Pro" : "Entrar para assinar"}</Button></form><div className="mt-2 flex gap-2">{user ? <><PixPaymentButton planId={proPlan.id} /><form action="/api/payments/preapproval" method="POST"><input type="hidden" name="plan_id" value={proPlan.id} /><Button type="submit" size="sm" variant="outline" className="flex-1 rounded-xl text-xs">Recorrente (cartão)</Button></form></> : null}</div></> : null}
+        <Card className="plan-card h-full min-w-0 border-primary/25">
+          <CardHeader className="min-h-[9.5rem]">
+            <CardTitle className="flex items-center gap-2"><ShieldCheck className="h-5 w-5 text-primary" /> Pro Leitor</CardTitle>
+            <p className="text-sm text-muted-foreground">Experiência premium para ler melhor.</p>
+          </CardHeader>
+          <CardContent className="flex flex-1 flex-col">
+            <div className="mb-5 min-h-[5.25rem]">
+              {proPlan ? <><span className="text-3xl font-black">{formatBRL(proPlan.price_cents)}</span><p className="mt-1 text-sm text-muted-foreground">por mês</p></> : <span className="text-xl font-bold text-muted-foreground">Em breve</span>}
+            </div>
+            <ul className="plan-benefits mb-6 flex-1 space-y-3">
+              {(proPlan ? parseFeatures(proPlan) : readerFeatures).slice(0, 7).map((feature) => (
+                <li key={feature} className="flex gap-3 text-sm"><Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />{feature}</li>
+              ))}
+            </ul>
+            <PaidPlanActions planId={proPlan?.id} signedIn={Boolean(user)} signedInLabel="Assinar Pro" signedOutLabel="Entrar para assinar" />
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-card shadow-2xl shadow-amber-500/10">
+        <Card className="plan-card relative h-full min-w-0 overflow-hidden border-amber-500/40 bg-gradient-to-b from-amber-500/10 to-card shadow-xl shadow-amber-500/10">
           <div className="absolute right-4 top-4 rounded-full bg-amber-400 px-3 py-1 text-xs font-black text-amber-950">Para autores</div>
-          <CardHeader><CardTitle className="flex items-center gap-2"><Brain className="h-5 w-5 text-amber-400" /> Autor+</CardTitle><p className="text-sm text-muted-foreground">Ferramentas reais para transformar ideia em obra publicável.</p></CardHeader>
-          <CardContent>
-            <div className="mb-5">{authorPlan ? <><span className="text-3xl font-black">{formatBRL(authorPlan.price_cents)}</span><span className="text-muted-foreground">/{formatInterval(authorPlan.interval)}</span></> : <span className="text-xl font-bold text-muted-foreground">Em breve</span>}</div>
-            <ul className="mb-6 space-y-3">{authorPlusBenefits.slice(0, 6).map((f)=><li key={f} className="flex gap-3 text-sm"><BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />{f}</li>)}</ul>
-            {authorPlan ? <><form action="/api/payments/checkout" method="POST"><input type="hidden" name="plan_id" value={authorPlan.id} /><Button type="submit" className="w-full rounded-xl bg-amber-400 text-amber-950 hover:bg-amber-300">{user ? "Virar Autor+" : "Entrar para virar Autor+"}<ArrowRight className="ml-2 h-4 w-4" /></Button></form><div className="mt-2 flex gap-2">{user ? <><PixPaymentButton planId={authorPlan.id} /><form action="/api/payments/preapproval" method="POST"><input type="hidden" name="plan_id" value={authorPlan.id} /><Button type="submit" size="sm" variant="outline" className="flex-1 rounded-xl text-xs">Recorrente (cartão)</Button></form></> : null}</div></> : null}
+          <CardHeader className="min-h-[9.5rem] pr-28">
+            <CardTitle className="flex items-center gap-2"><Brain className="h-5 w-5 text-amber-400" /> Autor+</CardTitle>
+            <p className="text-sm text-muted-foreground">Ferramentas reais para transformar ideia em obra publicável.</p>
+          </CardHeader>
+          <CardContent className="flex flex-1 flex-col">
+            <div className="mb-5 min-h-[5.25rem]">
+              {authorPlan ? <><span className="text-3xl font-black">{formatBRL(authorPlan.price_cents)}</span><p className="mt-1 text-sm text-muted-foreground">por mês</p></> : <span className="text-xl font-bold text-muted-foreground">Em breve</span>}
+            </div>
+            <ul className="plan-benefits mb-6 flex-1 space-y-3">
+              {authorPlusBenefits.slice(0, 6).map((feature) => (
+                <li key={feature} className="flex gap-3 text-sm"><BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />{feature}</li>
+              ))}
+            </ul>
+            <PaidPlanActions planId={authorPlan?.id} signedIn={Boolean(user)} signedInLabel="Virar Autor+" signedOutLabel="Entrar para virar Autor+" tone="amber" />
           </CardContent>
         </Card>
 
-        <Card className="relative overflow-hidden border-emerald-500/40 bg-gradient-to-b from-emerald-500/10 to-card shadow-2xl shadow-emerald-500/10">
+        <Card className="plan-card relative h-full min-w-0 overflow-hidden border-emerald-500/35 bg-gradient-to-b from-emerald-500/10 to-card shadow-xl shadow-emerald-500/[0.09] ring-1 ring-emerald-400/10">
           <div className="absolute right-4 top-4 rounded-full bg-emerald-400 px-3 py-1 text-xs font-black text-emerald-950">3 meses grátis</div>
-          <CardHeader><CardTitle className="flex items-center gap-2"><CalendarDays className="h-5 w-5 text-emerald-400" /> Autor+ Anual</CardTitle><p className="text-sm text-muted-foreground">Paga uma vez e usa 12 meses. Melhor custo-benefício para autor sério.</p></CardHeader>
-          <CardContent>
-            <div className="mb-1">{authorYearlyPlan ? <><span className="text-3xl font-black">{formatBRL(authorYearlyPlan.price_cents)}</span><span className="text-muted-foreground">/{formatInterval(authorYearlyPlan.interval)}</span></> : <span className="text-xl font-bold text-muted-foreground">Em breve</span>}</div>
-            <p className="mb-5 text-xs font-semibold text-emerald-400">equivale a R$ 14,93/mês · pague 9 e leve 12</p>
-            <ul className="mb-6 space-y-3">{(authorYearlyPlan ? parseFeatures(authorYearlyPlan) : ["Todos os benefícios do Autor+", "3 meses grátis", "12 meses completos de acesso"]).map((f)=><li key={f} className="flex gap-3 text-sm"><BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />{f}</li>)}</ul>
-            {authorYearlyPlan ? <><form action="/api/payments/checkout" method="POST"><input type="hidden" name="plan_id" value={authorYearlyPlan.id} /><Button type="submit" className="w-full rounded-xl bg-emerald-400 text-emerald-950 hover:bg-emerald-300">{user ? "Assinar anual" : "Entrar para assinar"}<ArrowRight className="ml-2 h-4 w-4" /></Button></form><div className="mt-2 flex gap-2">{user ? <><PixPaymentButton planId={authorYearlyPlan.id} /><form action="/api/payments/preapproval" method="POST"><input type="hidden" name="plan_id" value={authorYearlyPlan.id} /><Button type="submit" size="sm" variant="outline" className="flex-1 rounded-xl text-xs">Recorrente (cartão)</Button></form></> : null}</div></> : null}
+          <CardHeader className="min-h-[9.5rem] pr-28">
+            <CardTitle className="flex items-center gap-2"><CalendarDays className="h-5 w-5 text-emerald-400" /> Autor+ Anual</CardTitle>
+            <p className="text-sm text-muted-foreground">12 meses de ferramentas para quem quer manter o ritmo de criação.</p>
+          </CardHeader>
+          <CardContent className="flex flex-1 flex-col">
+            <div className="mb-5 min-h-[5.25rem]">
+              {authorYearlyPlan && annualMonthlyEquivalent ? <>
+                <span className="text-3xl font-black text-emerald-400">{formatBRL(annualMonthlyEquivalent)}</span>
+                <p className="mt-1 text-sm font-semibold text-emerald-400">por mês</p>
+                <p className="mt-1 text-xs text-muted-foreground">{formatBRL(authorYearlyPlan.price_cents)} cobrados anualmente</p>
+              </> : <span className="text-xl font-bold text-muted-foreground">Em breve</span>}
+            </div>
+            <ul className="plan-benefits mb-6 flex-1 space-y-3">
+              {(authorYearlyPlan ? parseFeatures(authorYearlyPlan) : ["Todos os benefícios do Autor+", "3 meses grátis", "12 meses completos de acesso"]).map((feature) => (
+                <li key={feature} className="flex gap-3 text-sm"><BadgeCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-400" />{feature}</li>
+              ))}
+            </ul>
+            <PaidPlanActions planId={authorYearlyPlan?.id} signedIn={Boolean(user)} signedInLabel="Assinar anual" signedOutLabel="Entrar para assinar" tone="emerald" />
           </CardContent>
         </Card>
       </div>
 
+      <PlanFaq />
+
       <section className="mt-14 overflow-hidden rounded-2xl border border-border/60 bg-card">
         <div className="border-b border-border/50 p-5"><h2 className="font-heading text-2xl font-bold">Comparação honesta</h2><p className="text-sm text-muted-foreground">Ninguém paga para ter permissão de publicar. Paga para ter ferramentas melhores.</p></div>
-        <div className="overflow-x-auto"><table className="w-full min-w-[720px] text-sm"><thead><tr className="border-b border-border/40"><th className="p-4 text-left">Recurso</th><th className="p-4 text-center">Grátis</th><th className="p-4 text-center">Pro</th><th className="p-4 text-center">Autor+</th></tr></thead><tbody>{comparison.map((row)=><tr key={row.label} className="border-b border-border/20 last:border-0"><td className="p-4 font-medium">{row.label}</td><td className="p-4 text-center"><Cell value={row.free} /></td><td className="p-4 text-center"><Cell value={row.pro} /></td><td className="p-4 text-center"><Cell value={row.author} /></td></tr>)}</tbody></table></div>
+        <div className="overflow-x-auto"><table className="w-full min-w-[720px] text-sm"><thead><tr className="border-b border-border/40"><th className="p-4 text-left">Recurso</th><th className="p-4 text-center">Grátis</th><th className="p-4 text-center">Pro</th><th className="p-4 text-center">Autor+</th></tr></thead><tbody>{comparison.map((row) => <tr key={row.label} className="border-b border-border/20 last:border-0"><td className="p-4 font-medium">{row.label}</td><td className="p-4 text-center"><Cell value={row.free} /></td><td className="p-4 text-center"><Cell value={row.pro} /></td><td className="p-4 text-center"><Cell value={row.author} /></td></tr>)}</tbody></table></div>
       </section>
 
       <section className="mt-12 rounded-2xl border border-amber-500/25 bg-amber-500/10 p-6 text-center">
@@ -149,14 +251,6 @@ export default async function PlansPage({ searchParams }: { searchParams?: Promi
         <h2 className="font-heading text-2xl font-bold">Quer ver antes de pagar?</h2>
         <p className="mx-auto mt-2 max-w-2xl text-sm text-muted-foreground">Entre na Central Autor+ em modo preview. Você testa ideias e assistente editorial com limites; assets e trilhas avançadas ficam bloqueados até assinar.</p>
         <Button asChild variant="outline" className="mt-4 rounded-xl"><Link href={user ? "/dashboard/autor-plus" : "/auth/signup"}>Testar preview Autor+ <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
-      </section>
-
-      <section className="mt-8 rounded-xl border border-muted/30 bg-muted/10 p-5 text-center text-xs text-muted-foreground">
-        <p className="font-medium text-foreground">ℹ️ Sobre renovação</p>
-        <p className="mt-1 max-w-xl mx-auto">
-          No momento, as assinaturas funcionam com pagamento manual. Cada ciclo (mês/ano) exige um novo pagamento.
-          A renovação automática está em desenvolvimento e será ativada em breve.
-        </p>
       </section>
     </main>
   );
