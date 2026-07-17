@@ -20,7 +20,7 @@ Então Davi apareceu meia hora depois, com um pacote de salgadinho amassado deba
 
 Era uma provocação idiota. Funcionou mesmo assim.
 
-League of Legends era o jogo que os dois usavam para fazer o tempo desaparecer. De um lado da tela havia a base do time deles; do outro, a base inimiga. No meio, cinco jogadores de cada lado tentavam abrir caminho pelo mapa antes que o outro time destruísse tudo. Caio jogava havia tempo suficiente para saber o que cada erro custava e para nunca admitir que levava aquilo a sério.
+League of Legends era o jogo que os dois usavam para fazer o tempo desaparecer. De um lado da tela havia a base do time deles; do outro, a base inimiga. No meio, cinco jogadores de cada lado tentavam abrir caminho pelo mapa antes que o outro time destruísse tudo. Caio conhecia o jogo bem o bastante para saber que um erro podia virar uma partida — e ainda fingia que não se importava quando perdia.
 
 Naquela noite, ele escolheu Ryze.
 
