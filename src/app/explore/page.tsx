@@ -1,7 +1,7 @@
 export const revalidate = 120;
 
 import Link from "next/link";
-import { ArrowRight, BookOpen, ChevronLeft, ChevronRight, Filter, LibraryBig, PenLine, Search, SlidersHorizontal, Sparkles, Tags, X } from "lucide-react";
+import { BookOpen, ChevronLeft, ChevronRight, LibraryBig, PenLine, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -318,18 +318,6 @@ function sortItems(items: CatalogItem[], sort: SortFilter) {
   return list.sort((a, b) => Number(b.is_hot) - Number(a.is_hot) || b.views - a.views || b.chapter_count - a.chapter_count);
 }
 
-function genreOptions(items: CatalogItem[]) {
-  const map = new Map<string, number>();
-  for (const item of items) for (const g of item.genres) map.set(g, (map.get(g) || 0) + 1);
-  return Array.from(map.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "pt-BR")).slice(0, 18);
-}
-
-function tagOptions(items: CatalogItem[]) {
-  const map = new Map<string, number>();
-  for (const item of items) for (const t of item.tags) map.set(t, (map.get(t) || 0) + 1);
-  return Array.from(map.entries()).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "pt-BR")).slice(0, 18);
-}
-
 function BookCatalogCard({ item }: { item: CatalogItem }) {
   const cover = item.cover_local_path || item.cover_url;
   return (
@@ -392,18 +380,13 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
   const pageItems = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
-  const genres = genreOptions(allItems);
-  const tags = tagOptions(allItems);
   const stats = {
     all: allItems.length,
     novel: allItems.filter((i) => i.itemType === "novel").length,
     manga: allItems.filter((i) => i.itemType === "manga" && i.displayKind === "Mangá").length,
     manhwa: allItems.filter((i) => i.itemType === "manga" && i.displayKind === "Manhwa").length,
     book: allItems.filter((i) => i.itemType === "book").length,
-    originals: allItems.filter((i) => i.is_original).length,
-    hot: allItems.filter((i) => i.is_hot).length,
   };
-  const activeCount = [sp.q, sp.kind && sp.kind !== "all" ? sp.kind : "", sp.original, sp.popular, sp.recent, sp.status && sp.status !== "all" ? sp.status : "", sp.genre, sp.tag, sp.author, sp.minChapters].filter(Boolean).length;
 
   return (
     <main className="aurora-bg min-h-screen">
@@ -414,17 +397,8 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
               <Badge variant="secondary" className="gap-2 rounded-full px-3 py-1"><LibraryBig className="h-3.5 w-3.5" /> Catálogo unificado · {stats.all.toLocaleString("pt-BR")} obras</Badge>
               <div className="space-y-3">
                 <h1 className="gradient-text font-heading text-4xl font-black tracking-tight md:text-6xl">Encontre sua próxima leitura.</h1>
-                <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">Novels, mangás, manhwas e livros em uma única estante — com busca rápida, filtros editoriais e cards feitos para descobrir obra nova sem esforço.</p>
+                <p className="max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">Novels, mangás, manhwas e livros em uma única estante — use a busca no topo e a seta ao lado dela para encontrar sua próxima obra.</p>
               </div>
-              <form action="/explore" className="glass-panel grid gap-2 rounded-3xl p-2 md:grid-cols-[1fr_auto]">
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-primary/80" />
-                  <input name="q" defaultValue={sp.q || ""} placeholder="Buscar título, autor, gênero, tag..." className="h-12 w-full rounded-2xl border border-border/50 bg-background/55 pl-12 pr-4 text-sm outline-none transition focus:border-primary/60 focus:ring-4 focus:ring-primary/15 md:h-14 md:text-base" />
-                </div>
-                <Button size="lg" className="rounded-2xl"><Search className="h-4 w-4" /> Buscar</Button>
-                {sp.kind && sp.kind !== "all" ? <input type="hidden" name="kind" value={sp.kind} /> : null}
-                {sp.sort ? <input type="hidden" name="sort" value={sp.sort} /> : null}
-              </form>
             </div>
             <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-4 lg:grid-cols-2">
               <Stat label="Novels" value={stats.novel} />
@@ -437,79 +411,6 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
       </section>
 
       <div className="container mx-auto max-w-7xl space-y-4 px-4 py-5">
-        <section className="glass-panel rounded-xl border-primary/10 p-2.5 shadow-sm md:p-3">
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <div className="min-w-0">
-              <h2 className="flex items-center gap-1.5 font-heading text-sm font-black"><SlidersHorizontal className="h-4 w-4 text-primary" /> Filtrar catálogo</h2>
-              <p className="hidden text-[11px] text-muted-foreground sm:block">Tipo, status, gênero, autor e capítulos.</p>
-            </div>
-            {activeCount > 0 ? <Button variant="outline" size="sm" asChild className="h-8 shrink-0 rounded-lg px-2.5 text-xs"><Link href="/explore"><X className="h-3.5 w-3.5" /> Limpar</Link></Button> : null}
-          </div>
-
-          <div className="grid gap-2 xl:grid-cols-2">
-            <FilterRow label="Tipo">
-              <Chip href={buildHref(sp, { kind: null, page: null })} active={!sp.kind || sp.kind === "all"}>Todos</Chip>
-              <Chip href={buildHref(sp, { kind: "novel", page: null })} active={sp.kind === "novel"}>Novels</Chip>
-              <Chip href={buildHref(sp, { kind: "manga", page: null })} active={sp.kind === "manga"}>Mangás</Chip>
-              <Chip href={buildHref(sp, { kind: "manhwa", page: null })} active={sp.kind === "manhwa"}>Manhwas</Chip>
-              <Chip href={buildHref(sp, { kind: "book", page: null })} active={sp.kind === "book"}>Livros</Chip>
-            </FilterRow>
-
-            <FilterRow label="Curadoria">
-              <Chip href={buildHref(sp, { original: sp.original === "1" ? null : "1", page: null })} active={sp.original === "1"}>Originais ({stats.originals})</Chip>
-              <Chip href={buildHref(sp, { popular: sp.popular === "1" ? null : "1", page: null })} active={sp.popular === "1"}>Populares ({stats.hot})</Chip>
-              <Chip href={buildHref(sp, { recent: sp.recent === "1" ? null : "1", page: null })} active={sp.recent === "1"}>Recentes</Chip>
-            </FilterRow>
-
-            <FilterRow label="Status">
-              <Chip href={buildHref(sp, { status: null, page: null })} active={!sp.status || sp.status === "all"}>Todos</Chip>
-              <Chip href={buildHref(sp, { status: "ongoing", page: null })} active={sp.status === "ongoing"}>Em andamento</Chip>
-              <Chip href={buildHref(sp, { status: "completed", page: null })} active={sp.status === "completed"}>Completos</Chip>
-              <Chip href={buildHref(sp, { status: "hiatus", page: null })} active={sp.status === "hiatus"}>Hiato</Chip>
-            </FilterRow>
-
-            <FilterRow label="Gênero">
-              <Chip href={buildHref(sp, { genre: null, page: null })} active={!sp.genre}>Todos</Chip>
-              {genres.slice(0, 8).map(([genre]) => <Chip key={genre} href={buildHref(sp, { genre, page: null })} active={sp.genre === genre}>{genre}</Chip>)}
-            </FilterRow>
-
-            <details className="border-t border-border/50 pt-2 lg:col-span-2">
-              <summary className="cursor-pointer select-none text-xs font-semibold text-muted-foreground marker:text-primary hover:text-foreground">Mais filtros e ordenação</summary>
-              <form action="/explore" className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_150px_130px_140px_auto]">
-                <input type="hidden" name="kind" value={sp.kind || ""} />
-                <input type="hidden" name="genre" value={sp.genre || ""} />
-                <input type="hidden" name="tag" value={sp.tag || ""} />
-                <input type="hidden" name="status" value={sp.status || ""} />
-                <input type="hidden" name="original" value={sp.original || ""} />
-                <input type="hidden" name="popular" value={sp.popular || ""} />
-                <input type="hidden" name="recent" value={sp.recent || ""} />
-                <label>
-                  <span className="sr-only">Busca rápida</span>
-                  <input name="q" defaultValue={sp.q || ""} placeholder="Título, autor ou gênero" className="h-9 w-full rounded-lg border border-input bg-background/55 px-2.5 text-sm text-foreground outline-none focus:border-primary/60" />
-                </label>
-                <label>
-                  <span className="sr-only">Autor</span>
-                  <input name="author" defaultValue={sp.author || ""} placeholder="Autor" className="h-9 w-full rounded-lg border border-input bg-background/55 px-2.5 text-sm text-foreground outline-none focus:border-primary/60" />
-                </label>
-                <label>
-                  <span className="sr-only">Mínimo de capítulos</span>
-                  <input name="minChapters" type="number" min="0" defaultValue={sp.minChapters || ""} placeholder="Capítulos mín." className="h-9 w-full rounded-lg border border-input bg-background/55 px-2.5 text-sm text-foreground outline-none focus:border-primary/60" />
-                </label>
-                <label>
-                  <span className="sr-only">Ordenação</span>
-                  <select name="sort" aria-label="Ordenação" defaultValue={sort} className="h-9 w-full rounded-lg border border-input bg-background/55 px-2.5 text-sm text-foreground outline-none focus:border-primary/60">
-                    <option value="popular">Populares</option>
-                    <option value="updated">Atualizados</option>
-                    <option value="chapters">Mais capítulos</option>
-                    <option value="title">A-Z</option>
-                  </select>
-                </label>
-                <Button type="submit" size="sm" className="h-9 rounded-lg px-3"><Filter className="h-3.5 w-3.5" /> Aplicar</Button>
-              </form>
-            </details>
-          </div>
-        </section>
-
         <section className="space-y-4">
           <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <div>
@@ -559,24 +460,5 @@ function Stat({ label, value }: { label: string; value: number }) {
       <div className="font-heading text-2xl font-black text-foreground">{compactNumber(value)}</div>
       <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
     </div>
-  );
-}
-
-function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="grid gap-1.5 sm:grid-cols-[78px_1fr] sm:items-start">
-      <div className="flex items-center gap-1 pt-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground"><Tags className="h-3 w-3 text-primary" />{label}</div>
-      <div className="flex flex-wrap gap-1.5">{children}</div>
-    </div>
-  );
-}
-
-function Chip({ href, active, children }: { href: string; active?: boolean; children: React.ReactNode }) {
-  return (
-    <Link href={href} scroll={false}>
-      <Badge variant={active ? "default" : "outline"} className="cursor-pointer rounded-full px-2.5 py-0.5 text-[11px] transition hover:border-primary/50 hover:bg-primary/10">
-        {children}
-      </Badge>
-    </Link>
   );
 }
