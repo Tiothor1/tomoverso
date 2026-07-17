@@ -1,18 +1,18 @@
 # Capítulo 1 — A pior ideia da noite
 
-Caio soube que alguma coisa estava errada quando Ryze parou de olhar para a tela.
+Caio clicou na margem oposta do rio uma vez. Depois outra.
 
-Não era uma impressão. Até então, o mago azul ocupava o centro do monitor velho como qualquer outro campeão: pequeno demais, preso ao mapa, correndo entre árvores digitais enquanto Davi falava alto atrás dele. Caio conhecia aquele brilho azul. Conhecia a animação do pergaminho nas costas, a voz grave saindo abafada do fone e até o jeito como a câmera tremia quando uma habilidade acertava alguém.
+Ryze não se moveu.
 
-Mas naquela noite Ryze não corria.
+Na primeira tentativa, ele pensou que o mouse tinha falhado. Na segunda, culpou a internet. Só na terceira percebeu o que tornava aquilo errado: a partida continuava. Os minions marchavam pela rota, os outros campeões corriam pelo mapa e os efeitos das habilidades explodiam em cores no monitor velho. Apenas Ryze permanecia parado, no meio da água rasa, com o pergaminho pesado nas costas.
 
-Ele estava parado no rio, imóvel, encarando para fora da tela.
+Caio conhecia bem demais aquela tela para achar normal. Sabia a diferença entre lag, travamento e um campeão preso numa parede. Nada tinha prendido Ryze. O círculo do comando aparecia onde Caio clicava, desaparecia e voltava a aparecer. Ryze simplesmente ignorava cada ordem.
 
 — Você morreu de novo? — Davi perguntou, largado no colchão encostado na parede. A camisa vermelha de time estava amarrotada e uma lata vazia rolava perto do pé dele. — Caio, pelo amor de Deus, aperta R. É só apertar R.
 
 Caio não respondeu.
 
-A chuva batia no vidro da janela com uma insistência cansada. O apartamento inteiro parecia úmido: o sofá coberto por uma manta, a cozinha escura, o cheiro de café requentado vindo de algum lugar. Na tela, o cursor piscava ao lado de Ryze. O jogo continuava. Os outros jogadores continuavam se movendo. Só ele tinha parado.
+A chuva batia no vidro da janela com uma insistência cansada. O apartamento inteiro parecia úmido: o sofá coberto por uma manta, a cozinha escura, o cheiro de café requentado vindo de algum lugar. Na tela, o cursor piscava ao lado de Ryze. O jogo continuava. Só ele não obedecia.
 
 — Você está vendo isso? — Caio perguntou.
 
@@ -21,6 +21,8 @@ A chuva batia no vidro da janela com uma insistência cansada. O apartamento int
 — Não. O Ryze.
 
 Davi se inclinou, finalmente olhando para o monitor. Por um segundo, o deboche saiu do rosto dele.
+
+Sem receber nenhum comando, Ryze virou devagar a cabeça na direção da câmera do jogo.
 
 Ryze levantou uma mão.
 
