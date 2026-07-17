@@ -1,18 +1,12 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { cookies } from "next/headers";
-import { BookOpen, Compass, Crown, Headphones, Home, PenLine, Sparkles, Store } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { MobileMenu } from "@/components/layout/mobile-menu";
 import { NavbarMoreMenu } from "@/components/layout/site-preferences-menu";
-import { UserMenu } from "@/components/auth/user-menu";
 import { SubscriberCookieSync } from "@/components/auth/subscriber-cookie-sync";
-import { NotificationBell } from "@/components/notifications/notification-bell";
 import { getCurrentUser } from "@/lib/auth";
 import { getSiteConfig } from "@/lib/site-config";
 import { getDb } from "@/lib/db";
 import { getUserActiveSubscription } from "@/lib/subscriptions";
-import { getLocaleFromCookies, createTranslator } from "@/lib/i18n/server-t";
 
 export async function Navbar() {
   const user = await getCurrentUser();
@@ -22,9 +16,6 @@ export async function Navbar() {
   const storeHref = config.storefront_href || "/store";
   const publishHref = user ? "/dashboard/novels/new" : (config.publish_cta_href || "/auth/signup");
   const publishLabel = user ? "Publicar" : config.publish_cta_label;
-  const cookieStore = await cookies();
-  const locale = getLocaleFromCookies(cookieStore.get("novel_lang")?.value || null);
-  const t = createTranslator(locale);
 
   return (
     <>
@@ -35,55 +26,19 @@ export async function Navbar() {
         </div>
       ) : null}
       <header className="site-navbar sticky top-0 z-50 w-full border-b border-border/70 bg-background/90 shadow-sm backdrop-blur-xl">
-        <div className="container mx-auto flex h-16 max-w-7xl items-center gap-3 px-4">
+        <div className="container mx-auto flex h-14 max-w-7xl items-center gap-2 px-4">
           <Link href="/" className="group flex min-w-0 flex-shrink-0 items-center gap-2" aria-label="Tomo Verso Editora início">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-primary">
-              <BookOpen className="h-5 w-5" />
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+              <BookOpen className="h-4 w-4" />
             </span>
             <span className="hidden min-w-0 sm:block">
-              <span className="block truncate font-heading text-lg font-black leading-none tracking-tight text-foreground xl:text-xl">
+              <span className="block truncate font-heading text-base font-black leading-none tracking-tight text-foreground">
                 {config.site_name}
-              </span>
-              <span className="hidden text-[10px] uppercase tracking-[0.18em] text-muted-foreground xl:block">
-                {config.site_tagline}
               </span>
             </span>
           </Link>
 
-          <nav className="ml-2 hidden items-center gap-1 lg:flex" aria-label={t("nav.more")}>
-            <NavLink href="/">
-              <Home className="mr-1.5 h-4 w-4" />
-              {t("nav.home")}
-            </NavLink>
-            <NavLink href="/feed" tone="accent">
-              <Sparkles className="mr-1.5 h-4 w-4" />
-              {t("nav.feed")}
-            </NavLink>
-            <NavLink href="/explore">
-              <Compass className="mr-1.5 h-4 w-4" />
-              {t("nav.catalog")}
-            </NavLink>
-            <NavLink href="/tomomusic" tone="accent">
-              <Headphones className="mr-1.5 h-4 w-4" />
-              TomoMusic
-            </NavLink>
-            <NavLink href={publishHref}>
-              <PenLine className="mr-1.5 h-4 w-4" />
-              {t("nav.publish")}
-            </NavLink>
-            <NavLink href="/autor-plus" tone="accent">
-              <Crown className="mr-1.5 h-4 w-4" />
-              {t("nav.author_plus")}
-            </NavLink>
-            {config.storefront_enabled ? (
-              <NavLink href={storeHref}>
-                <Store className="mr-1.5 h-4 w-4" />
-                {t("nav.store")}
-              </NavLink>
-            ) : null}
-          </nav>
-
-          <div className="ml-auto flex shrink-0 items-center gap-1.5">
+          <nav className="ml-auto flex shrink-0 items-center gap-1.5" aria-label="Navegação principal">
             <NavbarMoreMenu
               showStore={!!config.storefront_enabled}
               storeHref={storeHref}
@@ -91,56 +46,14 @@ export async function Navbar() {
               publishLabel={publishLabel}
               hasActiveSubscription={!!sub}
               subBadge={sub?.badge_label || null}
-            />
-
-            {user && <NotificationBell />}
-
-            {user ? (
-              <UserMenu
-                user={{
-                  id: user.id,
-                  username: user.username,
-                  display_name: user.display_name,
-                  avatar_url: user.avatar_url || undefined,
-                  role: user.role,
-                }}
-              />
-            ) : (
-              <Button asChild className="rounded-full px-4 font-bold shadow-sm">
-                <Link href="/auth/login">{t("nav.login")}</Link>
-              </Button>
-            )}
-
-            <MobileMenu
               isLoggedIn={!!user}
-              isAdmin={user?.role === "admin"}
-              showStore={!!config.storefront_enabled}
-              storeHref={storeHref}
-              username={user?.username}
-              publishLabel={publishLabel}
-              publishHref={publishHref}
-              hasActiveSubscription={!!sub}
-              subBadge={sub?.badge_label || null}
             />
-          </div>
+            <Button asChild variant="ghost" className="h-9 rounded-full border border-primary/30 bg-primary/10 px-3 text-sm font-bold text-primary hover:bg-primary/15 hover:text-primary">
+              <Link href="/store/plans">Planos</Link>
+            </Button>
+          </nav>
         </div>
       </header>
     </>
-  );
-}
-
-function NavLink({ href, children, tone = "default" }: { href: string; children: ReactNode; tone?: "default" | "accent" }) {
-  return (
-    <Button
-      variant="ghost"
-      asChild
-      className={
-        tone === "accent"
-          ? "rounded-full px-3 font-semibold text-primary hover:bg-primary/10 hover:text-primary"
-          : "rounded-full px-3 font-semibold text-foreground/82 hover:bg-muted hover:text-foreground"
-      }
-    >
-      <Link href={href}>{children}</Link>
-    </Button>
   );
 }

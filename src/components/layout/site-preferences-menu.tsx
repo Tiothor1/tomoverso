@@ -19,6 +19,7 @@ import {
   Sparkles,
   Sun,
   Trophy,
+  UserRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -41,6 +42,7 @@ type NavbarMoreMenuProps = {
   publishLabel: string;
   hasActiveSubscription: boolean;
   subBadge?: string | null;
+  isLoggedIn: boolean;
 };
 
 const themeOptions: Array<{ id: ThemePreference; label: string; icon: ComponentType<{ className?: string }> }> = [
@@ -69,7 +71,7 @@ const languageOptions: Array<{ id: LanguageCode; label: string; short: string; f
   { id: "zh", label: "中文", short: "ZH", flag: "CN" },
 ];
 
-export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel, hasActiveSubscription, subBadge }: NavbarMoreMenuProps) {
+export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel, hasActiveSubscription, subBadge, isLoggedIn }: NavbarMoreMenuProps) {
   const { theme, resolvedTheme, colorTheme, setTheme, setColorTheme } = useTheme();
   const { language, setLanguage } = useLanguage();
   const t = useTranslate();
@@ -84,15 +86,22 @@ export function NavbarMoreMenu({ showStore, storeHref, publishHref, publishLabel
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
-          className="hidden rounded-full border border-border/60 px-3 text-sm font-semibold hover:border-primary/35 hover:bg-primary/8 lg:inline-flex"
+          className="inline-flex h-9 rounded-full border border-border/60 px-3 text-sm font-semibold hover:border-primary/35 hover:bg-primary/8"
           aria-label="Abrir menu Mais"
         >
           Mais
           <MoreHorizontal className="ml-1.5 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 p-2">
+      <DropdownMenuContent align="end" className="max-h-[calc(100vh-5rem)] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto p-2">
         <DropdownMenuLabel>Mais no Tomo Verso</DropdownMenuLabel>
+        <DropdownMenuItem asChild>
+          <Link href={isLoggedIn ? "/dashboard" : "/auth/login"} className="cursor-pointer gap-2">
+            <UserRound className="h-4 w-4" />
+            {isLoggedIn ? "Meu painel" : "Entrar"}
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
           <Link href="/search" className="cursor-pointer gap-2">
             <Search className="h-4 w-4" />
