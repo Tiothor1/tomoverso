@@ -22,12 +22,13 @@ export function HeaderSearch({ className }: HeaderSearchProps) {
 
   return (
     <form onSubmit={submit} className={cn("group relative w-full", className)}>
-      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary" />
+      <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary" />
       <Input
         value={query}
         onChange={(event) => setQuery(event.target.value)}
         placeholder="Buscar..."
-        className="h-10 rounded-full border-border/70 bg-muted/35 pl-9 pr-20 text-sm shadow-none focus-visible:border-primary/45 focus-visible:bg-background focus-visible:ring-primary/20"
+        aria-label="Buscar obras"
+        className="h-9 rounded-full border-border/70 bg-muted/35 pl-8 pr-10 text-sm shadow-none focus-visible:border-primary/45 focus-visible:bg-background focus-visible:ring-primary/20"
       />
       {query ? (
         <button

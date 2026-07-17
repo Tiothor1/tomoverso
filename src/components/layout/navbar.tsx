@@ -2,6 +2,7 @@ import Link from "next/link";
 import { BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavbarMoreMenu } from "@/components/layout/site-preferences-menu";
+import { HeaderSearch } from "@/components/layout/header-search";
 import { SubscriberCookieSync } from "@/components/auth/subscriber-cookie-sync";
 import { getCurrentUser } from "@/lib/auth";
 import { getSiteConfig } from "@/lib/site-config";
@@ -37,6 +38,8 @@ export async function Navbar() {
               </span>
             </span>
           </Link>
+
+          <HeaderSearch className="min-w-0 flex-1 max-w-xl" />
 
           <nav className="ml-auto flex shrink-0 items-center gap-1.5" aria-label="Navegação principal">
             <NavbarMoreMenu

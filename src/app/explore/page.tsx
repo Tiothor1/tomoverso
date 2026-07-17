@@ -436,17 +436,17 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
         </div>
       </section>
 
-      <div className="container mx-auto max-w-7xl space-y-6 px-4 py-8">
-        <section className="glass-panel rounded-3xl border-primary/10 p-3 shadow-sm md:p-4">
-          <div className="mb-3 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h2 className="flex items-center gap-2 font-heading text-lg font-black"><SlidersHorizontal className="h-5 w-5 text-primary" /> Filtrar catálogo</h2>
-              <p className="text-xs text-muted-foreground">Busca limpa por tipo, status, gênero, autor e capítulos.</p>
+      <div className="container mx-auto max-w-7xl space-y-4 px-4 py-5">
+        <section className="glass-panel rounded-xl border-primary/10 p-2.5 shadow-sm md:p-3">
+          <div className="mb-2 flex items-center justify-between gap-2">
+            <div className="min-w-0">
+              <h2 className="flex items-center gap-1.5 font-heading text-sm font-black"><SlidersHorizontal className="h-4 w-4 text-primary" /> Filtrar catálogo</h2>
+              <p className="hidden text-[11px] text-muted-foreground sm:block">Tipo, status, gênero, autor e capítulos.</p>
             </div>
-            {activeCount > 0 ? <Button variant="outline" asChild><Link href="/explore"><X className="h-4 w-4" /> Limpar filtros</Link></Button> : null}
+            {activeCount > 0 ? <Button variant="outline" size="sm" asChild className="h-8 shrink-0 rounded-lg px-2.5 text-xs"><Link href="/explore"><X className="h-3.5 w-3.5" /> Limpar</Link></Button> : null}
           </div>
 
-          <div className="space-y-3">
+          <div className="grid gap-2 xl:grid-cols-2">
             <FilterRow label="Tipo">
               <Chip href={buildHref(sp, { kind: null, page: null })} active={!sp.kind || sp.kind === "all"}>Todos</Chip>
               <Chip href={buildHref(sp, { kind: "novel", page: null })} active={sp.kind === "novel"}>Novels</Chip>
@@ -473,37 +473,40 @@ export default async function ExplorePage({ searchParams }: { searchParams: Prom
               {genres.slice(0, 8).map(([genre]) => <Chip key={genre} href={buildHref(sp, { genre, page: null })} active={sp.genre === genre}>{genre}</Chip>)}
             </FilterRow>
 
-            <form action="/explore" className="grid gap-3 border-t border-border/50 pt-3 md:grid-cols-[1fr_180px_170px_150px_auto]">
-              <input type="hidden" name="kind" value={sp.kind || ""} />
-              <input type="hidden" name="genre" value={sp.genre || ""} />
-              <input type="hidden" name="tag" value={sp.tag || ""} />
-              <input type="hidden" name="status" value={sp.status || ""} />
-              <input type="hidden" name="original" value={sp.original || ""} />
-              <input type="hidden" name="popular" value={sp.popular || ""} />
-              <input type="hidden" name="recent" value={sp.recent || ""} />
-              <label className="space-y-1 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                <span>Busca rápida</span>
-                <input name="q" defaultValue={sp.q || ""} placeholder="Título, autor, gênero..." className="h-10 w-full rounded-xl border border-input bg-background/55 px-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary/60" />
-              </label>
-              <label className="space-y-1 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                <span>Autor</span>
-                <input name="author" defaultValue={sp.author || ""} placeholder="Nome do autor" className="h-10 w-full rounded-xl border border-input bg-background/55 px-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary/60" />
-              </label>
-              <label className="space-y-1 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                <span>Capítulos mín.</span>
-                <input name="minChapters" type="number" min="0" defaultValue={sp.minChapters || ""} placeholder="Mínimo" className="h-10 w-full rounded-xl border border-input bg-background/55 px-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary/60" />
-              </label>
-              <label className="space-y-1 text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                <span>Ordenação</span>
-                <select name="sort" defaultValue={sort} className="h-10 w-full rounded-xl border border-input bg-background/55 px-3 text-sm font-normal normal-case tracking-normal text-foreground outline-none focus:border-primary/60">
-                <option value="popular">Populares</option>
-                <option value="updated">Atualizados</option>
-                <option value="chapters">Mais capítulos</option>
-                <option value="title">A-Z</option>
-                </select>
-              </label>
-              <Button type="submit" className="self-end rounded-xl"><Filter className="h-4 w-4" /> Aplicar</Button>
-            </form>
+            <details className="border-t border-border/50 pt-2 lg:col-span-2">
+              <summary className="cursor-pointer select-none text-xs font-semibold text-muted-foreground marker:text-primary hover:text-foreground">Mais filtros e ordenação</summary>
+              <form action="/explore" className="mt-2 grid gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1fr)_150px_130px_140px_auto]">
+                <input type="hidden" name="kind" value={sp.kind || ""} />
+                <input type="hidden" name="genre" value={sp.genre || ""} />
+                <input type="hidden" name="tag" value={sp.tag || ""} />
+                <input type="hidden" name="status" value={sp.status || ""} />
+                <input type="hidden" name="original" value={sp.original || ""} />
+                <input type="hidden" name="popular" value={sp.popular || ""} />
+                <input type="hidden" name="recent" value={sp.recent || ""} />
+                <label>
+                  <span className="sr-only">Busca rápida</span>
+                  <input name="q" defaultValue={sp.q || ""} placeholder="Título, autor ou gênero" className="h-9 w-full rounded-lg border border-input bg-background/55 px-2.5 text-sm text-foreground outline-none focus:border-primary/60" />
+                </label>
+                <label>
+                  <span className="sr-only">Autor</span>
+                  <input name="author" defaultValue={sp.author || ""} placeholder="Autor" className="h-9 w-full rounded-lg border border-input bg-background/55 px-2.5 text-sm text-foreground outline-none focus:border-primary/60" />
+                </label>
+                <label>
+                  <span className="sr-only">Mínimo de capítulos</span>
+                  <input name="minChapters" type="number" min="0" defaultValue={sp.minChapters || ""} placeholder="Capítulos mín." className="h-9 w-full rounded-lg border border-input bg-background/55 px-2.5 text-sm text-foreground outline-none focus:border-primary/60" />
+                </label>
+                <label>
+                  <span className="sr-only">Ordenação</span>
+                  <select name="sort" aria-label="Ordenação" defaultValue={sort} className="h-9 w-full rounded-lg border border-input bg-background/55 px-2.5 text-sm text-foreground outline-none focus:border-primary/60">
+                    <option value="popular">Populares</option>
+                    <option value="updated">Atualizados</option>
+                    <option value="chapters">Mais capítulos</option>
+                    <option value="title">A-Z</option>
+                  </select>
+                </label>
+                <Button type="submit" size="sm" className="h-9 rounded-lg px-3"><Filter className="h-3.5 w-3.5" /> Aplicar</Button>
+              </form>
+            </details>
           </div>
         </section>
 
@@ -561,9 +564,9 @@ function Stat({ label, value }: { label: string; value: number }) {
 
 function FilterRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="grid gap-2 md:grid-cols-[110px_1fr] md:items-start">
-      <div className="flex items-center gap-1.5 pt-1 text-xs font-black uppercase tracking-[0.16em] text-muted-foreground"><Tags className="h-3.5 w-3.5 text-primary" />{label}</div>
-      <div className="flex flex-wrap gap-2">{children}</div>
+    <div className="grid gap-1.5 sm:grid-cols-[78px_1fr] sm:items-start">
+      <div className="flex items-center gap-1 pt-0.5 text-[10px] font-black uppercase tracking-[0.12em] text-muted-foreground"><Tags className="h-3 w-3 text-primary" />{label}</div>
+      <div className="flex flex-wrap gap-1.5">{children}</div>
     </div>
   );
 }
@@ -571,7 +574,7 @@ function FilterRow({ label, children }: { label: string; children: React.ReactNo
 function Chip({ href, active, children }: { href: string; active?: boolean; children: React.ReactNode }) {
   return (
     <Link href={href} scroll={false}>
-      <Badge variant={active ? "default" : "outline"} className="cursor-pointer rounded-full px-3 py-1 text-xs transition hover:border-primary/50 hover:bg-primary/10">
+      <Badge variant={active ? "default" : "outline"} className="cursor-pointer rounded-full px-2.5 py-0.5 text-[11px] transition hover:border-primary/50 hover:bg-primary/10">
         {children}
       </Badge>
     </Link>
