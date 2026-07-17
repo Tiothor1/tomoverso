@@ -162,7 +162,7 @@ function HeaderSearchContent({ className, pathname, searchParamsString }: Header
           <Search className="h-3.5 w-3.5" />
         </button>
       </form>
-      {isCatalog ? <CatalogFilterMenu key={searchParamsString} searchParamsString={searchParamsString} /> : null}
+      <CatalogFilterMenu key={searchParamsString} searchParamsString={searchParamsString} />
     </div>
   );
 }
