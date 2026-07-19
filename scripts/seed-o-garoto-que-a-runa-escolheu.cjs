@@ -37,6 +37,10 @@ const chapters = fs.readdirSync(contentDir)
   });
 
 if (!chapters.length) throw new Error(`No chapter files found in ${contentDir}`);
+const expectedChapterTotal = 120;
+if (chapters.length !== expectedChapterTotal) {
+  throw new Error(`Expected ${expectedChapterTotal} chapter files, found ${chapters.length}`);
+}
 for (let index = 0; index < chapters.length; index += 1) {
   const expected = index + 1;
   if (chapters[index].number !== expected) {
@@ -46,7 +50,17 @@ for (let index = 0; index < chapters.length; index += 1) {
 
 const db = new Database(dbPath);
 db.pragma("foreign_keys = ON");
-const novelColumns = new Set(db.prepare("PRAGMA table_info(novels)").all().map((col) => col.name));
+const adultMetadataColumns = [
+  ["classification_rating", "TEXT DEFAULT NULL"],
+  ["tone", "TEXT DEFAULT NULL"],
+  ["subtitle", "TEXT DEFAULT NULL"],
+  ["content_warnings", "TEXT DEFAULT NULL"],
+];
+let novelColumns = new Set(db.prepare("PRAGMA table_info(novels)").all().map((col) => col.name));
+for (const [column, type] of adultMetadataColumns) {
+  if (!novelColumns.has(column)) db.prepare(`ALTER TABLE novels ADD COLUMN ${column} ${type}`).run();
+}
+novelColumns = new Set(db.prepare("PRAGMA table_info(novels)").all().map((col) => col.name));
 if (!db.prepare("SELECT 1 FROM users WHERE id = ?").get(authorId)) {
   throw new Error(`Author ${authorId} was not found in ${dbPath}`);
 }
@@ -64,7 +78,7 @@ const upsert = db.transaction(() => {
     authorId,
     "tomoverso",
     "light-novel",
-    "ongoing",
+    "completed",
     JSON.stringify(["Fantasia", "Isekai", "Aventura", "Ação"]),
     JSON.stringify(["Runeterra", "Runas", "Ionia", "Original Tomoverso"]),
     0,
@@ -73,6 +87,18 @@ const upsert = db.transaction(() => {
   if (novelColumns.has("is_original")) {
     fields.push("is_original");
     values.push(1);
+  }
+  const adultMetadata = {
+    classification_rating: "18+",
+    tone: "Fantasia sombria, horror psicológico e aventura",
+    subtitle: "Uma marca rúnica abriu uma guerra entre mundos.",
+    content_warnings: "Obra destinada a maiores de 18 anos. Contém violência gráfica, linguagem forte, morte e terror psicológico.",
+  };
+  for (const [field, value] of Object.entries(adultMetadata)) {
+    if (novelColumns.has(field)) {
+      fields.push(field);
+      values.push(value);
+    }
   }
   const assignments = fields.filter((field) => field !== "id").map((field) => `${field} = excluded.${field}`).join(", ");
   db.prepare(`INSERT INTO novels (${fields.join(", ")}) VALUES (${fields.map(() => "?").join(", ")}) ON CONFLICT(id) DO UPDATE SET ${assignments}, updated_at = datetime('now')`).run(...values);

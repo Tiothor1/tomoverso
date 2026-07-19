@@ -7,6 +7,7 @@
 - **Estado editorial:** seis capítulos publicados. Os Capítulos 7–100 serão escritos e revisados localmente, um por vez, e receberão uma única publicação depois de a sequência completa passar pela validação final.
 - **Mundo:** Runeterra. A chegada acontece em Ionia, mas a história pode atravessar outras regiões somente quando a trama exigir.
 - **Tom:** isekai de aventura e mistério rúnico; perigo concreto, vínculos graduais, humor pontual e consequências emocionais.
+- **Classificação:** **18+**. A ficha pública deve exibir a classificação e avisos de conteúdo antes da leitura. A série pode abordar violência gráfica, linguagem forte, terror psicológico, morte e temas adultos; todo conteúdo envolvendo personagens menores de idade permanece não sexual.
 - **Arte:** não usar ilustrações internas, imagens de exemplo, prompts de arte ou inserções Markdown nos capítulos. A capa oficial permanece como imagem de catálogo.
 
 ## Regra de produção serial
