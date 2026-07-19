@@ -79,7 +79,7 @@ const upsert = db.transaction(() => {
     authorId,
     "tomoverso",
     "light-novel",
-    "completed",
+    "ongoing",
     JSON.stringify(["Fantasia", "Isekai", "Aventura", "Ação"]),
     JSON.stringify(["Runeterra", "Runas", "Ionia", "Original Tomoverso"]),
     0,
