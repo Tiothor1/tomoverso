@@ -25,7 +25,8 @@ const chapters = fs.readdirSync(contentDir)
     const raw = fs.readFileSync(path.join(contentDir, file), "utf8");
     const heading = new RegExp(`^#\\s+Capítulo\\s+${number}\\s+[—-]\\s+(.+?)\\s*$`, "m").exec(raw);
     if (!heading) throw new Error(`Expected a '# Capítulo ${number} — Título' heading in ${file}`);
-    const content = raw.replace(/^#\s+[^\n]+\n\n/, "").trim();
+    // Aceita fontes LF e CRLF; o leitor já renderiza o título separadamente.
+    const content = raw.replace(/^#\s+[^\r\n]+\r?\n\r?\n/, "").trim();
     const wordCount = (content.match(/[\p{L}\p{N}’'-]+/gu) || []).length;
     const images = [...content.matchAll(/!\[[^\]]*\]\((\/uploads\/[^)]+)\)/g)].map((m) => m[1]);
     for (const image of images) {

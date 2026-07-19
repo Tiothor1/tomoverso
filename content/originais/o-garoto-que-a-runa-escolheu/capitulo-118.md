@@ -2,7 +2,11 @@
 
 As lanternas tinham chegado ao arquivo em fila, do jeito que uma cidade só chegava ao deserto quando não confiava no deserto o bastante para entrar nele sem testemunhas.
 
-Na noite anterior, a voz que ordenara custódia da construção não recebera de Caio uma resposta obediente. Maira ficara com o irmão, Rian e os primeiros vigias junto à entrada, porque alguém precisava vigiar a Vigília sem fingir que já sabia o que ela era. Sera explicara as três linhas no chão. Ryze admitira que o sistema tinha começado como uma regra de pedido, resposta e testemunha. Edda Sorn, enviada da Cidade do Intervalo, ouvira tudo sem prometer que acreditava.
+A luz âmbar da noite anterior não abrira outra travessia na sala de sinais. Trouxera instruções, a promessa de uma fiscal e um modo estreito de retornar ao Arquivo da Primeira Malha sem pedir à Vigília que escolhesse um preço. Ao amanhecer, Caio, Sera, Luan, Ryze, Iren e Rian tinham usado esse retorno uma única vez. Depois, fecharam o círculo atrás deles e deixaram vigias dos dois lados da corda.
+
+Maira falara de Roda Baixa pela janela de cobre, com Iren ao lado, antes de ele voltar para ajudar no registro. A voz que ordenara custódia da construção não recebera de Caio uma resposta obediente. Rian ficara com os primeiros vigias junto à entrada, porque alguém precisava vigiar a Vigília sem fingir que já sabia o que ela era. Sera explicara as três linhas no chão. Ryze admitira que o sistema tinha começado como uma regra de pedido, resposta e testemunha.
+
+Edda Sorn chegara pela passagem estreita pouco depois, acompanhada por quatro vigias que carregavam lanternas em vez de estandartes. Ouviu tudo sem prometer que acreditava.
 
 — A cidade não toma a construção — a fiscal dissera ao fim. — Mas também não vai fingir que uma rota de vigília aberta no deserto é problema de quatro pessoas. Venham. Declarem o que pretendem fazer diante de quem vive entre passagens.
 
@@ -432,7 +436,7 @@ Luan franziu a testa.
 
 Edda tirou do bolso uma pequena moeda quadrada de bronze. Em um lado, havia três pontos ligados por uma linha. No outro, uma ponte desenhada sobre ondas.
 
-— Amanhã, ao segundo sino, uma passagem vai abrir sob o Mercado das Agulhas. Ela leva para fora do Intervalo, a uma região que não está em nenhum mapa de Runeterra que eu conheça. A Casa do Lastro vai tentar registrar a abertura antes que alguém possa perguntar quem vive do outro lado.
+— Amanhã, ao terceiro sino, uma passagem vai abrir sob o Mercado das Agulhas. Ela leva para fora do Intervalo, a uma região que não está em nenhum mapa de Runeterra que eu conheça. A Casa do Lastro vai tentar registrar a abertura antes que alguém possa perguntar quem vive do outro lado.
 
 Caio sentiu a marca no tornozelo responder, uma pulsação curta e indignada.
 
